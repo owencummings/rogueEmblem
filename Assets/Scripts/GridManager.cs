@@ -50,9 +50,6 @@ public class GridManager : MonoBehaviour
                 cubes[i,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
                                          Quaternion.identity, this.transform);
                 cubes[i,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
-                //cubes[i,j].GetComponent<NavMeshSurface>().BuildNavMesh();
-
-
             }
         }
     }

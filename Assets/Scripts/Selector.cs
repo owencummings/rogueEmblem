@@ -39,6 +39,12 @@ public class Selector : MonoBehaviour
             }
         }
 
+        if (Input.GetKeyUp(KeyCode.Space)){
+            // Hide selectables
+            foreach (ISelectable selectable in selectableSet){
+            }
+        }
+
         if (Input.GetMouseButtonDown(0)){
             RaycastHit hit;
             // Deselect current selection
@@ -70,6 +76,11 @@ public class Selector : MonoBehaviour
                 }
 
             }
+        }
+
+        if (Input.GetMouseButtonDown(1)){
+            Command command = new Command(KeyCode.Mouse1, ray);
+            selectedObject.OnCommand(command);
         }
     }
 
