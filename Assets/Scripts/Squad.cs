@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Selectable;
 using UnityEngine.AI;
+using UnityEngine.Rendering.Universal;
 
 public class Squad : MonoBehaviour, ISelectable
 {
@@ -13,10 +14,15 @@ public class Squad : MonoBehaviour, ISelectable
     public Vector3 selectableLocation;
     public Vector3 rallyLocation;
 
-    public GameObject selectableMeshPrefab;
     public GameObject rallyFlagPrefab;
-    public GameObject selectableMesh;
     public GameObject rallyFlag;
+
+    public DecalProjector decalProjector;
+
+    private Color squadColor;
+    float currOpacity = 0f;
+
+    public bool isDisplaying;
 
     private bool _isSelected;
     public bool IsSelected
@@ -42,8 +48,14 @@ public class Squad : MonoBehaviour, ISelectable
             GameObject go = Instantiate(unitPrefab, circleDestinations[i], Quaternion.identity);
             unitArr[i] = go;
         }
-        selectableMesh = Instantiate(selectableMeshPrefab, transform.position + 0.01f * Vector3.up, Quaternion.identity);
         rallyFlag = Instantiate(rallyFlagPrefab, transform.position, Quaternion.identity);
+
+
+        // Set random color
+        squadColor = Random.ColorHSV(0f, 1f, 0.5f, 0.75f, 0.8f, 0.9f);
+        Material decalMat = decalProjector.material;
+        decalProjector.material = new Material(decalProjector.material);
+        decalProjector.material.SetColor("_Color", squadColor);
     }
 
 
@@ -62,30 +74,41 @@ public class Squad : MonoBehaviour, ISelectable
 
 
     void Update(){
+        // Change position based on aggregate of units
         Vector3 aggregatePosition = Vector3.zero;
         foreach (GameObject unit in unitArr){
             aggregatePosition = aggregatePosition + unit.transform.position;
         }
         selectableLocation = aggregatePosition/unitArr.Length;
-        selectableMesh.transform.position = selectableLocation + 0.01f * Vector3.up;
         transform.position = selectableLocation;
+
+        // Change opacity based on selection status
+        // Really this should just change opacity of the projector
+        float targetOpacity = 0f; 
+        float opacitySpeed = 4f;
+        if (isDisplaying){
+            targetOpacity = 0.75f;
+        }
+        if (_isSelected){
+            targetOpacity = 1f;
+        }
+        currOpacity = Mathf.MoveTowards(currOpacity, targetOpacity, opacitySpeed * Time.deltaTime);
+        decalProjector.material.SetFloat("_Alpha", currOpacity);
     }
 
     public void OnShow(){
-
+        isDisplaying = true;
     }
 
     public void OnHide(){
-
+        isDisplaying = false;
     }
 
     public void OnSelect(){
-        selectableMesh.GetComponent<MeshRenderer>().material.SetInt("_Selected", 1);
         rallyFlag.transform.Find("Cube").gameObject.GetComponent<MeshRenderer>().material.SetInt("_Selected", 1);
     }
 
     public void OnDeselect(){
-        selectableMesh.GetComponent<MeshRenderer>().material.SetInt("_Selected", 0);
         rallyFlag.transform.Find("Cube").gameObject.GetComponent<MeshRenderer>().material.SetInt("_Selected", 0);
     }
 

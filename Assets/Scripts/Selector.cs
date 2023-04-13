@@ -36,12 +36,14 @@ public class Selector : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space)){
             // Display selectables
             foreach (ISelectable selectable in selectableSet){
+                selectable.OnShow();
             }
         }
 
         if (Input.GetKeyUp(KeyCode.Space)){
             // Hide selectables
             foreach (ISelectable selectable in selectableSet){
+                selectable.OnHide();
             }
         }
 
@@ -63,7 +65,7 @@ public class Selector : MonoBehaviour
                     foreach (ISelectable selectable in selectableSet){
                         currDistance = Mathf.Pow(hit.transform.position.x - selectable.Position.x, 2)
                                         + Mathf.Pow(hit.transform.position.z - selectable.Position.z, 2);
-                        if (currDistance < closestDistance){
+                        if (currDistance < closestDistance && currDistance < 3){
                             closestDistance = currDistance;
                             closestSelectable = selectable;
                         }
