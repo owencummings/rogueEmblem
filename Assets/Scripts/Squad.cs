@@ -8,7 +8,7 @@ using UnityEngine.Rendering.Universal;
 public class Squad : MonoBehaviour, ISelectable
 {
     // Start is called before the first frame update
-    private int maxUnits = 5;
+    private int maxUnits = 3;
     public GameObject[]  unitArr;
     public GameObject unitPrefab;
     public Vector3 selectableLocation;
@@ -40,7 +40,6 @@ public class Squad : MonoBehaviour, ISelectable
     {
         (this as ISelectable).SubscribeToSelector();
 
-        // Default for now, initialize 5 units
         unitArr = new GameObject[maxUnits];
         Vector3[] circleDestinations = getDestinationCircle(transform.position);
         for (int i = 0; i < maxUnits; i++)
@@ -60,7 +59,7 @@ public class Squad : MonoBehaviour, ISelectable
 
 
     // Put this somewhere else
-    Vector3[] getDestinationCircle(Vector3 center, float radius = 0.3f, int pointCount = 5)
+    Vector3[] getDestinationCircle(Vector3 center, float radius = 0.3f, int pointCount = 3)
     {
         int shift = Random.Range(0, pointCount);
         Vector3[] circleDestinations = new Vector3[pointCount];

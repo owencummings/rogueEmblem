@@ -58,7 +58,7 @@ public class Selector : MonoBehaviour
             
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~gridMask)){ // Make sure water exists on grid layer
                 // Iterate through selectables
-                float currDistance;
+                float currDistance = 3;
                 float closestDistance = float.MaxValue;
                 if (selectableSet.Count > 0){
                     ISelectable closestSelectable = null;
@@ -80,7 +80,7 @@ public class Selector : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(1)){
+        if (Input.GetMouseButtonDown(1) && selectedObject != null){
             Command command = new Command(KeyCode.Mouse1, ray);
             selectedObject.OnCommand(command);
         }
