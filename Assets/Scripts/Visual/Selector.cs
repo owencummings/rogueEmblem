@@ -81,7 +81,7 @@ public class Selector : MonoBehaviour
         }
 
         if (Input.GetMouseButtonDown(1) && selectedObject != null){
-            Command command = new Command(KeyCode.Mouse1, ray);
+            SelectableCommand command = new SelectableCommand(KeyCode.Mouse1, ray);
             selectedObject.OnCommand(command);
         }
     }

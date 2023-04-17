@@ -532,7 +532,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.033333335
+  m_VoxelSize: 0.016666668
   m_MinRegionArea: 0.5
   m_NavMeshData: {fileID: 0}
   m_BuildHeightMesh: 0
@@ -791,6 +791,12 @@ PrefabInstance:
       propertyPath: navSurface
       value: 
       objectReference: {fileID: 1218582965}
+    - target: {fileID: 4772088311458816434, guid: 97ca10a5764bc5140bfb608c04ad51d7,
+        type: 3}
+      propertyPath: enemyPrefab
+      value: 
+      objectReference: {fileID: 5414513936273422722, guid: da9b3de81b81816469e0af61c8a2445d,
+        type: 3}
     - target: {fileID: 4772088311458816434, guid: 97ca10a5764bc5140bfb608c04ad51d7,
         type: 3}
       propertyPath: squadPrefab

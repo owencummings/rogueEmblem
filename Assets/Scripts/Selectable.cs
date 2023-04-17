@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Selectable{
 
-    public struct Command {
-        public Command(KeyCode keyPressed, Ray commandRay){
+    public struct SelectableCommand {
+        public SelectableCommand(KeyCode keyPressed, Ray commandRay){
             KeyPressed = keyPressed;
             CommandRay = commandRay;
         }
@@ -39,7 +39,7 @@ namespace Selectable{
 
         void OnHide();
 
-        void OnCommand(Command command);
+        void OnCommand(SelectableCommand command);
 
         public void SubscribeToSelector(){
             Selector.Instance.AddSelectable(this);

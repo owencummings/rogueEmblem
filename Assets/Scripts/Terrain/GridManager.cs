@@ -15,13 +15,46 @@ public class GridManager : MonoBehaviour
     public float squareSize = 1f;
     public float cubeSize = 10f;
 
-    public GameObject navAgentPrefab; // temp
-
     public GameObject squadPrefab; // temp
+    public GameObject enemyPrefab; // temp
     
     void Awake()
     {
+        CreateFlatTerrain();
+    }
 
+    void Start(){
+        navSurface.BuildNavMesh();
+
+        // Get smarter way to slam features
+        if (cubes[0,0] != null)
+        {
+            Instantiate(squadPrefab, 
+                        new Vector3(cubes[0,0].transform.position.x, 
+                                    cubes[0,0].transform.localScale.y,
+                                    cubes[0,0].transform.position.z), 
+                        Quaternion.identity);
+        }
+        if (cubes[1,1] != null)
+        {
+            Instantiate(squadPrefab, 
+                        new Vector3(cubes[1,1].transform.position.x, 
+                                    cubes[1,1].transform.localScale.y,
+                                    cubes[1,1].transform.position.z), 
+                        Quaternion.identity);
+        }
+        if (cubes[8,8] != null)
+        {
+                Instantiate(enemyPrefab, 
+                new Vector3(cubes[8,8].transform.position.x, 
+                            cubes[8,8].transform.localScale.y,
+                            cubes[8,8].transform.position.z), 
+                Quaternion.identity);
+        }
+    }
+
+    void CreateRandomTerrain()
+    {
         // Assign some oscillation parameters for terrain variation
         float xSinAmp = UnityEngine.Random.Range(0.0f, 2.0f);
         float xSinPeriod = UnityEngine.Random.Range(0.2f, 0.5f);
@@ -54,23 +87,16 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void Start(){
-        navSurface.BuildNavMesh();
-
-        // Get smarter way to slam features
-        if (cubes[0,0] != null){
-            Instantiate(squadPrefab, 
-                        new Vector3(cubes[0,0].transform.position.x, 
-                                    cubes[0,0].transform.localScale.y,
-                                    cubes[0,0].transform.position.z), 
-                        Quaternion.identity);
-        }
-        if (cubes[1,1] != null){
-            Instantiate(squadPrefab, 
-                        new Vector3(cubes[1,1].transform.position.x, 
-                                    cubes[1,1].transform.localScale.y,
-                                    cubes[1,1].transform.position.z), 
-                        Quaternion.identity);
+    void CreateFlatTerrain()
+    {
+        cubes = new GameObject[gridSize,gridSize];
+        for (int i = 0; i < gridSize; i++){
+            for (int j = 0; j < gridSize; j++){
+                float height = 1;
+                cubes[i,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
+                                         Quaternion.identity, this.transform);
+                cubes[i,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+            }
         }
     }
 }

@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 8291726551158045341}
   - component: {fileID: 8714259428748499032}
   - component: {fileID: 1319045470340768117}
+  - component: {fileID: 5739724030856580725}
   m_Layer: 0
-  m_Name: NavAgent
+  m_Name: Unit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79,10 +80,22 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &5739724030856580725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285878399363094458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d6d3995a254c9e4585ca826c38d4010, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3225758489509800814
 PrefabInstance:
   m_ObjectHideFlags: 0
