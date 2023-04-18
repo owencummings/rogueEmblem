@@ -29,8 +29,9 @@ public class UnitRally : IState
     {
         Debug.Log("To rally");
         _navMeshAgent.enabled = true;
+        _rb.isKinematic = true;
         _unit.rallyDestination = _unit.nextDestination;
-        if (_unit.rallyDestination != null){
+        if (_unit.rallyDestination != null && _navMeshAgent.isOnNavMesh){
             _navMeshAgent.SetDestination(_unit.rallyDestination);
         }
     }
