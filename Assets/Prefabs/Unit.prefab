@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8714259428748499032}
   - component: {fileID: 1319045470340768117}
   - component: {fileID: 5739724030856580725}
+  - component: {fileID: 6728459840695588437}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -96,6 +97,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d6d3995a254c9e4585ca826c38d4010, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rallyDestination: {x: 0, y: 0, z: 0}
+  nextDestination: {x: 0, y: 0, z: 0}
+  attackTarget: {fileID: 0}
+  nextAttackTarget: {fileID: 0}
+  timeGrounded: 0
+  attackFinished: 0
+--- !u!136 &6728459840695588437
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7285878399363094458}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.3
+  m_Height: 0.6
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.3, z: 0}
 --- !u!1001 &3225758489509800814
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -174,7 +204,8 @@ PrefabInstance:
       propertyPath: m_ApplyRootMotion
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6788538757290762320, guid: ad4137f595ec8e2449cacca9df7d3735, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

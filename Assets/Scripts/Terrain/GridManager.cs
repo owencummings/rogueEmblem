@@ -43,12 +43,12 @@ public class GridManager : MonoBehaviour
                                     cubes[1,1].transform.position.z), 
                         Quaternion.identity);
         }
-        if (cubes[8,8] != null)
+        if (cubes[5,5] != null)
         {
                 Instantiate(enemyPrefab, 
-                new Vector3(cubes[8,8].transform.position.x, 
-                            cubes[8,8].transform.localScale.y,
-                            cubes[8,8].transform.position.z), 
+                new Vector3(cubes[5,5].transform.position.x, 
+                            cubes[5,5].transform.localScale.y,
+                            cubes[5,5].transform.position.z), 
                 Quaternion.identity);
         }
     }

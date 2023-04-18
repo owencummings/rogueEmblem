@@ -7,11 +7,13 @@ public class UnitRally : IState
 {
     private Unit _unit;
     private NavMeshAgent _navMeshAgent;
+    private Rigidbody _rb;
 
-    public UnitRally(Unit unit, NavMeshAgent navMeshAgent)
+    public UnitRally(Unit unit, NavMeshAgent navMeshAgent, Rigidbody rb)
     {
         _unit = unit;
         _navMeshAgent = navMeshAgent;
+        _rb = rb;
     }
 
     public void Tick(){
@@ -25,6 +27,7 @@ public class UnitRally : IState
 
     public void OnEnter()
     {
+        Debug.Log("To rally");
         _navMeshAgent.enabled = true;
         _unit.rallyDestination = _unit.nextDestination;
         if (_unit.rallyDestination != null){

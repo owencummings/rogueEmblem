@@ -18,6 +18,11 @@ public class Unit : MonoBehaviour
     public GameObject nextAttackTarget;
     private Squad parentSquad; 
 
+    private int walkableMask;
+    private float attackRange = 2f;
+    public float timeGrounded = 0f;
+    public bool attackFinished = false;
+
 
     void Awake(){
         rallyDestination = transform.position;
@@ -25,40 +30,48 @@ public class Unit : MonoBehaviour
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        walkableMask = LayerMask.NameToLayer("Walkable");
 
         // Set up state machine
         _stateMachine = new StateMachine();
         var idle = new UnitIdle(this, _navMeshAgent);
-        var rally = new UnitRally(this, _navMeshAgent);
-        var attackApproach = new UnitAttackApproach(this, _navMeshAgent);
+        var rally = new UnitRally(this, _navMeshAgent, _rb);
+        var attackApproach = new UnitAttackApproach(this, _navMeshAgent, _rb);
         var attack = new UnitAttack(this, _navMeshAgent, _rb);
 
 
         // State machine transition conditions
         Func<bool> NewRally = () => rallyDestination.Equals(nextDestination);
-        Func<bool> NewAttackTarget = () => ((nextAttackTarget != null && attackTarget == null) 
-                                            || (attackTarget.GetInstanceID() != nextAttackTarget.GetInstanceID()));
+        Func<bool> NewAttackTarget = () => ((nextAttackTarget != null) &&
+                                            ((attackTarget == null) || (attackTarget.GetInstanceID() != nextAttackTarget.GetInstanceID())));
+        Func<bool> NearAttackTarget = () => (Vector3.Distance(attackTarget.transform.position, this.transform.position) < attackRange);
+        Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackFinished);
 
         // State machine conditions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         //At(attack, rally, NewRally);
-        At(rally, attack, NewAttackTarget);
+        At(rally, attackApproach, NewAttackTarget);
+        At(attackApproach, attack, NearAttackTarget);
+        At(attack, rally, AttackFinished);
 
 
         _stateMachine.SetState(rally);
 
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
     void Update()
     {
         _stateMachine.Tick();
+    }
+
+    void FixedUpdate()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, 0.5f, ~walkableMask)) {
+            timeGrounded += Time.fixedDeltaTime;
+        } else {
+            timeGrounded = 0;
+        }
+        Debug.Log(timeGrounded);
     }
 
     public void OnCommand(UnitCommand unitCommand){
