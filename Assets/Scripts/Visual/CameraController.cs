@@ -16,7 +16,6 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         destination = this.transform.position;
-        pivot = destination + 5 * Mathf.Sqrt(2) * transform.forward;
         cam = this.GetComponent<Camera>();
         orthoSizeDestination = cam.orthographicSize;
     }
@@ -33,7 +32,7 @@ public class CameraController : MonoBehaviour
         orthoSizeDestination += Input.mouseScrollDelta.y * orthoSizeSpeed * -1;
         orthoSizeDestination = Mathf.Clamp(orthoSizeDestination, 3f, 20f);
         scrollSpeed = 1.0f * (orthoSizeDestination/3f);
-        pivot = transform.position + (transform.forward * 5 * Mathf.Sqrt(2));
+        pivot = transform.position + (transform.forward * 4 * Mathf.Sqrt(2));
 
 
         // Get cam rotate input
