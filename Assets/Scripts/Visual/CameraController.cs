@@ -6,6 +6,7 @@ public class CameraController : MonoBehaviour
 {
     public Camera cam;
     Vector3 destination;
+    Vector3 pivot;
     float orthoSizeDestination;
     float orthoSizeSpeed = 0.7f;
     float scrollSpeed = 1.0f;
@@ -15,6 +16,7 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         destination = this.transform.position;
+        pivot = destination + 5 * Mathf.Sqrt(2) * transform.forward;
         cam = this.GetComponent<Camera>();
         orthoSizeDestination = cam.orthographicSize;
     }
@@ -31,6 +33,8 @@ public class CameraController : MonoBehaviour
         orthoSizeDestination += Input.mouseScrollDelta.y * orthoSizeSpeed * -1;
         orthoSizeDestination = Mathf.Clamp(orthoSizeDestination, 3f, 20f);
         scrollSpeed = 1.0f * (orthoSizeDestination/3f);
+        pivot = transform.position + (transform.forward * 5 * Mathf.Sqrt(2));
+
 
         // Get cam rotate input
         if (Input.GetKeyDown(KeyCode.Q)){
@@ -47,7 +51,7 @@ public class CameraController : MonoBehaviour
             // Rotate camera angle
             degreesToRotate = Mathf.Clamp(destinationAngle, -1 * rotateSpeed * Time.deltaTime, rotateSpeed * Time.deltaTime);
             destinationAngle -= degreesToRotate;
-            transform.Rotate(0.0f, degreesToRotate, 0.0f, Space.World);
+            transform.RotateAround(pivot, Vector3.up, degreesToRotate);
         }
 
         // Move cam

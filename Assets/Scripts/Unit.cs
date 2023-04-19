@@ -74,7 +74,6 @@ public class Unit : MonoBehaviour
         } else {
             timeGrounded = 0;
         }
-        Debug.Log(timeGrounded);
     }
 
     public void OnCommand(UnitCommand unitCommand){
