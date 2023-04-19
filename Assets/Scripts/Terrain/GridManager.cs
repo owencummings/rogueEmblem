@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.AI.Navigation;
 using Unity.Mathematics;
+using TerrainGeneration;
 
 public class GridManager : MonoBehaviour
 {
@@ -15,12 +16,16 @@ public class GridManager : MonoBehaviour
     public float squareSize = 1f;
     public float cubeSize = 10f;
 
+    public int macroTileResolution = 10;
+    public int tilesPerMacroTile = 10;
+
     public GameObject squadPrefab; // temp
     public GameObject enemyPrefab; // temp
     
     void Awake()
     {
-        CreateFlatTerrain();
+        gridSize = 100;
+        CreateMacroTileTerrain();
     }
 
     void Start(){
@@ -93,10 +98,58 @@ public class GridManager : MonoBehaviour
         for (int i = 0; i < gridSize; i++){
             for (int j = 0; j < gridSize; j++){
                 float height = 1;
-                cubes[i,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
+                cubes[i,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2f)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2f)*cubeSize),
                                          Quaternion.identity, this.transform);
                 cubes[i,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
             }
         }
     }
+
+    void CreateMacroTileTerrain()
+    {
+        macroTileResolution = 4;
+        int fullResolution = macroTileResolution * tilesPerMacroTile;
+        float rand;
+        MacroTileType tileType;
+        cubes = new GameObject[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
+        for (int i1 = 0; i1 < macroTileResolution; i1++){
+            for (int j1 = 0; j1 < macroTileResolution; j1++){
+
+                // Determine tile type
+                if ((i1 == 0) || (j1 == 0) || (i1 == macroTileResolution-1) || (j1 == macroTileResolution-1))
+                {
+                    tileType = MacroTileType.Water;
+                }
+                else 
+                {
+                    rand = UnityEngine.Random.Range(0f, 1f);
+                    if (rand > 0.25){
+                        tileType = MacroTileType.Ring;
+                    } else {
+                        tileType = MacroTileType.Land;
+                    }
+
+                }
+
+                // Create tile
+                MacroTile macroTile = new MacroTile(tileType, tilesPerMacroTile);
+                macroTile.PopulateGrid();
+                for (int i = 0; i < tilesPerMacroTile; i++){
+                    for (int j = 0; j < tilesPerMacroTile; j++){
+                        int gridI = i1 * tilesPerMacroTile + i;
+                        int gridJ = j1 * tilesPerMacroTile + j;
+                        float height = macroTile.gridHeights[i, j];
+                        if (height > 0){
+                            cubes[gridI,gridJ] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * height/2, (gridJ-fullResolution/2f)*cubeSize),
+                                                    Quaternion.identity, this.transform);
+                            cubes[gridI,gridJ].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    
 }

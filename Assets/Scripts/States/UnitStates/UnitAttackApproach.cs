@@ -10,7 +10,7 @@ public class UnitAttackApproach : IState
     private Rigidbody _rb;
 
     private GameObject _attackTarget;
-    private float _attackRange = 2f;
+    //private float _attackRange = 2f;
     private const float _recalculateTime = 0.25f;
     private float _timer = 0f;
 

@@ -16,13 +16,14 @@ public class CubeMeshGenerator : MonoBehaviour
 	// TODO: Move this to CustomGeometry namespace, add resolution as param
 	// TODO: Use some mappings to reduce repeat code
 	private void CreateCube () {
+		int density = 2;
 		List<Vector3> vertices = new List<Vector3>();
 		List<int> triangles = new List<int>();
 		List<Vector3> nextVerts = new List<Vector3>();
 		List<int> nextTris = new List<int>();
 
 		// Top face
-		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), 10);
+		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
 		for (int i=0; i<nextVerts.Count; i++){
 			nextVerts[i] += Vector3.up * 0.5f;
 		}
@@ -30,7 +31,7 @@ public class CubeMeshGenerator : MonoBehaviour
 		triangles.AddRange(nextTris);
 
 		// Bottom
-		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), 10);
+		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
 		Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(180, 0, 0));
 		for (int i=0; i<nextVerts.Count; i++){
 			nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
@@ -46,7 +47,7 @@ public class CubeMeshGenerator : MonoBehaviour
 
 
 		// Side1
-		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), 10);
+		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
 		rot = Matrix4x4.Rotate(Quaternion.Euler(90, 0, 0));
 		for (int i=0; i<nextVerts.Count; i++){
 			nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
@@ -61,7 +62,7 @@ public class CubeMeshGenerator : MonoBehaviour
 		triangles.AddRange(nextTris);
 
 		// Side2
-		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), 10);
+		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
 		rot = Matrix4x4.Rotate(Quaternion.Euler(270, 0, 0));
 		for (int i=0; i<nextVerts.Count; i++){
 			nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
@@ -76,7 +77,7 @@ public class CubeMeshGenerator : MonoBehaviour
 		triangles.AddRange(nextTris);
 
 		// Side3
-		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), 10);
+		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
 		rot = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 90));
 		for (int i=0; i<nextVerts.Count; i++){
 			nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
@@ -91,7 +92,7 @@ public class CubeMeshGenerator : MonoBehaviour
 		triangles.AddRange(nextTris);
 
 		// Side4
-		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), 10);
+		(nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
 		rot = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 270));
 		for (int i=0; i<nextVerts.Count; i++){
 			nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
