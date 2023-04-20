@@ -13,20 +13,22 @@ public class Unit : MonoBehaviour
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
     public RallyVectors rallyVectors;
-    public GameObject attackTarget;
-    public GameObject nextAttackTarget;
+    public AttackData attackData;
     private Squad parentSquad; 
 
     private int walkableMask;
     private float attackRange = 2f;
     public float timeGrounded = 0f;
-    public bool attackFinished = false;
 
 
     void Awake(){
         rallyVectors = new RallyVectors();
         rallyVectors.rallyDestination = transform.position;
         rallyVectors.nextDestination = transform.position;
+
+        attackData = new AttackData();
+        attackData.attackFinished = false;
+
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         _rb.angularDrag = 1f;
@@ -35,18 +37,19 @@ public class Unit : MonoBehaviour
 
         // Set up state machine
         _stateMachine = new StateMachine();
-        var findNavMesh = new UnitFindNavMesh(this, _navMeshAgent, _rb);
+        var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
-        var attackApproach = new UnitAttackApproach(this, _navMeshAgent, _rb);
-        var attack = new UnitAttack(this, _navMeshAgent, _rb);
+        var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
+        var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
 
 
         // State machine transition conditions
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
-        Func<bool> NewAttackTarget = () => ((nextAttackTarget != null) &&
-                                            ((attackTarget == null) || (attackTarget.GetInstanceID() != nextAttackTarget.GetInstanceID())));
-        Func<bool> NearAttackTarget = () => (Vector3.Distance(attackTarget.transform.position, this.transform.position) < attackRange);
-        Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackFinished);
+        Func<bool> NewAttackTarget = () => ((attackData.nextAttackTarget != null) &&
+                                            ((attackData.attackTarget == null) ||
+                                             (attackData.attackTarget.GetInstanceID() != attackData.nextAttackTarget.GetInstanceID())));
+        Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
+        Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
 
         // State machine conditions
@@ -84,7 +87,7 @@ public class Unit : MonoBehaviour
 
         if (unitCommand.CommandEnum == UnitCommandEnum.Attack)
         {
-            nextAttackTarget = unitCommand.TargetGameObject;
+            attackData.nextAttackTarget = unitCommand.TargetGameObject;
         }
     }
 }
