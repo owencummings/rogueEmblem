@@ -3,19 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+public class AttackData{
+    public GameObject attackTarget;
+    public GameObject nextAttackTarget;
+    public bool attackFinished;
+}
+
 public class UnitAttack : IState
 {
-    private Unit _unit;
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    private GameObject _attackTarget;
+    private Transform _transform;
+    private AttackData _attackData;
     private float attackCooldown = 0.25f;
     private float attackTime = 0f;
 
-    public UnitAttack(Unit unit, NavMeshAgent navMeshAgent, Rigidbody rb)
+    public UnitAttack(NavMeshAgent navMeshAgent, Rigidbody rb, Transform transform, AttackData attackData)
     {
-        _unit = unit;
+        _attackData = attackData;
         _navMeshAgent = navMeshAgent;
+        _transform = transform;
         _rb = rb;
     }
 
@@ -23,21 +30,21 @@ public class UnitAttack : IState
     {
         attackTime += Time.deltaTime;
         if (attackTime > attackCooldown){
-            _unit.attackFinished = true;
+            _attackData.attackFinished = true;
         }
     }
 
     public void OnEnter(){
         _navMeshAgent.enabled = false;
-        _unit.transform.LookAt(_unit.attackTarget.transform);
+        _transform.LookAt(_attackData.attackTarget.transform);
         _rb.isKinematic = false;
-        _rb.AddForce(_unit.transform.up * 200 + _unit.transform.forward * 200);
+        _rb.AddForce(_transform.up * 200 + _transform.forward * 200);
         attackTime = 0f;
-        _unit.attackFinished = false;
+        _attackData.attackFinished = false;
     }
     public void OnExit(){
-        _unit.attackTarget = null;
-        _unit.nextAttackTarget = null;
-        _unit.attackFinished = false;
+        _attackData.attackTarget = null;
+        _attackData.nextAttackTarget = null;
+        _attackData.attackFinished = false;
     }
 }

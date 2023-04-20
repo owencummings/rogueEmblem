@@ -5,21 +5,20 @@ using UnityEngine.AI;
 
 public class UnitAttackApproach : IState
 {
-    private Unit _unit;
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
+    private AttackData _attackData;
 
-    private GameObject _attackTarget;
     //private float _attackRange = 2f;
     private const float _recalculateTime = 0.25f;
     private float _timer = 0f;
 
 
-    public UnitAttackApproach(Unit unit, NavMeshAgent navMeshAgent, Rigidbody rb)
+    public UnitAttackApproach(NavMeshAgent navMeshAgent, Rigidbody rb, AttackData attackData)
     {
-        _unit = unit;
         _navMeshAgent = navMeshAgent;
         _rb = rb;
+        _attackData = attackData;
     }
 
     public void Tick()
@@ -27,9 +26,9 @@ public class UnitAttackApproach : IState
         _timer += Time.deltaTime;
         if (_timer > _recalculateTime)
         {
-            if (_attackTarget != null)
+            if (_attackData.attackTarget != null)
             {
-                _navMeshAgent.SetDestination(_attackTarget.transform.position);
+                _navMeshAgent.SetDestination(_attackData.attackTarget.transform.position);
             }
             _timer = 0f;
         }
@@ -39,9 +38,8 @@ public class UnitAttackApproach : IState
     {
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
-        _unit.attackTarget = _unit.nextAttackTarget; 
-        _attackTarget = _unit.attackTarget;
-        _navMeshAgent.SetDestination(_attackTarget.transform.position);
+        _attackData.attackTarget = _attackData.nextAttackTarget; 
+        _navMeshAgent.SetDestination(_attackData.attackTarget.transform.position);
     }
 
     public void OnExit(){}

@@ -6,13 +6,11 @@ using UnityEngine.AI;
 
 public class UnitFindNavMesh : IState
 {
-    private Unit _unit;
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
 
-    public UnitFindNavMesh(Unit unit, NavMeshAgent navMeshAgent, Rigidbody rb)
+    public UnitFindNavMesh(NavMeshAgent navMeshAgent, Rigidbody rb)
     {
-        _unit = unit;
         _navMeshAgent = navMeshAgent;
         _rb = rb;
     }
