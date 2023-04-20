@@ -12,8 +12,7 @@ public class Unit : MonoBehaviour
     // Set up data
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    public Vector3 rallyDestination;
-    public Vector3 nextDestination;
+    public RallyVectors rallyVectors;
     public GameObject attackTarget;
     public GameObject nextAttackTarget;
     private Squad parentSquad; 
@@ -25,8 +24,9 @@ public class Unit : MonoBehaviour
 
 
     void Awake(){
-        rallyDestination = transform.position;
-        nextDestination = transform.position;
+        rallyVectors = new RallyVectors();
+        rallyVectors.rallyDestination = transform.position;
+        rallyVectors.nextDestination = transform.position;
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         _rb.angularDrag = 1f;
@@ -36,13 +36,13 @@ public class Unit : MonoBehaviour
         // Set up state machine
         _stateMachine = new StateMachine();
         var findNavMesh = new UnitFindNavMesh(this, _navMeshAgent, _rb);
-        var rally = new UnitRally(this, _navMeshAgent, _rb);
+        var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(this, _navMeshAgent, _rb);
         var attack = new UnitAttack(this, _navMeshAgent, _rb);
 
 
         // State machine transition conditions
-        Func<bool> NewRally = () => rallyDestination.Equals(nextDestination);
+        Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
         Func<bool> NewAttackTarget = () => ((nextAttackTarget != null) &&
                                             ((attackTarget == null) || (attackTarget.GetInstanceID() != nextAttackTarget.GetInstanceID())));
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackTarget.transform.position, this.transform.position) < attackRange);
@@ -79,7 +79,7 @@ public class Unit : MonoBehaviour
     public void OnCommand(UnitCommand unitCommand){
         if (unitCommand.CommandEnum  == UnitCommandEnum.Rally)
         {
-            nextDestination = unitCommand.TargetDestination;
+            rallyVectors.nextDestination = unitCommand.TargetDestination;
         }
 
         if (unitCommand.CommandEnum == UnitCommandEnum.Attack)

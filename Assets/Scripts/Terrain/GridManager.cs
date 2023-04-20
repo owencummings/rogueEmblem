@@ -31,31 +31,72 @@ public class GridManager : MonoBehaviour
     void Start(){
         navSurface.BuildNavMesh();
 
-        // Get smarter way to slam features
-        if (cubes[0,0] != null)
+        LazySlamFeature(squadPrefab, 20, 20);
+        LazySlamFeature(squadPrefab, 21, 21);
+        LazySlamFeature(enemyPrefab, 23, 23);
+    }
+
+
+    void LazySlamFeature(GameObject prefab, int x, int z)
+    {
+        int outputX = x;
+        int outputZ = z;
+        bool found = false;
+        int rand;
+        if (cubes[x, z] != null)
         {
-            Instantiate(squadPrefab, 
-                        new Vector3(cubes[0,0].transform.position.x, 
-                                    cubes[0,0].transform.localScale.y,
-                                    cubes[0,0].transform.position.z), 
-                        Quaternion.identity);
+            outputX = x;
+            outputZ = z;
+            found = true;
+        } 
+        else 
+        {
+            int i = 0;
+            int tryX = 0;
+            int tryZ = 0;
+            while (i < 10){
+                rand = UnityEngine.Random.Range(-5, 6);
+                tryX = x + rand;
+                rand = UnityEngine.Random.Range(-5, 6);
+                tryZ = z + rand;
+                if (cubes[tryX, tryZ] != null)
+                {
+                    outputX = tryX;
+                    outputZ = tryZ;
+                    found = true;
+                    break;
+                } 
+                i += 1;
+            }
         }
-        if (cubes[1,1] != null)
+        if (found)
         {
-            Instantiate(squadPrefab, 
-                        new Vector3(cubes[1,1].transform.position.x, 
-                                    cubes[1,1].transform.localScale.y,
-                                    cubes[1,1].transform.position.z), 
-                        Quaternion.identity);
-        }
-        if (cubes[5,5] != null)
-        {
-                Instantiate(enemyPrefab, 
-                new Vector3(cubes[5,5].transform.position.x, 
-                            cubes[5,5].transform.localScale.y,
-                            cubes[5,5].transform.position.z), 
+            Instantiate(prefab, 
+                new Vector3(cubes[outputX,outputZ].transform.position.x, 
+                            cubes[outputX,outputZ].transform.localScale.y,
+                            cubes[outputX,outputZ].transform.position.z), 
                 Quaternion.identity);
         }
+    }
+
+    void SlamFeature2(GameObject prefab, int x, int z)
+    {
+        // TODO: finish this...
+        // Gets closest square...
+        int tryX;
+        int tryZ;
+        // Find closest appropriate spot
+        for (int i=0; i < 5; i += 1){
+            for (int j = 0; j < 2*i; j += 1){
+                // Slam it
+                Instantiate(enemyPrefab, 
+                            new Vector3(cubes[5,5].transform.position.x, 
+                                        cubes[5,5].transform.localScale.y,
+                                        cubes[5,5].transform.position.z), 
+                            Quaternion.identity);
+                }
+        }
+
     }
 
     void CreateRandomTerrain()
@@ -123,7 +164,7 @@ public class GridManager : MonoBehaviour
                 else 
                 {
                     rand = UnityEngine.Random.Range(0f, 1f);
-                    if (rand > 0.25){
+                    if (rand > 0.7){
                         tileType = MacroTileType.Ring;
                     } else {
                         tileType = MacroTileType.Land;

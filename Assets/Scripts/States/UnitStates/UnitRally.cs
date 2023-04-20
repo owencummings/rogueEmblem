@@ -3,25 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+public class RallyVectors {
+    public Vector3 rallyDestination;
+    public Vector3 nextDestination;
+}
+
 public class UnitRally : IState
 {
-    private Unit _unit;
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
+    private RallyVectors _rallyVectors;
 
-    public UnitRally(Unit unit, NavMeshAgent navMeshAgent, Rigidbody rb)
+    public UnitRally(NavMeshAgent navMeshAgent, Rigidbody rb, RallyVectors rallyVectors)
     {
-        _unit = unit;
         _navMeshAgent = navMeshAgent;
         _rb = rb;
+        _rallyVectors = rallyVectors;
     }
 
     public void Tick(){
         // React to rally destination change
-        if (_unit.rallyDestination != _unit.nextDestination)
+        if (_rallyVectors.rallyDestination != _rallyVectors.nextDestination)
         {
-            _unit.rallyDestination = _unit.nextDestination;
-            _navMeshAgent.SetDestination(_unit.rallyDestination);
+            _rallyVectors.rallyDestination = _rallyVectors.nextDestination;
+            _navMeshAgent.SetDestination(_rallyVectors.rallyDestination);
         }
     }
 
@@ -29,9 +34,9 @@ public class UnitRally : IState
     {
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
-        _unit.rallyDestination = _unit.nextDestination;
-        if (_unit.rallyDestination != null && _navMeshAgent.isOnNavMesh){
-            _navMeshAgent.SetDestination(_unit.rallyDestination);
+        _rallyVectors.rallyDestination = _rallyVectors.nextDestination;
+        if (_rallyVectors.rallyDestination != null && _navMeshAgent.isOnNavMesh){
+            _navMeshAgent.SetDestination(_rallyVectors.rallyDestination);
         }
     }
 

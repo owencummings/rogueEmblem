@@ -90,27 +90,24 @@ namespace TerrainGeneration {
         public void PopulateRing()
         {
             float rand;
-            float heightPercentage = 0.5f; 
+            float ringWaterPercentage = 0.05f;
             PopulateNull();
 
             // Populate tile-defining features
             rand = Random.Range(0f, 1f);
+            int height = (int)(rand * 3) + 1;
             for (int i = 0; i < Resolution; i++)
             {
                 for (int j = 0; j < Resolution; j++)
                 {
                     if ((i == 0) || (j == 0) || (i == Resolution-1) || (j == Resolution-1))
                     {
-                        gridHeights[i,j] = 1;
+                        rand = Random.Range(0f, 1f);
+                        gridHeights[i,j] = rand > ringWaterPercentage ? 1 : 0;
                     } 
                     else if ((i > Resolution/2 - 3 && i < Resolution/2 + 2) && (j > Resolution/2 - 3 && j < Resolution/2 + 2))
                     {
-                        if (rand > heightPercentage)
-                        {
-                                gridHeights[i,j] = 1;
-                        } else {
-                                gridHeights[i,j] = 2;
-                        }
+                        gridHeights[i,j] = height;
                     }
                 }
             }

@@ -788,6 +788,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4772088311458816434, guid: 97ca10a5764bc5140bfb608c04ad51d7,
         type: 3}
+      propertyPath: cubePrefab
+      value: 
+      objectReference: {fileID: 7832334855732178913, guid: 72ecb0fdb01e07b4f8d8a7bff4ecec57,
+        type: 3}
+    - target: {fileID: 4772088311458816434, guid: 97ca10a5764bc5140bfb608c04ad51d7,
+        type: 3}
       propertyPath: navSurface
       value: 
       objectReference: {fileID: 1218582965}
