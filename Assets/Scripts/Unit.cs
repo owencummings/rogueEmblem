@@ -33,7 +33,7 @@ public class Unit : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _rb.angularDrag = 1f;
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        walkableMask = LayerMask.NameToLayer("Walkable");
+        walkableMask = LayerMask.GetMask("Walkable");
 
         // Set up state machine
         _stateMachine = new StateMachine();
@@ -72,7 +72,7 @@ public class Unit : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, 0.1f, ~walkableMask)) {
+        if (Physics.Raycast(transform.position, Vector3.down, 0.1f, walkableMask)) {
             timeGrounded += Time.fixedDeltaTime;
         } else {
             timeGrounded = 0;

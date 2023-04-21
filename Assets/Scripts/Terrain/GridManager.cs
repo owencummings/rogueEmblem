@@ -31,9 +31,9 @@ public class GridManager : MonoBehaviour
     void Start(){
         navSurface.BuildNavMesh();
 
-        LazySlamFeature(squadPrefab, 18, 18);
-        LazySlamFeature(squadPrefab, 19, 19);
-        LazySlamFeature(enemyPrefab, 20, 20);
+        LazySlamFeature(squadPrefab, 15, 15);
+        LazySlamFeature(squadPrefab, 14, 14);
+        LazySlamFeature(enemyPrefab, 23, 23);
     }
 
 
