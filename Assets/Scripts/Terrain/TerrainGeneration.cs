@@ -65,7 +65,7 @@ namespace TerrainGeneration {
 
             // Populate
             float landPercentage = 0.9f;
-            float neighborWaterPercentage = 0.11f;
+            //float neighborWaterPercentage = 0.11f;
             float rand;
             for (int i = 0; i < Resolution; i++)
             {

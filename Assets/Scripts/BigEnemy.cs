@@ -77,8 +77,8 @@ public class BigEnemy : MonoBehaviour
         } else {
             timeGrounded = 0;
         }
-        Debug.Log(timeGrounded);
     }
+    
     // Update is called once per frame
     void Update()
     {

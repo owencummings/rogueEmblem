@@ -79,9 +79,10 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    // TODO: finish this...
+    /*
     void SlamFeature2(GameObject prefab, int x, int z)
     {
-        // TODO: finish this...
         // Gets closest square...
         int tryX;
         int tryZ;
@@ -98,7 +99,8 @@ public class GridManager : MonoBehaviour
         }
 
     }
-
+    */
+    
     void CreateRandomTerrain()
     {
         // Assign some oscillation parameters for terrain variation
