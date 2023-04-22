@@ -79,6 +79,8 @@ public class Squad : MonoBehaviour, ISelectable
 
 
     void Update(){
+        if (PauseManager.paused){ return; }
+
         // Change position based on aggregate of units
         Vector3 aggregatePosition = Vector3.zero;
         foreach (GameObject unit in unitGoArr){

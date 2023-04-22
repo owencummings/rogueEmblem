@@ -67,6 +67,7 @@ public class Unit : MonoBehaviour
 
     void Update()
     {
+        if (PauseManager.paused){ return; }
         _stateMachine.Tick();
     }
 

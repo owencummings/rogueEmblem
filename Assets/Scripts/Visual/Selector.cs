@@ -31,6 +31,7 @@ public class Selector : MonoBehaviour
     }
 
     void Update(){
+        if (PauseManager.paused) { return ; }
         Ray ray = gameCam.ScreenPointToRay(Input.mousePosition);
         int gridMask = (1 << (gridLayer-1));
         if (Input.GetKeyDown(KeyCode.Space)){
