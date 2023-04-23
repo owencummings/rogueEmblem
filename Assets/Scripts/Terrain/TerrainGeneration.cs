@@ -178,7 +178,7 @@ namespace TerrainGeneration {
                 {
                     for (int j = 0; j < islandWidth; j++)
                     {
-                        gridHeights[islandX + i, islandX + j] = islandHeight;
+                        gridHeights[islandX + i, islandZ + j] = islandHeight;
                     }
                 }
             }
