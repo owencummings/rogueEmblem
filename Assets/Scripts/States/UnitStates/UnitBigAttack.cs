@@ -41,4 +41,6 @@ public class UnitBigAttack : IState
         _attackData.nextAttackTarget = null;
         _attackData.attackFinished = false;
     }
+
+    public void OnCollisionEnter(Collision collision){}
 }

@@ -41,4 +41,7 @@ public class UnitRally : IState
     }
 
     public void OnExit(){}
+
+    public void OnCollisionEnter(Collision collision){}
+
 }
