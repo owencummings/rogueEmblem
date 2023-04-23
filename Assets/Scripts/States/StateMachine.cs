@@ -36,6 +36,10 @@ public class StateMachine
       _currentState?.Tick();
    }
 
+   public void OnCollisionEnter(Collision collision){
+      _currentState?.OnCollisionEnter(collision);
+   }
+
    public void SetState(IState state)
    {
       if (state == _currentState)

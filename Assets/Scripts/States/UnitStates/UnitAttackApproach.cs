@@ -43,4 +43,5 @@ public class UnitAttackApproach : IState
     }
 
     public void OnExit(){}
+    public void OnCollisionEnter(Collision collision){}
 }

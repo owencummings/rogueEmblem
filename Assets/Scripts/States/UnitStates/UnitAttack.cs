@@ -47,4 +47,14 @@ public class UnitAttack : IState
         _attackData.nextAttackTarget = null;
         _attackData.attackFinished = false;
     }
+
+    public void OnCollisionEnter(Collision collision){
+        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+            DamageInstance damage = new DamageInstance();
+            damage.damageValue = 1;
+            damage.sourcePosition = Vector3.zero;
+            damageable.OnDamage(damage);
+        }
+    }
 }

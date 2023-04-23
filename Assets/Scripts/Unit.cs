@@ -19,6 +19,7 @@ public class Unit : MonoBehaviour
     private int walkableMask;
     private float attackRange = 2f;
     public float timeGrounded = 0f;
+    public Queue<DamageInstance> damageQueue = new Queue<DamageInstance>();
 
 
     void Awake(){
@@ -41,7 +42,7 @@ public class Unit : MonoBehaviour
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
         var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
-
+        var takeDamage = new UnitDamage(_navMeshAgent, _rb, damageQueue);
 
         // State machine transition conditions
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
@@ -61,6 +62,7 @@ public class Unit : MonoBehaviour
         At(attack, findNavMesh, AttackFinished);
         At(findNavMesh, rally, FoundNavMesh);
 
+        _stateMachine.AddAnyTransition(takeDamage, () => damageQueue.Count > 0);
         _stateMachine.SetState(rally);
 
     }
@@ -78,6 +80,10 @@ public class Unit : MonoBehaviour
         } else {
             timeGrounded = 0;
         }
+    }
+
+    void OnCollisionEnter(Collision collision){
+        _stateMachine.OnCollisionEnter(collision);
     }
 
     public void OnCommand(UnitCommand unitCommand){

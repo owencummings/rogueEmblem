@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class BigEnemy : MonoBehaviour
+public class BigEnemy : MonoBehaviour, IDamageable
 {
 
     private StateMachine _stateMachine;
 
-    // Set up data
+    public int Health { get; set; }
+    public TeamEnum Team { get; set; }
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
     public RallyVectors rallyVectors;
     public AttackData attackData;
+    private Queue<DamageInstance> _damageQueue;
 
     private Collider[] _aggroHit;
     private float _aggroRange = 3f;
@@ -34,12 +36,16 @@ public class BigEnemy : MonoBehaviour
         attackData = new AttackData();
         attackData.attackFinished = false;
 
+        _damageQueue = new Queue<DamageInstance>();
+
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         _rb.angularDrag = 1f;
         _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         playerUnitMask = LayerMask.GetMask("PlayerUnit");
         walkableMask = LayerMask.GetMask("Walkable");
+        Health = 10;
+        Team = TeamEnum.Enemy;
 
 
         // Set up state machine
@@ -48,6 +54,7 @@ public class BigEnemy : MonoBehaviour
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
+        var damage = new UnitDamage(_navMeshAgent, _rb, _damageQueue);
 
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
         Func<bool> InAggroRange = () =>
@@ -67,6 +74,8 @@ public class BigEnemy : MonoBehaviour
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(findNavMesh, rally, FoundNavMesh);
+        _stateMachine.AddAnyTransition(damage, () => _damageQueue.Count > 0);
+
         _stateMachine.SetState(rally);
 
     }
@@ -84,5 +93,13 @@ public class BigEnemy : MonoBehaviour
     {
         if (PauseManager.paused){ return; }
         _stateMachine.Tick();
+    }
+    
+    void OnCollisionEnter(Collision collision){
+        _stateMachine.OnCollisionEnter(collision);
+    }
+
+    public void OnDamage(DamageInstance damage){
+        _damageQueue.Enqueue(damage);
     }
 }
