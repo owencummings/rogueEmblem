@@ -28,7 +28,8 @@ public class UnitBigAttack : IState
         }
     }
 
-    public void OnEnter(){
+    public void OnEnter()
+    {
         _navMeshAgent.enabled = false;
         _transform.LookAt(_attackData.attackTarget.transform);
         _rb.isKinematic = false;
@@ -36,11 +37,24 @@ public class UnitBigAttack : IState
         attackTime = 0f;
         _attackData.attackFinished = false;
     }
-    public void OnExit(){
+
+    public void OnExit()
+    {
         _attackData.attackTarget = null;
         _attackData.nextAttackTarget = null;
         _attackData.attackFinished = false;
     }
 
-    public void OnCollisionEnter(Collision collision){}
+    public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+            if (damageable.Team ==  _attackData.team) { return; }
+
+            DamageInstance damage = new DamageInstance();
+            damage.damageValue = 1;
+            damage.sourcePosition = _transform.position;
+            damageable.OnDamage(damage);
+        }
+    }
 }

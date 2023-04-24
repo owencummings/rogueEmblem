@@ -29,23 +29,25 @@ public class BigEnemy : MonoBehaviour, IDamageable
     // Start is called before the first frame update
     void Awake()
     {
+        Health = 10;
+        Team = TeamEnum.Enemy;
         rallyVectors = new RallyVectors();
         rallyVectors.rallyDestination = transform.position;
         rallyVectors.nextDestination = transform.position;
 
         attackData = new AttackData();
         attackData.attackFinished = false;
+        attackData.team = Team;
 
         _damageQueue = new Queue<DamageInstance>();
 
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
-        _rb.angularDrag = 1f;
-        _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        RigidbodyUtils.StandardizeRigidbody(_rb);
+
         playerUnitMask = LayerMask.GetMask("PlayerUnit");
         walkableMask = LayerMask.GetMask("Walkable");
-        Health = 10;
-        Team = TeamEnum.Enemy;
+
 
 
         // Set up state machine
@@ -54,7 +56,7 @@ public class BigEnemy : MonoBehaviour, IDamageable
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
-        var damage = new UnitDamage(_navMeshAgent, _rb, _damageQueue);
+        var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue);
 
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
         Func<bool> InAggroRange = () =>
@@ -68,13 +70,15 @@ public class BigEnemy : MonoBehaviour, IDamageable
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < _attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 1f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
+        Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(rally, attackApproach, InAggroRange);
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(findNavMesh, rally, FoundNavMesh);
-        _stateMachine.AddAnyTransition(damage, () => _damageQueue.Count > 0);
+        _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
+        At(takeDamage, findNavMesh, DamageFinished);
 
         _stateMachine.SetState(rally);
 

@@ -165,13 +165,7 @@ public class GridManager : MonoBehaviour
                 }
                 else 
                 {
-                    rand = UnityEngine.Random.Range(0f, 1f);
-                    if (rand > 0.7){
-                        tileType = MacroTileType.Ring;
-                    } else {
-                        tileType = MacroTileType.Land;
-                    }
-
+                    tileType = MacroTileType.Land;
                 }
 
                 // Create tile
