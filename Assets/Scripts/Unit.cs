@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnitCommands;
 
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, IDamageable
 {
     private StateMachine _stateMachine;
 
@@ -14,26 +14,35 @@ public class Unit : MonoBehaviour
     private Rigidbody _rb;
     public RallyVectors rallyVectors;
     public AttackData attackData;
+    private Queue<DamageInstance> _damageQueue;
+    public int Health { get; set; }
+    public TeamEnum Team { get; set; }
     private Squad parentSquad; 
 
     private int walkableMask;
     private float attackRange = 2f;
     public float timeGrounded = 0f;
-    public Queue<DamageInstance> damageQueue = new Queue<DamageInstance>();
 
 
     void Awake(){
+        Health = 10;
+        Team = TeamEnum.Player;
+
         rallyVectors = new RallyVectors();
         rallyVectors.rallyDestination = transform.position;
         rallyVectors.nextDestination = transform.position;
 
         attackData = new AttackData();
         attackData.attackFinished = false;
+        attackData.team = Team;
+
+        _damageQueue = new Queue<DamageInstance>();
+
 
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
-        _rb.angularDrag = 1f;
-        _rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        RigidbodyUtils.StandardizeRigidbody(_rb);
+
         walkableMask = LayerMask.GetMask("Walkable");
 
         // Set up state machine
@@ -42,7 +51,7 @@ public class Unit : MonoBehaviour
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
         var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
-        var takeDamage = new UnitDamage(_navMeshAgent, _rb, damageQueue);
+        var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue);
 
         // State machine transition conditions
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
@@ -52,6 +61,8 @@ public class Unit : MonoBehaviour
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
+        Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
+
 
         // State machine conditions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
@@ -61,8 +72,10 @@ public class Unit : MonoBehaviour
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(findNavMesh, rally, FoundNavMesh);
+        _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
+        At(takeDamage, findNavMesh, DamageFinished);
+        
 
-        _stateMachine.AddAnyTransition(takeDamage, () => damageQueue.Count > 0);
         _stateMachine.SetState(rally);
 
     }
@@ -75,7 +88,7 @@ public class Unit : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, 0.1f, walkableMask)) {
+        if (Physics.Raycast(transform.position, Vector3.down, 0.2f, walkableMask)) {
             timeGrounded += Time.fixedDeltaTime;
         } else {
             timeGrounded = 0;
@@ -96,5 +109,9 @@ public class Unit : MonoBehaviour
         {
             attackData.nextAttackTarget = unitCommand.TargetGameObject;
         }
+    }
+
+    public void OnDamage(DamageInstance damage){
+        _damageQueue.Enqueue(damage);
     }
 }

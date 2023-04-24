@@ -24,7 +24,7 @@ public class UnitDamage : IState
         while (_damageQueue.Count > 0)
         {
             DamageInstance damageInstance = _damageQueue.Dequeue();
-            _rb.AddForce(Vector3.up * 100); // placeholder
+            _rb.AddForce((_rb.position - damageInstance.sourcePosition).normalized * damageInstance.damageValue * 100);
             _timeToRecoil += 0.5f;
         }
     }

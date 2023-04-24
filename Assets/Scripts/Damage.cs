@@ -12,8 +12,19 @@ public enum TeamEnum
 public interface IDamageable 
 {
     int Health { get; set; }
-    void OnDamage(DamageInstance damage){}
     TeamEnum Team { get; set; }
+    void OnDamage(DamageInstance damage){}
+}
+
+// The most common implementation of IDamageable
+public interface IStandardDamageable : IDamageable
+{
+    new int Health { get; set; }
+    new TeamEnum Team { get; set; }
+    Queue<DamageInstance> DamageQueue { get; set; }
+    new void OnDamage(DamageInstance damage){
+        DamageQueue.Enqueue(damage);
+    }
 }
 
 // Eventually add RecoilInstance class to separate damage from recoil instances

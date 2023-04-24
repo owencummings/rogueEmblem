@@ -171,7 +171,6 @@ public class GridManager : MonoBehaviour
                     } else {
                         tileType = MacroTileType.Land;
                     }
-
                 }
 
                 // Create tile

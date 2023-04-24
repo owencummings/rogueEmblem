@@ -7,6 +7,7 @@ public class AttackData{
     public GameObject attackTarget;
     public GameObject nextAttackTarget;
     public bool attackFinished;
+    public TeamEnum team;
 }
 
 public class UnitAttack : IState
@@ -34,26 +35,31 @@ public class UnitAttack : IState
         }
     }
 
-    public void OnEnter(){
+    public void OnEnter()
+    {
         _navMeshAgent.enabled = false;
         _transform.LookAt(_attackData.attackTarget.transform);
         _rb.isKinematic = false;
-        _rb.AddForce(_transform.up * 200 + _transform.forward * 200);
+        _rb.AddForce(_transform.up * 100 + _transform.forward * 300);
         attackTime = 0f;
         _attackData.attackFinished = false;
     }
-    public void OnExit(){
+
+    public void OnExit()
+    {
         _attackData.attackTarget = null;
         _attackData.nextAttackTarget = null;
         _attackData.attackFinished = false;
     }
 
-    public void OnCollisionEnter(Collision collision){
+    public void OnCollisionEnter(Collision collision)
+    {
         if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
+            if (damageable.Team ==  _attackData.team) { return; }
             DamageInstance damage = new DamageInstance();
             damage.damageValue = 1;
-            damage.sourcePosition = Vector3.zero;
+            damage.sourcePosition = _transform.position;
             damageable.OnDamage(damage);
         }
     }
