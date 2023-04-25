@@ -61,14 +61,14 @@ public class Unit : MonoBehaviour, IDamageable
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
-        Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
+        Func<bool> DamageFinished = () => (timeGrounded > 0.7f); // Improve
 
 
         // State machine conditions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(rally, attackApproach, NewAttackTarget);
         // Fix below to cancel attackapproaches
-        // At(attackApproach, rally, NewRally);
+        //At(attackApproach, rally, NewRally);
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(findNavMesh, rally, FoundNavMesh);
@@ -88,7 +88,10 @@ public class Unit : MonoBehaviour, IDamageable
 
     void FixedUpdate()
     {
-        if (Physics.Raycast(transform.position, Vector3.down, 0.2f, walkableMask)) {
+        if (Physics.OverlapSphere(transform.position - Vector3.down * 0.1f,
+                                  transform.localScale.x/2,
+                                  walkableMask).Length != 0)
+        {
             timeGrounded += Time.fixedDeltaTime;
         } else {
             timeGrounded = 0;

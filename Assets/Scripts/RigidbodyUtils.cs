@@ -10,5 +10,6 @@ static class RigidbodyUtils
         rb.centerOfMass = Vector3.zero;
         rb.inertiaTensor = new Vector3(1, 0, 1);
         rb.inertiaTensorRotation = Quaternion.identity;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
     }
 }
