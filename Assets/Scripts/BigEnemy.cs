@@ -48,8 +48,6 @@ public class BigEnemy : MonoBehaviour, IDamageable
         playerUnitMask = LayerMask.GetMask("PlayerUnit");
         walkableMask = LayerMask.GetMask("Walkable");
 
-
-
         // Set up state machine
         _stateMachine = new StateMachine();
         var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
@@ -68,7 +66,7 @@ public class BigEnemy : MonoBehaviour, IDamageable
             return (_aggroHit.Length > 0);
         };
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < _attackRange);
-        Func<bool> AttackFinished = () => (timeGrounded > 1f && attackData.attackFinished);
+        Func<bool> AttackFinished = () => (timeGrounded > 2f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
         Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
 
@@ -84,20 +82,25 @@ public class BigEnemy : MonoBehaviour, IDamageable
 
     }
 
-    void FixedUpdate(){
-        if (Physics.Raycast(transform.position, Vector3.down, 0.3f, walkableMask)) {
+    void Update()
+    {
+        if (PauseManager.paused){ return; }
+        _stateMachine.Tick();
+    }
+
+    void FixedUpdate()
+    {
+        if (Physics.OverlapSphere(transform.position - Vector3.down * 0.1f,
+                                  transform.localScale.x/2,
+                                  walkableMask).Length != 0)
+        {
             timeGrounded += Time.fixedDeltaTime;
         } else {
             timeGrounded = 0;
         }
     }
     
-    // Update is called once per frame
-    void Update()
-    {
-        if (PauseManager.paused){ return; }
-        _stateMachine.Tick();
-    }
+
     
     void OnCollisionEnter(Collision collision){
         _stateMachine.OnCollisionEnter(collision);
