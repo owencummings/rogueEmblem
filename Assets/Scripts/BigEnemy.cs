@@ -22,7 +22,7 @@ public class BigEnemy : MonoBehaviour, IDamageable
 
     private int playerUnitMask;
     private int walkableMask;
-    private float _attackRange = 1.5f;
+    private float _attackRange = 2.5f;
     public float timeGrounded = 0f;
     public bool attackFinished = false;
 

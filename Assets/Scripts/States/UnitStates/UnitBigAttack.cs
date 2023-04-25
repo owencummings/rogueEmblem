@@ -9,8 +9,10 @@ public class UnitBigAttack : IState
     private Rigidbody _rb;
     private Transform _transform;
     private AttackData _attackData;
-    private float attackCooldown = 0.25f;
-    private float attackTime = 0f;
+    private float raiseProgress = 0f;
+    private float raiseTime = 0.75f;
+    private Vector3 _targetPosition;
+    private bool falling = false;
 
     public UnitBigAttack(NavMeshAgent navMeshAgent, Rigidbody rb, Transform transform, AttackData attackData)
     {
@@ -22,10 +24,20 @@ public class UnitBigAttack : IState
 
     public void Tick()
     {
-        attackTime += Time.deltaTime;
-        if (attackTime > attackCooldown){
-            _attackData.attackFinished = true;
+        raiseProgress += Time.deltaTime;
+        if (falling){
+            _attackData.attackFinished = true; 
+        } else {
+            if (raiseProgress > raiseTime){
+                falling = true;
+                _rb.velocity = Vector3.zero;
+                _rb.AddForce(Vector3.down * 1000f);
+            } else {
+                Vector3 moveVector = (_targetPosition + 2.5f*Vector3.up - _transform.position);
+                _rb.velocity = moveVector.normalized * 5f;
+            }
         }
+
     }
 
     public void OnEnter()
@@ -34,8 +46,10 @@ public class UnitBigAttack : IState
         _transform.LookAt(_attackData.attackTarget.transform);
         _rb.isKinematic = false;
         _rb.AddForce(_transform.up * 300 + _transform.forward * 100);
-        attackTime = 0f;
         _attackData.attackFinished = false;
+        _targetPosition = _attackData.attackTarget.transform.position;
+        falling = false;
+        raiseProgress = 0;
     }
 
     public void OnExit()
