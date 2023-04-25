@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,23 @@ namespace TerrainGeneration {
         {
             TileType = tileType;
             Resolution = resolution;
+        }
+
+        public List<Tuple<int, int>> GetNeighborList(int x, int z)
+        {
+            List<Tuple<int, int>> outList = new  List<Tuple<int, int>>();
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    if ((x+i >= 0) && (z + j >= 0) && (x+i < Resolution) && (z+j < Resolution))
+                    {
+                        Tuple<int, int> nextTuple = new Tuple<int, int>(x + i, z + j);
+                        outList.Add(nextTuple);
+                    }
+                }
+            }
+            return outList;
         }
 
         public void PopulateGrid()
@@ -56,32 +74,27 @@ namespace TerrainGeneration {
             {
                 for (int j = 0; j < Resolution; j++)
                 {
-                    if ((i == 0) || (j == 0) || (i == Resolution-1) || (j == Resolution-1))
-                    {
-                        gridHeights[i,j] = 1;
-                    }
+                    // This is just the ring...
+                    // if ((i == 0) || (j == 0) || (i == Resolution-1) || (j == Resolution-1))
+                    gridHeights[i,j] = 1;
+
                 }
             }
 
-            // Populate
-            float landPercentage = 0.9f;
-            //float neighborWaterPercentage = 0.11f;
-            float rand;
-            for (int i = 0; i < Resolution; i++)
+            // Populate lakes
+            int numIslands = UnityEngine.Random.Range(0,4);
+            for (int island = 0; island < numIslands; island++)
             {
-                for (int j = 0; j < Resolution; j++)
+                // Get location and island size
+                int islandLength = UnityEngine.Random.Range(2,5);
+                int islandWidth = UnityEngine.Random.Range(2,5);
+                int islandX = UnityEngine.Random.Range(0,Resolution - islandLength);
+                int islandZ = UnityEngine.Random.Range(0, Resolution - islandWidth);
+                for (int i = 0; i < islandLength; i++)
                 {
-                    if (gridHeights[i,j] == -1)
+                    for (int j = 0; j < islandWidth; j++)
                     {
-                        rand = Random.Range(0f, 1f);
-                        // Adjust landPercentage based on neighbor values
-                        // Should iterate based on fill-status (random selection from tiles with most neighbors)
-                        if (landPercentage > rand){
-                            gridHeights[i,j] = 1;
-                        } else {
-                            gridHeights[i,j] = 0;
-
-                        }
+                        gridHeights[islandX + i, islandZ + j] = 0;
                     }
                 }
             }
@@ -94,7 +107,7 @@ namespace TerrainGeneration {
             PopulateNull();
 
             // Populate tile-defining features
-            rand = Random.Range(0f, 1f);
+            rand = UnityEngine.Random.Range(0f, 1f);
             int height = (int)(rand * 3) + 1;
             for (int i = 0; i < Resolution; i++)
             {
@@ -102,7 +115,7 @@ namespace TerrainGeneration {
                 {
                     if ((i == 0) || (j == 0) || (i == Resolution-1) || (j == Resolution-1))
                     {
-                        rand = Random.Range(0f, 1f);
+                        rand = UnityEngine.Random.Range(0f, 1f);
                         gridHeights[i,j] = rand > ringWaterPercentage ? 1 : 0;
                     } 
                     else if ((i > Resolution/2 - 3 && i < Resolution/2 + 2) && (j > Resolution/2 - 3 && j < Resolution/2 + 2))
@@ -120,7 +133,7 @@ namespace TerrainGeneration {
                 {
                     if (gridHeights[i,j] == -1)
                     {
-                        rand = Random.Range(0f, 1f);
+                        rand = UnityEngine.Random.Range(0f, 1f);
                         if (landPercentage > rand){
                             gridHeights[i,j] = 1;
                         } else {
@@ -141,31 +154,35 @@ namespace TerrainGeneration {
             {
                 for (int j = 0; j < Resolution; j++)
                 {
-                    if ((i < 2) || (j < 2) || (i > Resolution-3) || (j > Resolution-3))
-                    {
-                        gridHeights[i,j] = 0;
-                    }
+                    gridHeights[i,j] = 0;
                 }
             }
 
-            // Populate
-            float landPercentage = 0.1f;
-            float rand;
-            for (int i = 0; i < Resolution; i++)
+
+            // Do no islands fairly frequently
+            float rand = UnityEngine.Random.Range(0f, 1f);
+            if (rand > 0.33){ return; }
+
+            // Populate islands
+            int numIslands = UnityEngine.Random.Range(0,4);
+            for (int island = 0; island < numIslands; island++)
             {
-                for (int j = 0; j < Resolution; j++)
+                // Get location and island size
+                int islandLength = UnityEngine.Random.Range(2,5);
+                int islandWidth = UnityEngine.Random.Range(2,5);
+                int islandX = UnityEngine.Random.Range(2,Resolution - 2 - islandLength);
+                int islandZ = UnityEngine.Random.Range(2, Resolution - 2 - islandWidth);
+                int islandHeight = UnityEngine.Random.Range(1, 5);
+
+                for (int i = 0; i < islandLength; i++)
                 {
-                    if (gridHeights[i,j] == -1)
+                    for (int j = 0; j < islandWidth; j++)
                     {
-                        rand = Random.Range(0f, 1f);
-                        if (landPercentage > rand){
-                            gridHeights[i,j] = 1;
-                        } else {
-                            gridHeights[i,j] = 0;
-                        }
+                        gridHeights[islandX + i, islandZ + j] = islandHeight;
                     }
                 }
             }
         }
+
     }
 }
