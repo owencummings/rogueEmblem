@@ -11,16 +11,18 @@ public enum TeamEnum
 
 public interface IDamageable 
 {
-    int Health { get; set; }
+    float Health { get; set; }
     TeamEnum Team { get; set; }
+    Transform SourceTransform { get; set; }
     void OnDamage(DamageInstance damage){}
 }
 
-// The most common implementation of IDamageable
+// The most common implementation of IDamageable, WIP
 public interface IStandardDamageable : IDamageable
 {
-    new int Health { get; set; }
+    new float Health { get; set; }
     new TeamEnum Team { get; set; }
+    new Transform SourceTransform { get; }
     Queue<DamageInstance> DamageQueue { get; set; }
     new void OnDamage(DamageInstance damage){
         DamageQueue.Enqueue(damage);
@@ -30,7 +32,8 @@ public interface IStandardDamageable : IDamageable
 // Eventually add RecoilInstance class to separate damage from recoil instances
 public class DamageInstance {
     public float damageValue;
-    public Vector3 sourcePosition;
+    public Vector3 sourcePosition; // Maybe not necessary
+    public Vector3 forceVector;
     // Consider adding an optional type as well
 }
 

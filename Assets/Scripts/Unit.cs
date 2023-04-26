@@ -15,8 +15,9 @@ public class Unit : MonoBehaviour, IDamageable
     public RallyVectors rallyVectors;
     public AttackData attackData;
     private Queue<DamageInstance> _damageQueue;
-    public int Health { get; set; }
+    public float Health { get; set; }
     public TeamEnum Team { get; set; }
+    public Transform SourceTransform { get; set; }
     private Squad parentSquad; 
 
     private int walkableMask;
@@ -25,8 +26,9 @@ public class Unit : MonoBehaviour, IDamageable
 
 
     void Awake(){
-        Health = 10;
+        Health = 3f;
         Team = TeamEnum.Player;
+        SourceTransform = transform;
 
         rallyVectors = new RallyVectors();
         rallyVectors.rallyDestination = transform.position;
@@ -51,7 +53,8 @@ public class Unit : MonoBehaviour, IDamageable
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
         var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
-        var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue);
+        var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
+        var death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
 
         // State machine transition conditions
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
@@ -61,8 +64,8 @@ public class Unit : MonoBehaviour, IDamageable
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
-        Func<bool> DamageFinished = () => (timeGrounded > 0.7f); // Improve
-
+        Func<bool> DamageFinished = () => (timeGrounded > 0.7f && takeDamage.timeRecoiled > 1f);
+        Func<bool> NoHealth = () => (Health <= 0.0f);
 
         // State machine conditions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
@@ -74,7 +77,8 @@ public class Unit : MonoBehaviour, IDamageable
         At(findNavMesh, rally, FoundNavMesh);
         _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
         At(takeDamage, findNavMesh, DamageFinished);
-        
+        At(takeDamage, death, NoHealth);
+
 
         _stateMachine.SetState(rally);
 

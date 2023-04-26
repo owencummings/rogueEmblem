@@ -84,6 +84,7 @@ public class Squad : MonoBehaviour, ISelectable
         // Change position based on aggregate of units
         Vector3 aggregatePosition = Vector3.zero;
         foreach (GameObject unit in unitGoArr){
+            if (unit == null) { continue; }
             aggregatePosition = aggregatePosition + unit.transform.position;
         }
         selectableLocation = aggregatePosition/unitGoArr.Length;

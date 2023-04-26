@@ -9,8 +9,9 @@ public class BigEnemy : MonoBehaviour, IDamageable
 
     private StateMachine _stateMachine;
 
-    public int Health { get; set; }
+    public float Health { get; set; }
     public TeamEnum Team { get; set; }
+    public Transform SourceTransform { get; set; }
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
     public RallyVectors rallyVectors;
@@ -29,8 +30,10 @@ public class BigEnemy : MonoBehaviour, IDamageable
     // Start is called before the first frame update
     void Awake()
     {
-        Health = 10;
+        Health = 10f;
         Team = TeamEnum.Enemy;
+        SourceTransform = transform;
+
         rallyVectors = new RallyVectors();
         rallyVectors.rallyDestination = transform.position;
         rallyVectors.nextDestination = transform.position;
@@ -54,7 +57,8 @@ public class BigEnemy : MonoBehaviour, IDamageable
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
-        var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue);
+        var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
+        var lookAt = new UnitLookAt(_navMeshAgent, transform);
 
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
         Func<bool> InAggroRange = () =>
@@ -65,7 +69,8 @@ public class BigEnemy : MonoBehaviour, IDamageable
             }
             return (_aggroHit.Length > 0);
         };
-        Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < _attackRange);
+        Func<bool> NearAttackTarget = () => (attackData.attackTarget != null && 
+                                             Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < _attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 2f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
         Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
