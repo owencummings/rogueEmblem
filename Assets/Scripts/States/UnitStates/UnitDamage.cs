@@ -9,22 +9,26 @@ public class UnitDamage : IState
     private UnityEngine.AI.NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
     private Queue<DamageInstance> _damageQueue;
+    private IDamageable _damageable;
 
     private float _timeToRecoil = 0f;
-    private float _timeRecoiled = 0f;
+    public float timeRecoiled = 0f;
 
-    public UnitDamage(NavMeshAgent navMeshAgent, Rigidbody rb, Queue<DamageInstance> damageQueue)
+    public UnitDamage(NavMeshAgent navMeshAgent, Rigidbody rb, Queue<DamageInstance> damageQueue, IDamageable damageable)
     {
         _navMeshAgent = navMeshAgent;
         _rb = rb;
         _damageQueue = damageQueue;
+        _damageable = damageable;
     }
 
-    private void ConsumeDamageQueue(){
+    private void ConsumeDamageQueue()
+    {
         while (_damageQueue.Count > 0)
         {
             DamageInstance damageInstance = _damageQueue.Dequeue();
-            _rb.AddForce((_rb.position - damageInstance.sourcePosition).normalized * damageInstance.damageValue * 100);
+            _rb.AddForce(damageInstance.forceVector);
+            _damageable.Health -= damageInstance.damageValue;
             _timeToRecoil += 0.5f;
         }
     }
@@ -33,12 +37,12 @@ public class UnitDamage : IState
     {
         _navMeshAgent.enabled = false;
         _rb.isKinematic = false;
+        timeRecoiled = 0f;
     }
 
     public void Tick(){
         ConsumeDamageQueue();
-        _timeRecoiled += Time.deltaTime;
-        // Something to end state
+        timeRecoiled += Time.deltaTime;
     }
 
     public void OnExit(){}

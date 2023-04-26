@@ -31,7 +31,7 @@ public class UnitBigAttack : IState
             if (raiseProgress > raiseTime){
                 falling = true;
                 _rb.velocity = Vector3.zero;
-                _rb.AddForce(Vector3.down * 1000f);
+                _rb.AddForce(Vector3.down * 3000f);
             } else {
                 Vector3 moveVector = (_targetPosition + 2.5f*Vector3.up - _transform.position);
                 _rb.velocity = moveVector.normalized * 5f;
@@ -63,11 +63,14 @@ public class UnitBigAttack : IState
     {
         if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            if (damageable.Team ==  _attackData.team) { return; }
+            if (!falling || damageable.Team ==  _attackData.team) { return; }
 
             DamageInstance damage = new DamageInstance();
-            damage.damageValue = 1;
+            damage.damageValue = 2;
             damage.sourcePosition = _transform.position;
+            Vector3 directionVector = damageable.SourceTransform.position - _transform.position;
+            Vector3 xzVector = new Vector3(directionVector.x, 0f, directionVector.z);
+            damage.forceVector = xzVector.normalized * 100;
             damageable.OnDamage(damage);
         }
     }
