@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnitCommands;
 
-public class Unit : MonoBehaviour, IDamageable
+public class Archer : MonoBehaviour, IDamageable, ICommandable
 {
     private StateMachine _stateMachine;
 
@@ -18,10 +18,11 @@ public class Unit : MonoBehaviour, IDamageable
     public float Health { get; set; }
     public TeamEnum Team { get; set; }
     public Transform SourceTransform { get; set; }
+    public int ObjectID { get; set; }
     private Squad parentSquad; 
 
     private int walkableMask;
-    private float attackRange = 2f;
+    private float attackRange = UnitArcherAttack.attackRange;
     public float timeGrounded = 0f;
 
 
@@ -29,6 +30,7 @@ public class Unit : MonoBehaviour, IDamageable
         Health = 3f;
         Team = TeamEnum.Player;
         SourceTransform = transform;
+        ObjectID = gameObject.GetInstanceID();
 
         rallyVectors = new RallyVectors();
         rallyVectors.rallyDestination = transform.position;
@@ -52,7 +54,7 @@ public class Unit : MonoBehaviour, IDamageable
         var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
-        var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
+        var attack = new UnitArcherAttack(_navMeshAgent, _rb, transform, attackData);
         var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
         var death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
 
@@ -64,7 +66,7 @@ public class Unit : MonoBehaviour, IDamageable
         Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
-        Func<bool> DamageFinished = () => (timeGrounded > 0.7f && takeDamage.timeRecoiled > 1f);
+        Func<bool> DamageFinished = () => (timeGrounded > 0.5f && takeDamage.timeRecoiled > 0.5f);
         Func<bool> NoHealth = () => (Health <= 0.0f);
 
         // State machine conditions

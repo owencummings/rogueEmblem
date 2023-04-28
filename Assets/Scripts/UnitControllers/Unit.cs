@@ -3,36 +3,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnitCommands;
 
-public class BigEnemy : MonoBehaviour, IDamageable
+public interface ICommandable{
+    void OnCommand(UnitCommand unitCommand);
+}
+
+public class Unit : MonoBehaviour, IDamageable, ICommandable
 {
-
     private StateMachine _stateMachine;
 
-    public float Health { get; set; }
-    public TeamEnum Team { get; set; }
-    public Transform SourceTransform { get; set; }
-    public int ObjectID { get; set; }
-    private NavMeshAgent _navMeshAgent;
+    // Set up data
+    protected NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
     public RallyVectors rallyVectors;
     public AttackData attackData;
     private Queue<DamageInstance> _damageQueue;
+    public float Health { get; set; }
+    public TeamEnum Team { get; set; }
+    public Transform SourceTransform { get; set; }
+    public int ObjectID { get; set; }
+    private Squad parentSquad; 
 
-    private Collider[] _aggroHit;
-    private float _aggroRange = 3f;
-
-    private int playerUnitMask;
     private int walkableMask;
-    private float _attackRange = 2.5f;
+    private float attackRange = 2f;
     public float timeGrounded = 0f;
-    public bool attackFinished = false;
 
-    // Start is called before the first frame update
-    void Awake()
-    {
-        Health = 10f;
-        Team = TeamEnum.Enemy;
+
+    void Awake(){
+        Health = 3f;
+        Team = TeamEnum.Player;
         SourceTransform = transform;
         ObjectID = gameObject.GetInstanceID();
 
@@ -46,11 +46,11 @@ public class BigEnemy : MonoBehaviour, IDamageable
 
         _damageQueue = new Queue<DamageInstance>();
 
+
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         RigidbodyUtils.StandardizeRigidbody(_rb);
 
-        playerUnitMask = LayerMask.GetMask("PlayerUnit");
         walkableMask = LayerMask.GetMask("Walkable");
 
         // Set up state machine
@@ -58,32 +58,33 @@ public class BigEnemy : MonoBehaviour, IDamageable
         var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
         var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
         var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
-        var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
+        var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
         var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
-        var lookAt = new UnitLookAt(_navMeshAgent, transform);
+        var death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
 
+        // State machine transition conditions
         Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
-        Func<bool> InAggroRange = () =>
-        {
-            _aggroHit = Physics.OverlapSphere(transform.position, _aggroRange, playerUnitMask);
-            if (_aggroHit.Length > 0){
-                attackData.nextAttackTarget = _aggroHit[0].gameObject;
-            }
-            return (_aggroHit.Length > 0);
-        };
-        Func<bool> NearAttackTarget = () => (attackData.attackTarget != null && 
-                                             Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < _attackRange);
-        Func<bool> AttackFinished = () => (timeGrounded > 2f && attackData.attackFinished);
+        Func<bool> NewAttackTarget = () => ((attackData.nextAttackTarget != null) &&
+                                            ((attackData.attackTarget == null) ||
+                                             (attackData.attackTarget.GetInstanceID() != attackData.nextAttackTarget.GetInstanceID())));
+        Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
+        Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
-        Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
+        Func<bool> DamageFinished = () => (timeGrounded > 0.5f && takeDamage.timeRecoiled > 0.5f);
+        Func<bool> NoHealth = () => (Health <= 0.0f);
 
+        // State machine conditions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
-        At(rally, attackApproach, InAggroRange);
+        At(rally, attackApproach, NewAttackTarget);
+        // Fix below to cancel attackapproaches
+        //At(attackApproach, rally, NewRally);
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(findNavMesh, rally, FoundNavMesh);
         _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
         At(takeDamage, findNavMesh, DamageFinished);
+        At(takeDamage, death, NoHealth);
+
 
         _stateMachine.SetState(rally);
 
@@ -106,11 +107,21 @@ public class BigEnemy : MonoBehaviour, IDamageable
             timeGrounded = 0;
         }
     }
-    
 
-    
     void OnCollisionEnter(Collision collision){
         _stateMachine.OnCollisionEnter(collision);
+    }
+
+    public void OnCommand(UnitCommand unitCommand){
+        if (unitCommand.CommandEnum  == UnitCommandEnum.Rally)
+        {
+            rallyVectors.nextDestination = unitCommand.TargetDestination;
+        }
+
+        if (unitCommand.CommandEnum == UnitCommandEnum.Attack)
+        {
+            attackData.nextAttackTarget = unitCommand.TargetGameObject;
+        }
     }
 
     public void OnDamage(DamageInstance damage){

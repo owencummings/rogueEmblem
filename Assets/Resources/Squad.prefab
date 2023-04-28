@@ -103,8 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitArr: []
   unitGoArr: []
-  unitPrefab: {fileID: 7285878399363094458, guid: 6d0c56972db51bb498c8c714be4dbcf2,
-    type: 3}
+  unitPrefab: {fileID: 0}
   selectableLocation: {x: 0, y: 0, z: 0}
   rallyLocation: {x: 0, y: 0, z: 0}
   rallyFlagPrefab: {fileID: 3113606497625232564, guid: bebad8dbf478727418da5df94e7d3367,
