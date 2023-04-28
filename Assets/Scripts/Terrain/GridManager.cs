@@ -30,12 +30,16 @@ public class GridManager : MonoBehaviour
 
     void Start(){
         navSurface.BuildNavMesh();
-
-        LazySlamFeature(squadPrefab, 15, 15);
-        LazySlamFeature(squadPrefab, 14, 14);
+        CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
+        CreateSquad(Resources.Load("Archer") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
     }
 
+    void CreateSquad(GameObject unitPrefab, int x, int z){
+        GameObject squad = Resources.Load("Squad") as GameObject;
+        squad.GetComponent<Squad>().unitPrefab = unitPrefab;
+        LazySlamFeature(squad, x, z);
+    }
 
     void LazySlamFeature(GameObject prefab, int x, int z)
     {

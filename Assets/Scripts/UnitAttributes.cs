@@ -4,10 +4,5 @@ using UnityEngine;
 
 namespace UnitAttributes
 {
-    public interface IDamageable{
-        int Health { get; set; }
-        void Damage(int damage){
-            Health -= damage;
-        }
-    }
+    // Eventually fill with starting unit stats
 }

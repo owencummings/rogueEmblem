@@ -14,6 +14,7 @@ public interface IDamageable
     float Health { get; set; }
     TeamEnum Team { get; set; }
     Transform SourceTransform { get; set; }
+    int ObjectID { get; set; }
     void OnDamage(DamageInstance damage){}
 }
 

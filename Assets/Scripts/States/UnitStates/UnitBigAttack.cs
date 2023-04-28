@@ -13,6 +13,7 @@ public class UnitBigAttack : IState
     private float raiseTime = 0.75f;
     private Vector3 _targetPosition;
     private bool falling = false;
+    private HashSet<int> objectsHit = new HashSet<int>();
 
     public UnitBigAttack(NavMeshAgent navMeshAgent, Rigidbody rb, Transform transform, AttackData attackData)
     {
@@ -50,6 +51,7 @@ public class UnitBigAttack : IState
         _targetPosition = _attackData.attackTarget.transform.position;
         falling = false;
         raiseProgress = 0;
+        objectsHit = new HashSet<int>();
     }
 
     public void OnExit()
@@ -63,15 +65,16 @@ public class UnitBigAttack : IState
     {
         if (collision.gameObject.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            if (!falling || damageable.Team ==  _attackData.team) { return; }
+            if (!falling || damageable.Team ==  _attackData.team || objectsHit.Contains(damageable.ObjectID)) { return; }
 
             DamageInstance damage = new DamageInstance();
             damage.damageValue = 2;
             damage.sourcePosition = _transform.position;
             Vector3 directionVector = damageable.SourceTransform.position - _transform.position;
             Vector3 xzVector = new Vector3(directionVector.x, 0f, directionVector.z);
-            damage.forceVector = xzVector.normalized * 100;
+            damage.forceVector = xzVector.normalized * 150;
             damageable.OnDamage(damage);
+            objectsHit.Add(damageable.ObjectID);
         }
     }
 }
