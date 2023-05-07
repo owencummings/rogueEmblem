@@ -14,6 +14,8 @@ public class Selector : MonoBehaviour
     private HashSet<ISelectable> selectableSet;
 
     public static Selector Instance { get; private set; }
+    public GameObject blockPrefab;
+    private int walkableMask;
 
     private void Awake() 
     { 
@@ -28,28 +30,49 @@ public class Selector : MonoBehaviour
         }
 
         selectableSet = new HashSet<ISelectable>();
+
+        walkableMask = LayerMask.GetMask("Walkable");
+
     }
 
     void Update(){
         if (PauseManager.paused) { return ; }
+
+
         Ray ray = gameCam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
         int gridMask = (1 << (gridLayer-1));
-        if (Input.GetKeyDown(KeyCode.Space)){
+
+        // Test building feature here for now
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, walkableMask))
+            {
+                Vector3 newBlockPosition = hit.transform.position + hit.normal;
+                //Vector3Int roundedPosition = Vector3Int.R
+                Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
+                NavMeshManager.Instance.BakeNavMesh();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
             // Display selectables
             foreach (ISelectable selectable in selectableSet){
                 selectable.OnShow();
             }
         }
 
-        if (Input.GetKeyUp(KeyCode.Space)){
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
             // Hide selectables
             foreach (ISelectable selectable in selectableSet){
                 selectable.OnHide();
             }
         }
 
-        if (Input.GetMouseButtonDown(0)){
-            RaycastHit hit;
+        if (Input.GetMouseButtonDown(0))
+        {
             // Deselect current selection
             if (selectedObject != null){
                 selectedObject.OnDeselect();
@@ -57,7 +80,8 @@ public class Selector : MonoBehaviour
             }
             selectedObject = null;
             
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~gridMask)){ // Make sure water exists on grid layer
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~gridMask))
+            {   // Make sure water exists on grid layer
                 // Iterate through selectables
                 float currDistance = 3;
                 float closestDistance = float.MaxValue;
@@ -81,7 +105,8 @@ public class Selector : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(1) && selectedObject != null){
+        if (Input.GetMouseButtonDown(1) && selectedObject != null)
+        {
             SelectableCommand command = new SelectableCommand(KeyCode.Mouse1, ray);
             selectedObject.OnCommand(command);
         }

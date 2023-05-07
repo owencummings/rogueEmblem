@@ -11,7 +11,7 @@ public class WeatherManager : MonoBehaviour
     void Awake()
     {
         RenderSettings.ambientLight = closeAtmosphereColor; // Currently I think the shader overshoots the lerp, so farAtmosphere is actually the midrange.
-        RenderSettings.ambientIntensity = 0f;
+        RenderSettings.ambientIntensity = 0.02f;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;
         RenderSettings.fogColor = farAtmosphereColor;
@@ -22,5 +22,13 @@ public class WeatherManager : MonoBehaviour
     void FixedUpdate()
     {
         lightSource.transform.rotation *= Quaternion.AngleAxis(0.1f, Vector3.right);
+        if (lightSource.transform.eulerAngles.x > -10f && lightSource.transform.eulerAngles.x < 190f)
+        {
+            lightSource.intensity = 4f;
+        } 
+        else 
+        {
+            lightSource.intensity = 0f;
+        }
     }
 }
