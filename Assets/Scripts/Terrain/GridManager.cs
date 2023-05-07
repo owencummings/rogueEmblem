@@ -14,7 +14,7 @@ public class GridManager : MonoBehaviour
     public GameObject cubePrefab;
     public int gridSize = 20;
     public float squareSize = 1f;
-    public float cubeSize = 10f;
+    public float cubeSize = 1f;
 
     public int macroTileResolution = 10;
     public int tilesPerMacroTile = 10;
@@ -22,8 +22,22 @@ public class GridManager : MonoBehaviour
     public GameObject squadPrefab; // temp
     public GameObject enemyPrefab; // temp
     
+    public float offsetXZ = 0f;
+    public float offsetY = 0.5f;
+
+    public static GridManager Instance { get; private set; }
+
     void Awake()
     {
+        // Singleton
+        if (Instance != null && Instance != this) 
+        { 
+            Destroy(this); 
+        } 
+        else 
+        { 
+            Instance = this; 
+        } 
         gridSize = 100;
         CreateMacroTileTerrain();
     }
@@ -31,7 +45,7 @@ public class GridManager : MonoBehaviour
     void Start(){
         navSurface.BuildNavMesh();
         CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
-        CreateSquad(Resources.Load("Archer") as GameObject, 14, 14);
+        CreateSquad(Resources.Load("Unit") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
     }
 
@@ -39,6 +53,28 @@ public class GridManager : MonoBehaviour
         GameObject squad = Resources.Load("Squad") as GameObject;
         squad.GetComponent<Squad>().unitPrefab = unitPrefab;
         LazySlamFeature(squad, x, z);
+    }
+
+    public Vector3 GetClosestGridPoint(Vector3 inputPoint){
+        float outX, outY, outZ;
+        // Get nearest point lower than inputPoint
+        // gridPointRoundedDown = (inPoint - inpoint%gridSize) + offset
+        outX = (inputPoint.x - inputPoint.x % cubeSize) - offsetXZ;
+        outY = (inputPoint.y - inputPoint.y % cubeSize) - offsetY;
+        outZ = (inputPoint.z - inputPoint.z % cubeSize) - offsetXZ;
+
+        if (Mathf.Abs(outX - inputPoint.x) > cubeSize/2f){
+            outX += cubeSize;
+        }
+        if (Mathf.Abs(outY - inputPoint.y) > cubeSize/2f){
+            outY += cubeSize;
+        }
+        if (Mathf.Abs(outZ - inputPoint.z) > cubeSize/2f){
+            outZ += cubeSize;
+        }
+
+        Vector3 outputPoint = new Vector3(outX, outY, outZ);
+        return outputPoint;
     }
 
     void LazySlamFeature(GameObject prefab, int x, int z)
@@ -156,6 +192,8 @@ public class GridManager : MonoBehaviour
     {
         macroTileResolution = 4;
         int fullResolution = macroTileResolution * tilesPerMacroTile;
+        offsetXZ = (fullResolution/2f) % 1;
+        offsetY = 0.5f; 
         float rand;
         MacroTileType tileType;
         cubes = new GameObject[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
@@ -186,9 +224,12 @@ public class GridManager : MonoBehaviour
                         int gridJ = j1 * tilesPerMacroTile + j;
                         float height = macroTile.gridHeights[i, j];
                         if (height > 0){
-                            cubes[gridI,gridJ] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * height/2, (gridJ-fullResolution/2f)*cubeSize),
-                                                    Quaternion.identity, this.transform);
-                            cubes[gridI,gridJ].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                            for (int k = 0; k < height; k++){
+                                cubes[gridI,gridJ] = Instantiate(cubePrefab,
+                                                                new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * (k + 0.5f), (gridJ-fullResolution/2f)*cubeSize),
+                                                                Quaternion.identity, this.transform);
+                                cubes[gridI,gridJ].transform.localScale = new Vector3(cubeSize, cubeSize, cubeSize);
+                            }
                         }
 
                     }
