@@ -31,4 +31,19 @@ namespace CustomGeometry {
 
 
     }
+
+    // TODO: Add resolution eventually? For mesh deforming.
+    static class TriGenerator {
+        public static (List<Vector3>, List<int>) GenerateTri(Vector2 size){
+            List<Vector3> verts = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            verts.Add(new Vector3( 0.5f, 0f,  0.5f));
+            verts.Add(new Vector3( 0.5f, 0f, -0.5f));
+            verts.Add(new Vector3(-0.5f, 0f, -0.5f));
+            triangles.Add(0);
+            triangles.Add(1);
+            triangles.Add(2);
+            return (verts, triangles);
+        }
+    }
 }
