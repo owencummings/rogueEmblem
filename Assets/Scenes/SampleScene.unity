@@ -500,6 +500,8 @@ MonoBehaviour:
   gameCam: {fileID: 330585545}
   blockPrefab: {fileID: 8102450376007290982, guid: c7ee749dbe15fd64baf55c30b8f7ff62,
     type: 3}
+  rampPrefab: {fileID: 963416831844032996, guid: 376f32e8446005c479667ebfcb9ae7f4,
+    type: 3}
 --- !u!4 &793541707
 Transform:
   m_ObjectHideFlags: 0
@@ -992,6 +994,12 @@ PrefabInstance:
       propertyPath: navSurface
       value: 
       objectReference: {fileID: 1218582965}
+    - target: {fileID: 4772088311458816434, guid: 97ca10a5764bc5140bfb608c04ad51d7,
+        type: 3}
+      propertyPath: rampPrefab
+      value: 
+      objectReference: {fileID: 963416831844032996, guid: 376f32e8446005c479667ebfcb9ae7f4,
+        type: 3}
     - target: {fileID: 4772088311458816434, guid: 97ca10a5764bc5140bfb608c04ad51d7,
         type: 3}
       propertyPath: enemyPrefab

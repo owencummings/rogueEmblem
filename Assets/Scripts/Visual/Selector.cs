@@ -15,6 +15,7 @@ public class Selector : MonoBehaviour
 
     public static Selector Instance { get; private set; }
     public GameObject blockPrefab;
+    public GameObject rampPrefab;
     private int walkableMask;
 
     private void Awake() 
@@ -49,8 +50,11 @@ public class Selector : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, walkableMask))
             {
                 Vector3 newBlockPosition = hit.transform.position + hit.normal;
-                //Vector3Int roundedPosition = Vector3Int.R
-                Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
+                if (hit.normal == Vector3.up || hit.normal == Vector3.down){
+                    Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
+                } else {
+                    Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.LookRotation(hit.normal), GameManager.Instance.transform);
+                }
                 NavMeshManager.Instance.BakeNavMesh();
             }
         }
