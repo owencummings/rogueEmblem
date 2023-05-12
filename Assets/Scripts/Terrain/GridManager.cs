@@ -224,7 +224,7 @@ public class GridManager : MonoBehaviour
                         int gridJ = j1 * tilesPerMacroTile + j;
                         float height = macroTile.gridHeights[i, j];
                         if (height > 0){
-                            for (int k = 0; k < height; k++){
+                            for (int k = -4; k < height; k++){
                                 cubes[gridI,gridJ] = Instantiate(cubePrefab,
                                                                 new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * (k + 0.5f), (gridJ-fullResolution/2f)*cubeSize),
                                                                 Quaternion.identity, this.transform);

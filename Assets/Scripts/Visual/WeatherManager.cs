@@ -11,8 +11,8 @@ public class WeatherManager : MonoBehaviour
     void Awake()
     {
         RenderSettings.ambientLight = closeAtmosphereColor; // Currently I think the shader overshoots the lerp, so farAtmosphere is actually the midrange.
-        RenderSettings.ambientIntensity = 0.02f;
-        RenderSettings.fog = true;
+        RenderSettings.ambientIntensity = 0f;
+        RenderSettings.fog = false;
         RenderSettings.fogMode = FogMode.Linear;
         RenderSettings.fogColor = farAtmosphereColor;
         RenderSettings.fogDensity = 0.02f;
