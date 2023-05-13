@@ -44,7 +44,7 @@ public class Selector : MonoBehaviour
         RaycastHit hit;
         int gridMask = (1 << (gridLayer-1));
 
-        // Test building feature here for now
+        // Test building feature here for now, will want to add this to a unit behavior
         if (Input.GetKeyDown(KeyCode.R))
         {
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, walkableMask))
@@ -52,8 +52,16 @@ public class Selector : MonoBehaviour
                 Vector3 newBlockPosition = hit.transform.position + hit.normal;
                 if (hit.normal == Vector3.up || hit.normal == Vector3.down){
                     Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
-                } else {
+                } else if (hit.normal == Vector3.right || hit.normal == Vector3.left || hit.normal == Vector3.forward || hit.normal == Vector3.back){
+                    Debug.Log(hit.normal);
                     Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.LookRotation(hit.normal), GameManager.Instance.transform);
+                } else {
+                    Vector3 reverseFlatNormal = new Vector3(hit.normal.x, 0, hit.normal.z);
+                    reverseFlatNormal = reverseFlatNormal.normalized;
+                    reverseFlatNormal = new Vector3(1, -1, reverseFlatNormal.x);
+                    reverseFlatNormal *= 90f;
+                    reverseFlatNormal -= Vector3.forward * 90f;
+                    Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(hit.transform.position),  Quaternion.Euler(reverseFlatNormal), GameManager.Instance.transform);
                 }
                 NavMeshManager.Instance.BakeNavMesh();
             }

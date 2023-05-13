@@ -136,9 +136,9 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DeepColor: {r: 0.3186632, g: 0.560123, b: 0.8773585, a: 1}
+    - _DeepColor: {r: 0.25511748, g: 0.43921423, b: 0.8584906, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 0.9999342, g: 1, b: 0.9481132, a: 0}
-    - _ShallowColor: {r: 0.6232645, g: 0.74214923, b: 0.8867924, a: 0}
+    - _ShallowColor: {r: 0.4523407, g: 0.6510956, b: 0.8962264, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
