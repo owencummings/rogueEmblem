@@ -57,7 +57,6 @@ public class UnitBigAttack : IState
     public void OnExit()
     {
         _attackData.attackTarget = null;
-        _attackData.nextAttackTarget = null;
         _attackData.attackFinished = false;
     }
 

@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 public class AttackData{
     public GameObject attackTarget;
-    public GameObject nextAttackTarget;
     public bool attackFinished;
     public TeamEnum team;
 }
@@ -48,7 +47,6 @@ public class UnitAttack : IState
     public void OnExit()
     {
         _attackData.attackTarget = null;
-        _attackData.nextAttackTarget = null;
         _attackData.attackFinished = false;
     }
 
