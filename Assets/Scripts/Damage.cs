@@ -30,7 +30,7 @@ public interface IStandardDamageable : IDamageable
     }
 }
 
-// Eventually add RecoilInstance class to separate damage from recoil instances
+// Eventually add RecoilInstance class to separate damage from recoil instances?
 public class DamageInstance {
     public float damageValue;
     public Vector3 sourcePosition; // Maybe not necessary

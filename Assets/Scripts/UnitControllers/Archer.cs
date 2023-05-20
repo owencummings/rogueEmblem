@@ -12,9 +12,11 @@ public class Archer : MonoBehaviour, IDamageable, ICommandable
     // Set up data
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    public RallyVectors rallyVectors;
+    public RallyData rallyData;
     public AttackData attackData;
     private Queue<DamageInstance> _damageQueue;
+    private bool newCommand = false;
+    private UnitCommand mostRecentCommand;
     public float Health { get; set; }
     public TeamEnum Team { get; set; }
     public Transform SourceTransform { get; set; }
@@ -32,9 +34,11 @@ public class Archer : MonoBehaviour, IDamageable, ICommandable
         SourceTransform = transform;
         ObjectID = gameObject.GetInstanceID();
 
-        rallyVectors = new RallyVectors();
-        rallyVectors.rallyDestination = transform.position;
-        rallyVectors.nextDestination = transform.position;
+        mostRecentCommand = new UnitCommand(UnitCommandEnum.None, Vector3.zero, null);
+
+        rallyData = new RallyData();
+        rallyData.destination = transform.position;
+        rallyData.destinationObject = null;
 
         attackData = new AttackData();
         attackData.attackFinished = false;
@@ -51,38 +55,67 @@ public class Archer : MonoBehaviour, IDamageable, ICommandable
 
         // Set up state machine
         _stateMachine = new StateMachine();
+        var idle = new UnitIdle(_navMeshAgent, _rb);
         var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
-        var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
-        var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
+        var rally = new UnitRally(_navMeshAgent, _rb, rallyData);
+        var attackApproach = new UnitRally(_navMeshAgent, _rb, rallyData);
         var attack = new UnitArcherAttack(_navMeshAgent, _rb, transform, attackData);
         var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
         var death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
+        var carryRally = new UnitRally(_navMeshAgent, _rb, rallyData);
+        var carry = new UnitCarry(_navMeshAgent, _rb);
 
         // State machine transition conditions
-        Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
-        Func<bool> NewAttackTarget = () => ((attackData.nextAttackTarget != null) &&
-                                            ((attackData.attackTarget == null) ||
-                                             (attackData.attackTarget.GetInstanceID() != attackData.nextAttackTarget.GetInstanceID())));
-        Func<bool> NearAttackTarget = () => (Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
+        Func<bool> NearAttackTarget = () => (attackData.attackTarget != null && Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
         Func<bool> DamageFinished = () => (timeGrounded > 0.5f && takeDamage.timeRecoiled > 0.5f);
         Func<bool> NoHealth = () => (Health <= 0.0f);
+        Func<bool> NewValidCommand = () => {
+            if (newCommand == true){
+                newCommand = false;
+                return true;
+            }
+            return false;
+        };
+        Func<bool> NewRally = () => {
+            if (mostRecentCommand.CommandEnum == UnitCommandEnum.Rally)
+            {
+                rallyData.destination = mostRecentCommand.TargetDestination;
+                rallyData.destinationObject = null;
+                return true;
+            }
+            return false;
+        };
 
-        // State machine conditions
+        Func<bool> NewAttack = () => {
+            if (mostRecentCommand.CommandEnum == UnitCommandEnum.Attack)
+            {
+                rallyData.destination = Vector3.zero;
+                rallyData.destinationObject = mostRecentCommand.TargetGameObject;
+                attackData.attackTarget = mostRecentCommand.TargetGameObject;
+                return true;
+            }
+            return false;
+        };
+
+
+        #region StateMachineTransitions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
-        At(rally, attackApproach, NewAttackTarget);
-        // Fix below to cancel attackapproaches
-        //At(attackApproach, rally, NewRally);
+        At(rally, idle, NewValidCommand);
+        At(attackApproach, idle, NewValidCommand);
+        At(carryRally, idle, NewValidCommand);
+        At(idle, rally, NewRally);
+        At(idle, attackApproach, NewAttack);
         At(attackApproach, attack, NearAttackTarget);
-        At(attack, findNavMesh, AttackFinished);
-        At(findNavMesh, rally, FoundNavMesh);
+        At(attack, idle, AttackFinished);
+        At(findNavMesh, idle, FoundNavMesh);
         _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
         At(takeDamage, findNavMesh, DamageFinished);
         At(takeDamage, death, NoHealth);
+        #endregion
 
-
-        _stateMachine.SetState(rally);
+        _stateMachine.SetState(idle);
 
     }
 
@@ -108,16 +141,10 @@ public class Archer : MonoBehaviour, IDamageable, ICommandable
         _stateMachine.OnCollisionEnter(collision);
     }
 
-    public void OnCommand(UnitCommand unitCommand){
-        if (unitCommand.CommandEnum  == UnitCommandEnum.Rally)
-        {
-            rallyVectors.nextDestination = unitCommand.TargetDestination;
-        }
-
-        if (unitCommand.CommandEnum == UnitCommandEnum.Attack)
-        {
-            attackData.nextAttackTarget = unitCommand.TargetGameObject;
-        }
+    public void OnCommand(UnitCommand unitCommand)
+    {
+        newCommand = true;
+        mostRecentCommand = unitCommand;
     }
 
     public void OnDamage(DamageInstance damage){

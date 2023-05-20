@@ -15,7 +15,7 @@ public class BigEnemy : MonoBehaviour, IDamageable
     public int ObjectID { get; set; }
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    public RallyVectors rallyVectors;
+    public RallyData rallyData;
     public AttackData attackData;
     private Queue<DamageInstance> _damageQueue;
 
@@ -36,9 +36,9 @@ public class BigEnemy : MonoBehaviour, IDamageable
         SourceTransform = transform;
         ObjectID = gameObject.GetInstanceID();
 
-        rallyVectors = new RallyVectors();
-        rallyVectors.rallyDestination = transform.position;
-        rallyVectors.nextDestination = transform.position;
+        rallyData = new RallyData();
+        rallyData.destination = transform.position;
+        rallyData.destinationObject = null;
 
         attackData = new AttackData();
         attackData.attackFinished = false;
@@ -55,19 +55,18 @@ public class BigEnemy : MonoBehaviour, IDamageable
 
         // Set up state machine
         _stateMachine = new StateMachine();
+        var idle = new UnitIdle(_navMeshAgent, _rb);
         var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
-        var rally = new UnitRally(_navMeshAgent, _rb, rallyVectors);
-        var attackApproach = new UnitAttackApproach(_navMeshAgent, _rb, attackData);
+        var attackApproach = new UnitRally(_navMeshAgent, _rb, rallyData);
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
         var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
         var lookAt = new UnitLookAt(_navMeshAgent, transform);
 
-        Func<bool> NewRally = () => rallyVectors.rallyDestination.Equals(rallyVectors.nextDestination);
         Func<bool> InAggroRange = () =>
         {
             _aggroHit = Physics.OverlapSphere(transform.position, _aggroRange, playerUnitMask);
             if (_aggroHit.Length > 0){
-                attackData.nextAttackTarget = _aggroHit[0].gameObject;
+                attackData.attackTarget = _aggroHit[0].gameObject;
             }
             return (_aggroHit.Length > 0);
         };
@@ -78,14 +77,14 @@ public class BigEnemy : MonoBehaviour, IDamageable
         Func<bool> DamageFinished = () => (timeGrounded > 0.7f);
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
-        At(rally, attackApproach, InAggroRange);
+        At(idle, attackApproach, InAggroRange);
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
-        At(findNavMesh, rally, FoundNavMesh);
+        At(findNavMesh, idle, FoundNavMesh);
         _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
         At(takeDamage, findNavMesh, DamageFinished);
 
-        _stateMachine.SetState(rally);
+        _stateMachine.SetState(idle);
 
     }
 

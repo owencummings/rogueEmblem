@@ -9,7 +9,9 @@ public class GridManager : MonoBehaviour
 {
     // Eventually there has to be a LevelBuilder that sets parameters and generates this
     public NavMeshSurface navSurface;
+    // V This is getting overwritten within the same Y coordinate so that not all cubes a saved here.
     GameObject[,] cubes;
+    public float[,] heights;
     public GameObject[,] features;
     public GameObject cubePrefab;
     public int gridSize = 20;
@@ -47,6 +49,7 @@ public class GridManager : MonoBehaviour
         CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
         CreateSquad(Resources.Load("Unit") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
+        LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
     }
 
     void CreateSquad(GameObject unitPrefab, int x, int z){
@@ -113,7 +116,7 @@ public class GridManager : MonoBehaviour
         {
             Instantiate(prefab, 
                 new Vector3(cubes[outputX,outputZ].transform.position.x, 
-                            cubes[outputX,outputZ].transform.localScale.y,
+                            heights[outputX,outputZ] + 0.5f,
                             cubes[outputX,outputZ].transform.position.z), 
                 Quaternion.identity);
         }
@@ -197,6 +200,8 @@ public class GridManager : MonoBehaviour
         float rand;
         MacroTileType tileType;
         cubes = new GameObject[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
+        heights = new float[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
+
         for (int i1 = 0; i1 < macroTileResolution; i1++){
             for (int j1 = 0; j1 < macroTileResolution; j1++){
 
@@ -224,6 +229,7 @@ public class GridManager : MonoBehaviour
                         int gridJ = j1 * tilesPerMacroTile + j;
                         float height = macroTile.gridHeights[i, j];
                         if (height > 0){
+                            heights[gridI, gridJ] = height;
                             for (int k = -4; k < height; k++){
                                 cubes[gridI,gridJ] = Instantiate(cubePrefab,
                                                                 new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * (k + 0.5f), (gridJ-fullResolution/2f)*cubeSize),

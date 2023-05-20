@@ -719,6 +719,7 @@ MonoBehaviour:
   lightSource: {fileID: 410087040}
   closeAtmosphereColor: {r: 0.637, g: 0.877, b: 0.95, a: 1}
   farAtmosphereColor: {r: 0.419, g: 0.705, b: 0.91, a: 1}
+  maxIntensity: 4
 --- !u!1 &1417436223
 GameObject:
   m_ObjectHideFlags: 0
