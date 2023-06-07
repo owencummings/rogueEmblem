@@ -14,6 +14,7 @@ public class Archer : MonoBehaviour, IDamageable, ICommandable
     private Rigidbody _rb;
     public RallyData rallyData;
     public AttackData attackData;
+    
     private Queue<DamageInstance> _damageQueue;
     private bool newCommand = false;
     private UnitCommand mostRecentCommand;
@@ -63,7 +64,7 @@ public class Archer : MonoBehaviour, IDamageable, ICommandable
         var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
         var death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
         var carryRally = new UnitRally(_navMeshAgent, _rb, rallyData);
-        var carry = new UnitCarry(_navMeshAgent, _rb);
+        //var carry = new UnitCarry(_navMeshAgent, _rb, transform, carryData);
 
         // State machine transition conditions
         Func<bool> NearAttackTarget = () => (attackData.attackTarget != null && Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);

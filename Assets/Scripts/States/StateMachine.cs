@@ -19,8 +19,8 @@ using Object = System.Object;
 
 public class StateMachine
 {
-   private IState _currentState;
-   
+   public IState currentState;
+
    private Dictionary<Type, List<Transition>> _transitions = new Dictionary<Type,List<Transition>>();
    private List<Transition> _currentTransitions = new List<Transition>();
    private List<Transition> _anyTransitions = new List<Transition>();
@@ -33,26 +33,26 @@ public class StateMachine
       if (transition != null)
          SetState(transition.To);
       
-      _currentState?.Tick();
+      currentState?.Tick();
    }
 
    public void OnCollisionEnter(Collision collision){
-      _currentState?.OnCollisionEnter(collision);
+      currentState?.OnCollisionEnter(collision);
    }
 
    public void SetState(IState state)
    {
-      if (state == _currentState)
+      if (state == currentState)
          return;
       
-      _currentState?.OnExit();
-      _currentState = state;
+      currentState?.OnExit();
+      currentState = state;
       
-      _transitions.TryGetValue(_currentState.GetType(), out _currentTransitions);
+      _transitions.TryGetValue(currentState.GetType(), out _currentTransitions);
       if (_currentTransitions == null)
          _currentTransitions = EmptyTransitions;
       
-      _currentState.OnEnter();
+      currentState.OnEnter();
    }
 
    public void AddTransition(IState from, IState to, Func<bool> predicate)

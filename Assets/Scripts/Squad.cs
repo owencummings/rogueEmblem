@@ -150,7 +150,15 @@ public class Squad : MonoBehaviour, ISelectable
                     }
                 }
             }
-        } 
+        }
+
+        if (command.KeyPressed == KeyCode.LeftShift)
+        {
+            for (int i = 0; i < unitArr.Length; i++){
+                UnitCommand cancelCommand = new UnitCommand(UnitCommandEnum.Cancel, Vector3.zero, null);
+                unitArr[i].OnCommand(cancelCommand);
+            } 
+        }
     }
 
     void OnDestroy(){
