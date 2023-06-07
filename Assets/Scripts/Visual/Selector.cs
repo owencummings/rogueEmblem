@@ -122,6 +122,12 @@ public class Selector : MonoBehaviour
             SelectableCommand command = new SelectableCommand(KeyCode.Mouse1, ray);
             selectedObject.OnCommand(command);
         }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && selectedObject != null)
+        {
+            SelectableCommand command = new SelectableCommand(KeyCode.LeftShift, ray);
+            selectedObject.OnCommand(command);
+        }
     }
 
     public void AddSelectable(ISelectable selectable){

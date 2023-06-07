@@ -8,7 +8,8 @@ namespace UnitCommands
         None,
         Rally,
         Attack,
-        Carry
+        Carry, 
+        Cancel
     }
 
     public struct UnitCommand {

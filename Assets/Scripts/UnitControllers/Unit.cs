@@ -9,13 +9,8 @@ public interface ICommandable{
     void OnCommand(UnitCommand unitCommand);
 }
 
-public class Unit : MonoBehaviour, IDamageable, ICommandable
+public class Unit : NavBody, IDamageable, ICommandable
 {
-    private StateMachine _stateMachine;
-
-    // Set up data
-    protected NavMeshAgent _navMeshAgent;
-    private Rigidbody _rb;
     public RallyData rallyData;
     public AttackData attackData;
     public CarryData carryData;
@@ -26,14 +21,13 @@ public class Unit : MonoBehaviour, IDamageable, ICommandable
     public TeamEnum Team { get; set; }
     public Transform SourceTransform { get; set; }
     public int ObjectID { get; set; }
-    private Squad parentSquad; 
+    private Squad parentSquad;
+    private UnitCarry carry;
 
-    private int walkableMask;
     private float attackRange = 2f;
-    public float timeGrounded = 0f;
 
-
-    void Awake(){
+    new void Awake(){
+        base.Awake();
         Health = 3f;
         Team = TeamEnum.Player;
         SourceTransform = transform;
@@ -55,33 +49,22 @@ public class Unit : MonoBehaviour, IDamageable, ICommandable
 
         _damageQueue = new Queue<DamageInstance>();
 
-        _navMeshAgent = GetComponent<NavMeshAgent>();
-        _rb = GetComponent<Rigidbody>();
-        RigidbodyUtils.StandardizeRigidbody(_rb);
-
-        walkableMask = LayerMask.GetMask("Walkable");
-
-        // Set up state machine
-        _stateMachine = new StateMachine();
-        var idle = new UnitIdle(_navMeshAgent, _rb);
-        var findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
         var rally = new UnitRally(_navMeshAgent, _rb, rallyData);
         var attackRally = new UnitRally(_navMeshAgent, _rb, rallyData);
         var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
         var takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
         var death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
         var carryRally = new UnitRally(_navMeshAgent, _rb, rallyData);
-        var carry = new UnitCarry(_navMeshAgent, _rb);
+        carry = new UnitCarry(_navMeshAgent, _rb, transform, carryData);
 
         #region TransitionConditions        
         Func<bool> NearAttackTarget = () => (attackData.attackTarget != null &&
                                              Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> NearCarryTarget = () => {
             return (rallyData.destinationObject != null && rallyData.destination != null &&
-                    Vector3.Distance(rallyData.destinationObject.transform.position + rallyData.destination, this.transform.position) < 0.1f);
+                    Vector3.Distance(rallyData.destinationObject.transform.position + rallyData.destination, this.transform.position) < 0.3f);
         };
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
-        Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
         Func<bool> DamageFinished = () => (timeGrounded > 0.5f && takeDamage.timeRecoiled > 0.5f);
         Func<bool> NoHealth = () => (Health <= 0.0f);
         Func<bool> NewValidCommand = () => {
@@ -116,10 +99,28 @@ public class Unit : MonoBehaviour, IDamageable, ICommandable
         Func<bool> NewCarry = () => {
             if (mostRecentCommand.CommandEnum == UnitCommandEnum.Carry)
             {
-                rallyData.destination = mostRecentCommand.TargetDestination * 1.5f;
+                rallyData.destination = new Vector3 (mostRecentCommand.TargetDestination.x * 1.5f,
+                                                     mostRecentCommand.TargetDestination.y,
+                                                     mostRecentCommand.TargetDestination.z * 1.5f);
                 rallyData.destinationObject = mostRecentCommand.TargetGameObject;
                 carryData.carryPivot = mostRecentCommand.TargetDestination;
                 carryData.carryTarget = mostRecentCommand.TargetGameObject;
+                return true;
+            }
+            return false;
+        };
+
+        Func<bool> NewCancel = () => {
+            if (mostRecentCommand.CommandEnum == UnitCommandEnum.Cancel)
+            {
+                Debug.Log("Cancel");
+                // TODO re-rally to new destination
+                /*
+                rallyData.destination = new Vector3 (mostRecentCommand.TargetDestination.x * 1.5f,
+                                                     mostRecentCommand.TargetDestination.y,
+                                                     mostRecentCommand.TargetDestination.z * 1.5f);
+                rallyData.destinationObject = mostRecentCommand.TargetGameObject;
+                */
                 return true;
             }
             return false;
@@ -137,7 +138,7 @@ public class Unit : MonoBehaviour, IDamageable, ICommandable
         At(attackRally, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(carryRally, carry, NearCarryTarget);
-        At(findNavMesh, idle, FoundNavMesh);
+        At(carry, rigidIdle, NewCancel);
         _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
         At(takeDamage, findNavMesh, DamageFinished);
         At(takeDamage, death, NoHealth);
@@ -147,30 +148,22 @@ public class Unit : MonoBehaviour, IDamageable, ICommandable
 
     }
 
-    void Update()
-    {
-        if (PauseManager.paused){ return; }
-        _stateMachine.Tick();
-    }
-
-    void FixedUpdate()
-    {
-        if (Physics.OverlapSphere(transform.position - Vector3.down * 0.1f,
-                                  transform.localScale.x/2,
-                                  walkableMask).Length != 0)
-        {
-            timeGrounded += Time.fixedDeltaTime;
-        } else {
-            timeGrounded = 0;
-        }
-    }
-
-    void OnCollisionEnter(Collision collision){
-        _stateMachine.OnCollisionEnter(collision);
-    }
-
     public void OnCommand(UnitCommand unitCommand)
     {
+        if (_stateMachine.currentState == carry && unitCommand.CommandEnum == UnitCommandEnum.Rally)
+        {
+            if (carry.carryable.Carriers >= carry.carryable.CarriersNeeded)
+            {
+                // Convert back to square-centered destination
+                // Should probably just pass this with unitCommand
+                Vector3 newDestination = new Vector3(Mathf.RoundToInt(unitCommand.TargetDestination.x),
+                                                    unitCommand.TargetDestination.y,
+                                                    Mathf.RoundToInt(unitCommand.TargetDestination.z));
+                carry.carryable.NavAgent.destination = newDestination;
+            }
+            return;
+        } 
+
         newCommand = true;
         mostRecentCommand = unitCommand;
     }
