@@ -28,6 +28,8 @@ public class CameraController : MonoBehaviour
     }
 
     void Update(){
+        if (PauseManager.paused){ return; } 
+
         // Get zoom input and set zoom destination
         orthoSizeDestination += Input.mouseScrollDelta.y * orthoSizeSpeed * -1;
         orthoSizeDestination = Mathf.Clamp(orthoSizeDestination, 3f, 20f);

@@ -3,42 +3,53 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class RallyVectors {
-    public Vector3 rallyDestination;
-    public Vector3 nextDestination;
+public class RallyData {
+    public Vector3 destination;
+    public GameObject destinationObject;
 }
 
 public class UnitRally : IState
 {
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    private RallyVectors _rallyVectors;
+    private RallyData _rallyData;
+    private Vector3 _cachedRallyPoint = Vector3.zero;
 
-    public UnitRally(NavMeshAgent navMeshAgent, Rigidbody rb, RallyVectors rallyVectors)
+    public UnitRally(NavMeshAgent navMeshAgent, Rigidbody rb, RallyData rallyData)
     {
         _navMeshAgent = navMeshAgent;
         _rb = rb;
-        _rallyVectors = rallyVectors;
+        _rallyData = rallyData;
     }
 
     public void Tick(){
-        // React to rally destination change
-        if (_rallyVectors.rallyDestination != _rallyVectors.nextDestination)
-        {
-            _rallyVectors.rallyDestination = _rallyVectors.nextDestination;
-            _navMeshAgent.SetDestination(_rallyVectors.rallyDestination);
+        if (_rallyData.destination != null && _rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh &&
+            (Vector3.Distance(_rallyData.destinationObject.transform.position + _rallyData.destination, _cachedRallyPoint) > 0.1f))
+        {    
+            _navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination);
+            _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
         }
     }
 
     public void OnEnter()
     {
+        Debug.Log("New Rally");
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
-        _rallyVectors.rallyDestination = _rallyVectors.nextDestination;
-        if (_rallyVectors.rallyDestination != null && _navMeshAgent.isOnNavMesh){
-            _navMeshAgent.SetDestination(_rallyVectors.rallyDestination);
+        if (_rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh)
+        {
+            _navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination);
+            _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
         }
+        else if (_rallyData.destination != null && _navMeshAgent.isOnNavMesh)
+        {
+            _navMeshAgent.SetDestination(_rallyData.destination);
+        } 
+
     }
 
     public void OnExit(){}
+
+    public void OnCollisionEnter(Collision collision){}
+
 }

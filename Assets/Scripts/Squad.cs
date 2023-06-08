@@ -5,12 +5,13 @@ using Selectable;
 using UnityEngine.AI;
 using UnityEngine.Rendering.Universal;
 using UnitCommands;
+using Vector3Utils;
 
 public class Squad : MonoBehaviour, ISelectable
 {
     // Start is called before the first frame update
     private int maxUnits = 3;
-    public Unit[]  unitArr;
+    public ICommandable[]  unitArr;
     public GameObject [] unitGoArr;
 
     public GameObject unitPrefab;
@@ -44,14 +45,14 @@ public class Squad : MonoBehaviour, ISelectable
         (this as ISelectable).SubscribeToSelector();
 
         unitGoArr = new GameObject[maxUnits];
-        unitArr = new Unit[maxUnits];
+        unitArr = new ICommandable[maxUnits];
 
-        Vector3[] circleDestinations = getDestinationCircle(transform.position);
+        Vector3[] circleDestinations = Vector3UtilsClass.getDestinationCircle(transform.position);
         for (int i = 0; i < maxUnits; i++)
         {
             GameObject go = Instantiate(unitPrefab, circleDestinations[i], Quaternion.identity);
             unitGoArr[i] = go;
-            unitArr[i] = go.GetComponent<Unit>();
+            unitArr[i] = go.GetComponent<ICommandable>();
         }
         rallyFlag = Instantiate(rallyFlagPrefab, transform.position, Quaternion.identity);
 
@@ -63,32 +64,27 @@ public class Squad : MonoBehaviour, ISelectable
         decalProjector.material.SetColor("_Color", squadColor);
     }
 
-
-    // TODO: Put this somewhere else
-    Vector3[] getDestinationCircle(Vector3 center, float radius = 0.3f, int pointCount = 3)
-    {
-        int shift = Random.Range(0, pointCount);
-        Vector3[] circleDestinations = new Vector3[pointCount];
-        for (int i =0; i < pointCount; i++){
-            circleDestinations[i] = new Vector3(center.x + radius * Mathf.Cos(Mathf.PI * 2 * (i + shift)/pointCount),
-                                                center.y,
-                                                center.z + radius * Mathf.Sin(Mathf.PI * 2 * (i + shift)/pointCount));
-        }
-        return circleDestinations;
-    }
-
-
     void Update(){
+        if (PauseManager.paused){ return; }
+
         // Change position based on aggregate of units
         Vector3 aggregatePosition = Vector3.zero;
-        foreach (GameObject unit in unitGoArr){
+        int unitCount = 0;
+        foreach (GameObject unit in unitGoArr)
+        {
+            if (unit == null) { continue; }
             aggregatePosition = aggregatePosition + unit.transform.position;
+            unitCount += 1;
         }
-        selectableLocation = aggregatePosition/unitGoArr.Length;
-        transform.position = selectableLocation;
+
+        if (unitCount > 0)
+        {
+            selectableLocation = aggregatePosition/unitCount;
+            transform.position = selectableLocation;
+        }
+
 
         // Change opacity based on selection status
-        // Really this should just change opacity of the projector
         float targetOpacity = 0f; 
         float opacitySpeed = 4f;
         if (isDisplaying){
@@ -110,7 +106,7 @@ public class Squad : MonoBehaviour, ISelectable
     }
 
     public void OnSelect(){
-        // TODO: cache flag object ref
+        // TODO: cache this object ref
         rallyFlag.transform.Find("Cube").gameObject.GetComponent<MeshRenderer>().material.SetInt("_Selected", 1);
     }
 
@@ -124,14 +120,14 @@ public class Squad : MonoBehaviour, ISelectable
         int gridMask = (1 << (gridLayer-1));
 
         // Set route to new location
+        // TODO: Allow clicked object to determine the command sent to units?
         if (command.KeyPressed == KeyCode.Mouse1){
-            // TODO: Allow for raycast to hit enemies and behave differently
             if (Physics.Raycast(command.CommandRay, out hit, Mathf.Infinity)){
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Walkable"))
                 {
                     rallyLocation =  hit.transform.position + new Vector3(0, hit.transform.localScale.y/2.0f);
                     rallyFlag.transform.position = rallyLocation;
-                    Vector3[] destinations = getDestinationCircle(rallyLocation);
+                    Vector3[] destinations = Vector3UtilsClass.getDestinationCircle(rallyLocation, unitArr.Length);
                     for (int i = 0; i < unitArr.Length; i++){
                         UnitCommand rallyCommand = new UnitCommand(UnitCommandEnum.Rally, destinations[i], null);
                         unitArr[i].OnCommand(rallyCommand);
@@ -143,8 +139,26 @@ public class Squad : MonoBehaviour, ISelectable
                         unitArr[i].OnCommand(attackCommand);
                     }
                 }
+                else if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Carryable")){
+                    if (hit.transform.gameObject.TryGetComponent<ICarryable>(out ICarryable carryable))
+                    {
+                        // Get unit destinations
+                        for (int i = 0; i < unitArr.Length; i++){
+                            UnitCommand carryCommand = new UnitCommand(UnitCommandEnum.Carry, carryable.CarryPivots[i], hit.transform.gameObject);
+                            unitArr[i].OnCommand(carryCommand);
+                        } 
+                    }
+                }
             }
-        } 
+        }
+
+        if (command.KeyPressed == KeyCode.LeftShift)
+        {
+            for (int i = 0; i < unitArr.Length; i++){
+                UnitCommand cancelCommand = new UnitCommand(UnitCommandEnum.Cancel, Vector3.zero, null);
+                unitArr[i].OnCommand(cancelCommand);
+            } 
+        }
     }
 
     void OnDestroy(){

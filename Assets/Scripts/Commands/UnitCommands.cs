@@ -5,8 +5,11 @@ using UnityEngine;
 namespace UnitCommands
 {
     public enum UnitCommandEnum {
+        None,
         Rally,
-        Attack
+        Attack,
+        Carry, 
+        Cancel
     }
 
     public struct UnitCommand {
