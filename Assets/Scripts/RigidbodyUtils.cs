@@ -10,8 +10,8 @@ static class RigidbodyUtils
         rb.centerOfMass = Vector3.zero;
         //rb.inertiaTensor = new Vector3(1, 0, 1);
         //rb.inertiaTensorRotation = Quaternion.identity;
-        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-        rb.drag = 0.0f;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        rb.drag = 2f;
     }
 
     public static void AddRandomTorque(Rigidbody rb, float magnitude)

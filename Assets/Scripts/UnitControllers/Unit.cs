@@ -28,6 +28,7 @@ public class Unit : NavBody, IDamageable, ICommandable
 
     new void Awake(){
         base.Awake();
+        //_rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         Health = 3f;
         Team = TeamEnum.Player;
         SourceTransform = transform;
@@ -113,7 +114,6 @@ public class Unit : NavBody, IDamageable, ICommandable
         Func<bool> NewCancel = () => {
             if (mostRecentCommand.CommandEnum == UnitCommandEnum.Cancel)
             {
-                Debug.Log("Cancel");
                 // TODO re-rally to new destination
                 /*
                 rallyData.destination = new Vector3 (mostRecentCommand.TargetDestination.x * 1.5f,
@@ -138,18 +138,19 @@ public class Unit : NavBody, IDamageable, ICommandable
         At(attackRally, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
         At(carryRally, carry, NearCarryTarget);
-        At(carry, rigidIdle, NewCancel);
+        At(carry, findNavMesh, NewCancel);
         _stateMachine.AddAnyTransition(takeDamage, () => _damageQueue.Count > 0);
         At(takeDamage, findNavMesh, DamageFinished);
         At(takeDamage, death, NoHealth);
         #endregion
 
-        _stateMachine.SetState(idle);
+        _stateMachine.SetState(rigidIdle);
 
     }
 
     public void OnCommand(UnitCommand unitCommand)
     {
+        // If carrying, pass destination to carry navmeshagent
         if (_stateMachine.currentState == carry && unitCommand.CommandEnum == UnitCommandEnum.Rally)
         {
             if (carry.carryable.Carriers >= carry.carryable.CarriersNeeded)

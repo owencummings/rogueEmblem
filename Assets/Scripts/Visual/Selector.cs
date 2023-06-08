@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Unity.AI.Navigation;
 using Selectable;
 
 public class Selector : MonoBehaviour
@@ -17,6 +18,7 @@ public class Selector : MonoBehaviour
     public GameObject blockPrefab;
     public GameObject rampPrefab;
     private int walkableMask;
+    private GameObject go = null;
 
     private void Awake() 
     { 
@@ -39,7 +41,6 @@ public class Selector : MonoBehaviour
     void Update(){
         if (PauseManager.paused) { return ; }
 
-
         Ray ray = gameCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         int gridMask = (1 << (gridLayer-1));
@@ -49,21 +50,30 @@ public class Selector : MonoBehaviour
         {
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, walkableMask))
             {
+                
                 Vector3 newBlockPosition = hit.transform.position + hit.normal;
                 if (hit.normal == Vector3.up || hit.normal == Vector3.down){
-                    Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
+                    go = Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
                 } else if (hit.normal == Vector3.right || hit.normal == Vector3.left || hit.normal == Vector3.forward || hit.normal == Vector3.back){
-                    Debug.Log(hit.normal);
-                    Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.LookRotation(hit.normal), GameManager.Instance.transform);
+                    go = Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.LookRotation(hit.normal), GameManager.Instance.transform);
                 } else {
                     Vector3 reverseFlatNormal = new Vector3(hit.normal.x, 0, hit.normal.z);
                     reverseFlatNormal = reverseFlatNormal.normalized;
                     reverseFlatNormal = new Vector3(1, -1, reverseFlatNormal.x);
                     reverseFlatNormal *= 90f;
                     reverseFlatNormal -= Vector3.forward * 90f;
-                    Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(hit.transform.position),  Quaternion.Euler(reverseFlatNormal), GameManager.Instance.transform);
+                    go = Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(hit.transform.position),  Quaternion.Euler(reverseFlatNormal), GameManager.Instance.transform);
                 }
+
                 NavMeshManager.Instance.BakeNavMesh();
+                /*
+                if (go != null){
+                    Debug.Log(go);
+                    NavMeshData navData = go.GetComponent<NavMeshSurface>().navMeshData;
+                    NavMeshManager.Instance.UpdateNavMesh(navData);
+                    //go = null;
+                }
+                */
             }
         }
 

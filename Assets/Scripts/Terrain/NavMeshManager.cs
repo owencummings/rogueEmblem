@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AI;
 using Unity.AI.Navigation;
 
 public class NavMeshManager : MonoBehaviour
@@ -30,5 +32,5 @@ public class NavMeshManager : MonoBehaviour
     }
 
     public void BakeNavMesh(){ navSurface.BuildNavMesh(); }
-    //public void AsyncBakeNavMesh() { navSurface.BuildNavMeshAsync(); }
+    public void UpdateNavMesh(NavMeshData navMeshData){ navSurface.UpdateNavMesh(navMeshData); }
 }
