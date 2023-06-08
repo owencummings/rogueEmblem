@@ -40,11 +40,9 @@ public class UnitCarry : IState
     {
         _navMeshAgent.enabled = false;
         _rb.isKinematic = true;
-        _rb.detectCollisions = false;
         _tf.parent = _carryData.carryTarget.transform;
         carryable = _carryData.carryTarget.GetComponent<ICarryable>();
         carryable.Carriers += 1;
-        // Turn toward thing?
     }
 
     public void OnExit(){

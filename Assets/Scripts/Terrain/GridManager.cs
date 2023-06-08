@@ -235,6 +235,11 @@ public class GridManager : MonoBehaviour
                                                                 new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * (k + 0.5f), (gridJ-fullResolution/2f)*cubeSize),
                                                                 Quaternion.identity, this.transform);
                                 cubes[gridI,gridJ].transform.localScale = new Vector3(cubeSize, cubeSize, cubeSize);
+                                /*
+                                if (k < height - 1){
+                                    Destroy(cubes[gridI, gridJ].GetComponent<NavMeshSurface>());
+                                }
+                                */
                             }
                         }
 

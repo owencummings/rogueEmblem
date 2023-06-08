@@ -30,17 +30,19 @@ public class Carryable1 : NavBody, ICarryable
         _rb.constraints = 0;
 
         Func<bool> Carried = () => (Carriers >= CarriersNeeded);
-        Func<bool> Uncarried = () => (Carriers < CarriersNeeded);
+        Func<bool> Uncarried = () => {
+            if (Carriers < CarriersNeeded)
+            {
+                rigidIdle.entryForce = 200f * Vector3.up;
+                return true;
+            }
+            return false;
+        };
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(idle, carried, Carried);
         At(carried, rigidIdle, Uncarried);
 
         _stateMachine.SetState(idle);
-    }
-
-    new void Update(){
-        base.Update();
-        Debug.Log(timeGrounded);
     }
 }
