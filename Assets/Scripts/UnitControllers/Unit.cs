@@ -158,7 +158,7 @@ public class Unit : NavBody, IDamageable, ICommandable
                 // Convert back to square-centered destination
                 // Should probably just pass this with unitCommand
                 Vector3 newDestination = new Vector3(Mathf.RoundToInt(unitCommand.TargetDestination.x),
-                                                    unitCommand.TargetDestination.y,
+                                                    unitCommand.TargetDestination.y + 0.5f,
                                                     Mathf.RoundToInt(unitCommand.TargetDestination.z));
                 carry.carryable.NavAgent.destination = newDestination;
             }
