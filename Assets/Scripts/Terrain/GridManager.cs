@@ -9,9 +9,8 @@ public class GridManager : MonoBehaviour
 {
     // Eventually there has to be a LevelBuilder that sets parameters and generates this
     public NavMeshSurface navSurface;
-    // V This is getting overwritten within the same Y coordinate so that not all cubes a saved here.
-    GameObject[,] cubes;
-    public float[,] heights;
+    GameObject[,,] cubes;
+    public int[,] heights;
     public GameObject[,] features;
     public GameObject cubePrefab;
     public int gridSize = 20;
@@ -84,12 +83,14 @@ public class GridManager : MonoBehaviour
     {
         int outputX = x;
         int outputZ = z;
+        int outputY = 0;
         bool found = false;
         int rand;
-        if (cubes[x, z] != null)
+        if (heights[x, z] != 0)
         {
             outputX = x;
             outputZ = z;
+            outputY = heights[x,z];
             found = true;
         } 
         else 
@@ -102,10 +103,11 @@ public class GridManager : MonoBehaviour
                 tryX = x + rand;
                 rand = UnityEngine.Random.Range(-5, 6);
                 tryZ = z + rand;
-                if (cubes[tryX, tryZ] != null)
+                if (heights[tryX, tryZ] != 0)
                 {
                     outputX = tryX;
                     outputZ = tryZ;
+                    outputY = heights[tryX, tryZ];
                     found = true;
                     break;
                 } 
@@ -114,11 +116,10 @@ public class GridManager : MonoBehaviour
         }
         if (found)
         {
+            Debug.Log(new Vector3(outputX, outputZ, outputY));
             Instantiate(prefab, 
-                new Vector3(cubes[outputX,outputZ].transform.position.x, 
-                            heights[outputX,outputZ] + 0.5f,
-                            cubes[outputX,outputZ].transform.position.z), 
-                Quaternion.identity);
+                        cubes[outputX,outputZ,outputY].transform.position + Vector3.up,
+                        Quaternion.identity);
         }
     }
 
@@ -156,7 +157,8 @@ public class GridManager : MonoBehaviour
         float xCellShift = UnityEngine.Random.Range(0.0f, 100.0f);
         float yCellShift = UnityEngine.Random.Range(0.0f, 100.0f);
 
-        cubes = new GameObject[gridSize,gridSize];
+        cubes = new GameObject[gridSize,gridSize,1];
+        heights = new int[gridSize,gridSize];
         for (int i = 0; i < gridSize; i++){
             for (int j = 0; j < gridSize; j++){
 
@@ -171,22 +173,23 @@ public class GridManager : MonoBehaviour
                 float height = Mathf.Floor(1 + cubeSize *
                                                 (xSinAmp*(1 + Mathf.Sin(xSinPeriod*(i + xSinShift)))
                                                  + ySinAmp*(1 + Mathf.Sin(ySinPeriod*(j + ySinShift)))));
-                cubes[i,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
+                cubes[i,j,0] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
                                          Quaternion.identity, this.transform);
-                cubes[i,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                cubes[i,j,0].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
             }
         }
     }
 
     void CreateFlatTerrain()
     {
-        cubes = new GameObject[gridSize,gridSize];
+        cubes = new GameObject[gridSize,gridSize,1];
+        heights = new int[gridSize,gridSize];
         for (int i = 0; i < gridSize; i++){
             for (int j = 0; j < gridSize; j++){
                 float height = 1;
-                cubes[i,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2f)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2f)*cubeSize),
+                cubes[i,j,0] = Instantiate(cubePrefab, new Vector3((i-gridSize/2f)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2f)*cubeSize),
                                          Quaternion.identity, this.transform);
-                cubes[i,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                cubes[i,j,0].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
             }
         }
     }
@@ -199,9 +202,8 @@ public class GridManager : MonoBehaviour
         offsetY = 0.5f; 
         float rand;
         MacroTileType tileType;
-        cubes = new GameObject[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
-        heights = new float[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
-
+        cubes = new GameObject[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile, 20];
+        heights = new int[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
         for (int i1 = 0; i1 < macroTileResolution; i1++){
             for (int j1 = 0; j1 < macroTileResolution; j1++){
 
@@ -227,20 +229,12 @@ public class GridManager : MonoBehaviour
                     for (int j = 0; j < tilesPerMacroTile; j++){
                         int gridI = i1 * tilesPerMacroTile + i;
                         int gridJ = j1 * tilesPerMacroTile + j;
-                        float height = macroTile.gridHeights[i, j];
+                        int height = macroTile.gridHeights[i, j];
                         if (height > 0){
-                            heights[gridI, gridJ] = height;
-                            for (int k = -4; k < height; k++){
-                                cubes[gridI,gridJ] = Instantiate(cubePrefab,
-                                                                new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * (k + 0.5f), (gridJ-fullResolution/2f)*cubeSize),
-                                                                Quaternion.identity, this.transform);
-                                cubes[gridI,gridJ].transform.localScale = new Vector3(cubeSize, cubeSize, cubeSize);
-                                /*
-                                if (k < height - 1){
-                                    Destroy(cubes[gridI, gridJ].GetComponent<NavMeshSurface>());
-                                }
-                                */
-                            }
+                            cubes[gridI,gridJ,10-height] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * height/2, (gridJ-fullResolution/2f)*cubeSize),
+                                                    Quaternion.identity, this.transform);
+                            cubes[gridI,gridJ,10-height].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                            heights[gridI, gridJ] = 10-height;
                         }
 
                     }
