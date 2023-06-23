@@ -25,7 +25,6 @@ public class UnitRigidIdle : IState
     }
 
     public void Tick(){
-        Debug.Log(_rb.velocity);
         timeIdling += Time.deltaTime;
     }
 
