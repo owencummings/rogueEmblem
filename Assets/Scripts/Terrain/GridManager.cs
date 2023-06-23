@@ -231,9 +231,16 @@ public class GridManager : MonoBehaviour
                         int gridJ = j1 * tilesPerMacroTile + j;
                         int height = macroTile.gridHeights[i, j];
                         if (height > 0){
-                            cubes[gridI,gridJ,height+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * height/2, (gridJ-fullResolution/2f)*cubeSize),
-                                                    Quaternion.identity, this.transform);
-                            cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                            for (int k = -4; k < height + 1; k++)
+                            {
+                                cubes[gridI,gridJ,k+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k/2, (gridJ-fullResolution/2f)*cubeSize),
+                                                                           Quaternion.identity, this.transform);
+                                if (k != height)
+                                {
+                                    cubes[gridI,gridJ,k+10].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                                }
+                                //cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                            }
                             heights[gridI, gridJ] = height+10;
                         }
 
