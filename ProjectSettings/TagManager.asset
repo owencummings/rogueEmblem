@@ -16,7 +16,7 @@ TagManager:
   - Attackable
   - PlayerUnit
   - Carryable
-  - 
+  - NonWalkableTerrain
   - 
   - 
   - 

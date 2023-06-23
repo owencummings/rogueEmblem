@@ -9,7 +9,7 @@ public class GridManager : MonoBehaviour
 {
     // Eventually there has to be a LevelBuilder that sets parameters and generates this
     public NavMeshSurface navSurface;
-    GameObject[,,] cubes;
+    public GameObject[,,] cubes;
     public int[,] heights;
     public GameObject[,] features;
     public GameObject cubePrefab;
@@ -231,10 +231,10 @@ public class GridManager : MonoBehaviour
                         int gridJ = j1 * tilesPerMacroTile + j;
                         int height = macroTile.gridHeights[i, j];
                         if (height > 0){
-                            cubes[gridI,gridJ,10-height] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * height/2, (gridJ-fullResolution/2f)*cubeSize),
+                            cubes[gridI,gridJ,height+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * height/2, (gridJ-fullResolution/2f)*cubeSize),
                                                     Quaternion.identity, this.transform);
-                            cubes[gridI,gridJ,10-height].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
-                            heights[gridI, gridJ] = 10-height;
+                            cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                            heights[gridI, gridJ] = height+10;
                         }
 
                     }

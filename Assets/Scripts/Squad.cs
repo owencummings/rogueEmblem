@@ -118,12 +118,13 @@ public class Squad : MonoBehaviour, ISelectable
         RaycastHit hit;
         int gridLayer = 1;
         int gridMask = (1 << (gridLayer-1));
+        int terrainMask = LayerMask.GetMask("Walkable") + LayerMask.GetMask("NonWalkableTerrain");
 
         // Set route to new location
         // TODO: Allow clicked object to determine the command sent to units?
         if (command.KeyPressed == KeyCode.Mouse1){
             if (Physics.Raycast(command.CommandRay, out hit, Mathf.Infinity)){
-                if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Walkable"))
+                if (terrainMask == (terrainMask | 1 << hit.transform.gameObject.layer))
                 {
                     rallyLocation =  hit.transform.position + new Vector3(0, hit.transform.localScale.y/2.0f);
                     rallyFlag.transform.position = rallyLocation;

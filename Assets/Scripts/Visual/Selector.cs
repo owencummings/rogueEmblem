@@ -17,7 +17,7 @@ public class Selector : MonoBehaviour
     public static Selector Instance { get; private set; }
     public GameObject blockPrefab;
     public GameObject rampPrefab;
-    private int walkableMask;
+    private int terrainMask;
     private GameObject go = null;
 
     private void Awake() 
@@ -34,7 +34,8 @@ public class Selector : MonoBehaviour
 
         selectableSet = new HashSet<ISelectable>();
 
-        walkableMask = LayerMask.GetMask("Walkable");
+        terrainMask = LayerMask.GetMask("Walkable") + LayerMask.GetMask("NonWalkableTerrain");
+        Debug.Log(terrainMask);
 
     }
 
@@ -48,22 +49,43 @@ public class Selector : MonoBehaviour
         // Test building feature here for now, will want to add this to a unit behavior
         if (Input.GetKeyDown(KeyCode.R))
         {
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, walkableMask))
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, terrainMask))
             {
-                
+                Vector3 newBlockCoordinates;
                 Vector3 newBlockPosition = hit.transform.position + hit.normal;
                 if (hit.normal == Vector3.up || hit.normal == Vector3.down){
-                    go = Instantiate(blockPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.identity, GameManager.Instance.transform);
+                    newBlockCoordinates = GridManager.Instance.GetClosestGridPoint(newBlockPosition);
+                    go = Instantiate(blockPrefab, newBlockCoordinates, Quaternion.identity, GameManager.Instance.transform);
                 } else if (hit.normal == Vector3.right || hit.normal == Vector3.left || hit.normal == Vector3.forward || hit.normal == Vector3.back){
-                    go = Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(newBlockPosition), Quaternion.LookRotation(hit.normal), GameManager.Instance.transform);
+                    newBlockCoordinates = GridManager.Instance.GetClosestGridPoint(newBlockPosition);
+                    go = Instantiate(rampPrefab, newBlockCoordinates, Quaternion.LookRotation(hit.normal), GameManager.Instance.transform);
                 } else {
                     Vector3 reverseFlatNormal = new Vector3(hit.normal.x, 0, hit.normal.z);
                     reverseFlatNormal = reverseFlatNormal.normalized;
                     reverseFlatNormal = new Vector3(1, -1, reverseFlatNormal.x);
                     reverseFlatNormal *= 90f;
                     reverseFlatNormal -= Vector3.forward * 90f;
-                    go = Instantiate(rampPrefab, GridManager.Instance.GetClosestGridPoint(hit.transform.position),  Quaternion.Euler(reverseFlatNormal), GameManager.Instance.transform);
+                    newBlockCoordinates = GridManager.Instance.GetClosestGridPoint(hit.transform.position);
+                    go = Instantiate(rampPrefab, newBlockCoordinates,  Quaternion.Euler(reverseFlatNormal), GameManager.Instance.transform);
                 }
+
+                // Make certain blocks non-walkable to improve navmesh compute speed
+                Vector3Int gridManagerCoordinates = new Vector3Int((int)newBlockCoordinates.x + GridManager.Instance.macroTileResolution*GridManager.Instance.tilesPerMacroTile/2,
+                                                                   (int)newBlockCoordinates.z + GridManager.Instance.macroTileResolution*GridManager.Instance.tilesPerMacroTile/2,
+                                                                   (int)newBlockCoordinates.y+10);
+
+                // For ramp-on-ramp
+                if (GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z] != null){
+                    GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                } 
+
+                // Memoize
+                GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z] = go;
+
+                // For potential block underneath
+                if (GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z-1] != null){
+                    GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z-1].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                } 
 
                 NavMeshManager.Instance.BakeNavMesh();
                 /*
@@ -105,6 +127,7 @@ public class Selector : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~gridMask))
             {   // Make sure water exists on grid layer
                 // Iterate through selectables
+                // TODO this gridMask does nothing
                 float currDistance = 3;
                 float closestDistance = float.MaxValue;
                 if (selectableSet.Count > 0){
