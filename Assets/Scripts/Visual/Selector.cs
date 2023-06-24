@@ -31,12 +31,8 @@ public class Selector : MonoBehaviour
         { 
             Instance = this; 
         }
-
         selectableSet = new HashSet<ISelectable>();
-
         terrainMask = LayerMask.GetMask("Walkable") + LayerMask.GetMask("NonWalkableTerrain");
-        Debug.Log(terrainMask);
-
     }
 
     void Update(){

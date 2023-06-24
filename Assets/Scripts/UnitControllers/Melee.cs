@@ -2,28 +2,28 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnitCommands;
 
-public class Archer : Unit
-{
-    public AttackData attackData;
-    private float attackRange = UnitArcherAttack.attackRange;
 
-    new void Awake(){
+public class Melee : Unit
+{
+
+    public AttackData attackData;
+    private float attackRange = 2f;
+
+    new void Awake()
+    {
         UnitAwake();
         attackData = new AttackData();
         attackData.attackFinished = false;
         attackData.team = Team;
 
-        var attackApproach = new UnitRally(_navMeshAgent, _rb, rallyData);
-        var attack = new UnitArcherAttack(_navMeshAgent, _rb, transform, attackData);
+        var attackRally = new UnitRally(_navMeshAgent, _rb, rallyData);
+        var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
 
-
-        // State machine transition conditions
-        Func<bool> NearAttackTarget = () => (attackData.attackTarget != null && Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
+        Func<bool> NearAttackTarget = () => (attackData.attackTarget != null &&
+                                             Vector3.Distance(attackData.attackTarget.transform.position, this.transform.position) < attackRange);
         Func<bool> AttackFinished = () => (timeGrounded > 0.25f && attackData.attackFinished);
-
         Func<bool> NewAttack = () => {
             if (mostRecentCommand.CommandEnum == UnitCommandEnum.Attack)
             {
@@ -36,12 +36,9 @@ public class Archer : Unit
         };
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
-        At(attackApproach, idle, NewValidCommand);
-        At(idle, attackApproach, NewAttack);
-        At(attackApproach, attack, NearAttackTarget);
-        At(attack, idle, AttackFinished);
-
-        _stateMachine.SetState(idle);
-
+        At(attackRally, idle, NewValidCommand);
+        At(idle, attackRally, NewAttack);
+        At(attackRally, attack, NearAttackTarget);
+        At(attack, findNavMesh, AttackFinished);
     }
 }
