@@ -46,7 +46,7 @@ public class GridManager : MonoBehaviour
     void Start(){
         navSurface.BuildNavMesh();
         CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
-        CreateSquad(Resources.Load("Unit") as GameObject, 14, 14);
+        CreateSquad(Resources.Load("Melee") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
         LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
     }
@@ -116,7 +116,6 @@ public class GridManager : MonoBehaviour
         }
         if (found)
         {
-            Debug.Log(new Vector3(outputX, outputZ, outputY));
             Instantiate(prefab, 
                         cubes[outputX,outputZ,outputY].transform.position + Vector3.up,
                         Quaternion.identity);

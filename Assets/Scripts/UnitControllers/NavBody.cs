@@ -21,6 +21,11 @@ public abstract class NavBody : MonoBehaviour
 
     internal void Awake()
     {
+        NavBodyAwake();
+    }
+
+    internal void NavBodyAwake()
+    {
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         RigidbodyUtils.StandardizeRigidbody(_rb);
