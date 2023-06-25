@@ -5,7 +5,7 @@ using UnityEngine;
 using UnitCommands;
 
 
-public class Melee : Unit
+public class Melee : ControllableUnit
 {
 
     public AttackData attackData;
@@ -13,7 +13,7 @@ public class Melee : Unit
 
     new void Awake()
     {
-        UnitAwake();
+        ControllableUnitAwake();
         attackData = new AttackData();
         attackData.attackFinished = false;
         attackData.team = Team;

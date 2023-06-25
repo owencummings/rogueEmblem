@@ -33,7 +33,6 @@ public class UnitRally : IState
 
     public void OnEnter()
     {
-        Debug.Log("New Rally");
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
         if (_rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh)
