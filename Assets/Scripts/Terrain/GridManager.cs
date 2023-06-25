@@ -232,7 +232,7 @@ public class GridManager : MonoBehaviour
                         if (height > 0){
                             for (int k = -4; k < height + 1; k++)
                             {
-                                cubes[gridI,gridJ,k+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k/2, (gridJ-fullResolution/2f)*cubeSize),
+                                cubes[gridI,gridJ,k+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 1, (gridJ-fullResolution/2f)*cubeSize),
                                                                            Quaternion.identity, this.transform);
                                 if (k != height)
                                 {
