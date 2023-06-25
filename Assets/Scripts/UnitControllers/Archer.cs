@@ -5,13 +5,13 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnitCommands;
 
-public class Archer : Unit
+public class Archer : ControllableUnit
 {
     public AttackData attackData;
     private float attackRange = UnitArcherAttack.attackRange;
 
     new void Awake(){
-        UnitAwake();
+        ControllableUnitAwake();
         attackData = new AttackData();
         attackData.attackFinished = false;
         attackData.team = Team;
@@ -41,7 +41,7 @@ public class Archer : Unit
         At(attackApproach, attack, NearAttackTarget);
         At(attack, idle, AttackFinished);
 
-        _stateMachine.SetState(idle);
+        _stateMachine.SetState(rigidIdle);
 
     }
 }
