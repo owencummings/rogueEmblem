@@ -48,6 +48,7 @@ public class GridManager : MonoBehaviour
         CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
         CreateSquad(Resources.Load("Melee") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
+        LazySlamFeature(Resources.Load("Wizard") as GameObject, 10, 23);
         LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
     }
 
@@ -232,7 +233,7 @@ public class GridManager : MonoBehaviour
                         if (height > 0){
                             for (int k = -4; k < height + 1; k++)
                             {
-                                cubes[gridI,gridJ,k+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 1, (gridJ-fullResolution/2f)*cubeSize),
+                                cubes[gridI,gridJ,k+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (gridJ-fullResolution/2f)*cubeSize),
                                                                            Quaternion.identity, this.transform);
                                 if (k != height)
                                 {
