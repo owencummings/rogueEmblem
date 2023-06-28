@@ -13,9 +13,11 @@ public class UnitTeleport : IState
     private RallyData _rallyData;
     private float tpTime = 2.0f;
     private float timer = 0f;
-    private float spinIncr = 500.0f;
+    private float spinIncr = 700.0f;
     private float currSpin = 0.0f;
+    private float spinDirection;
     private bool warped = false;
+    public bool warpDone = false;
 
     public UnitTeleport(NavMeshAgent navMeshAgent, Rigidbody rb, Transform tf, RallyData rallyData)
     {
@@ -29,7 +31,7 @@ public class UnitTeleport : IState
     {
         if (!warped){
             currSpin += spinIncr * Time.deltaTime;
-            _tf.RotateAround(_tf.position, Vector3.up, currSpin * Time.deltaTime);
+            _tf.RotateAround(_tf.position, Vector3.up, currSpin * Time.deltaTime * spinDirection);
             timer += Time.deltaTime;
             if (timer > tpTime)
             {
@@ -40,7 +42,12 @@ public class UnitTeleport : IState
         else 
         {
             currSpin -= spinIncr * Time.deltaTime;
-            _tf.RotateAround(_tf.position, Vector3.up, currSpin * Time.deltaTime);
+            _tf.RotateAround(_tf.position, Vector3.up, currSpin * Time.deltaTime * spinDirection);
+            timer += Time.deltaTime;
+            if (timer > tpTime * 2)
+            {
+                warpDone = true;
+            }
         }
 
     }
@@ -52,6 +59,9 @@ public class UnitTeleport : IState
         warped = false;
         currSpin = 0f;
         timer = 0f;
+        warpDone = false;
+        float[] spinList = new float[]{-1f, 1f};
+        spinDirection = spinList[Random.Range(0, spinList.Length)];
     }
 
     public void OnExit(){

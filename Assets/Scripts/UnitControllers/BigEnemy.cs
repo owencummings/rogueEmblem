@@ -30,7 +30,7 @@ public class BigEnemy : Unit, IDamageable
 
         var attackApproach = new UnitRally(_navMeshAgent, _rb, rallyData);
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
-        var lookAt = new UnitLookAt(_navMeshAgent, transform);
+        var lookAt = new UnitLookAt(_navMeshAgent, transform, lookData);
 
         Func<bool> InAggroRange = () =>
         {
