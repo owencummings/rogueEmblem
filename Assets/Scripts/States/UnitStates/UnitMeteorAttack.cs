@@ -7,22 +7,27 @@ public class UnitMeteorAttack : IState
 {
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    private RallyData _rallyData;
+    private Transform _tf;
+    private AttackData _attackData;
     private Vector3 _cachedRallyPoint = Vector3.zero;
+    private float attackTime = 0f;
+    private float attackDuration = 2f;
+    private GameObject meteorPrefab = Resources.Load("Meteor") as GameObject;
 
-    public UnitMeteorAttack(NavMeshAgent navMeshAgent, Rigidbody rb, RallyData rallyData)
+
+    public UnitMeteorAttack(NavMeshAgent navMeshAgent, Rigidbody rb, Transform tf, AttackData attackData)
     {
         _navMeshAgent = navMeshAgent;
         _rb = rb;
-        _rallyData = rallyData;
+        _tf = tf;
+        _attackData = attackData;
     }
 
     public void Tick(){
-        if (_rallyData.destination != null && _rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh &&
-            (Vector3.Distance(_rallyData.destinationObject.transform.position + _rallyData.destination, _cachedRallyPoint) > 0.1f))
-        {    
-            _navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination);
-            _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
+        attackTime += Time.deltaTime;
+        if (attackTime > attackDuration)
+        {
+            _attackData.attackFinished = true;
         }
     }
 
@@ -30,15 +35,11 @@ public class UnitMeteorAttack : IState
     {
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
-        if (_rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh)
-        {
-            _navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination);
-            _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
-        }
-        else if (_rallyData.destination != null && _navMeshAgent.isOnNavMesh)
-        {
-            _navMeshAgent.SetDestination(_rallyData.destination);
-        } 
+        _tf.LookAt(_attackData.attackTarget.transform);
+        _navMeshAgent.SetDestination(_tf.position);
+        attackTime = 0f;
+        _attackData.attackFinished = false;
+        GameObject.Instantiate(meteorPrefab, _tf.position + Vector3.up * 3f, _tf.rotation);
 
     }
 

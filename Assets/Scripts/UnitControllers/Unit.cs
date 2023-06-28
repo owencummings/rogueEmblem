@@ -8,6 +8,7 @@ using UnitCommands;
 public class Unit : NavBody, IDamageable 
 {
     public RallyData rallyData;
+    public LookData lookData;
     private Queue<DamageInstance> _damageQueue;
 
     public float Health { get; set; }
@@ -38,6 +39,8 @@ public class Unit : NavBody, IDamageable
         rallyData = new RallyData();
         rallyData.destination = transform.position;
         rallyData.destinationObject = null;
+
+        lookData = new LookData();
 
         _damageQueue = new Queue<DamageInstance>();
 
