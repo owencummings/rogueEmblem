@@ -49,6 +49,7 @@ public class GridManager : MonoBehaviour
         CreateSquad(Resources.Load("Melee") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
         LazySlamFeature(Resources.Load("Wizard") as GameObject, 10, 23);
+        LazySlamFeature(Resources.Load("Lurker") as GameObject, 25, 10); 
         LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
     }
 
@@ -122,6 +123,8 @@ public class GridManager : MonoBehaviour
                         Quaternion.identity);
         }
     }
+
+    void LazySlamWaterFeature(GameObject prefab, int x, int z){}
 
     // TODO: finish this...
     /*
