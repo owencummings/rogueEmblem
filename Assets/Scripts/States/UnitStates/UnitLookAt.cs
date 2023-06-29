@@ -34,6 +34,7 @@ public class UnitLookAt : IState
         {
             lookAt = _lookData.lookLocation;
         }
+        // TODO: change this to only affect XZ rotation
         _tf.rotation = Quaternion.Slerp(_tf.rotation, Quaternion.LookRotation(lookAt - _tf.position), spinSpeed * Time.deltaTime);
     }
 
