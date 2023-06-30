@@ -13,6 +13,7 @@ public class BigEnemy : Unit, IDamageable
 
     private int playerUnitMask;
     private float _attackRange = 2.5f;
+    private float _lookRange = 5f;
     public bool attackFinished = false;
 
     // Start is called before the first frame update
@@ -32,6 +33,14 @@ public class BigEnemy : Unit, IDamageable
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
         var lookAt = new UnitLookAt(_navMeshAgent, transform, lookData);
 
+        Func<bool> InLookRange = () =>
+        {
+            _aggroHit = Physics.OverlapSphere(transform.position, _lookRange, playerUnitMask);
+            if (_aggroHit.Length > 0){
+                lookData.lookTarget = _aggroHit[0].gameObject;
+            }
+            return (_aggroHit.Length > 0);
+        };
         Func<bool> InAggroRange = () =>
         {
             _aggroHit = Physics.OverlapSphere(transform.position, _aggroRange, playerUnitMask);
@@ -45,7 +54,8 @@ public class BigEnemy : Unit, IDamageable
         Func<bool> AttackFinished = () => (timeGrounded > 2f && attackData.attackFinished);
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
-        At(idle, attackApproach, InAggroRange);
+        At(idle, lookAt, InLookRange);
+        At(lookAt, attackApproach, InAggroRange);
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
 
