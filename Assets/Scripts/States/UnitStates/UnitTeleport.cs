@@ -18,6 +18,7 @@ public class UnitTeleport : IState
     private float spinDirection;
     private bool warped = false;
     public bool warpDone = false;
+    private Vector3 anchor = Vector3.zero;
 
     public UnitTeleport(NavMeshAgent navMeshAgent, Rigidbody rb, Transform tf, RallyData rallyData)
     {
@@ -25,6 +26,7 @@ public class UnitTeleport : IState
         _rb = rb;
         _tf = tf;
         _rallyData = rallyData;
+        anchor = tf.position;
     }
 
     public void Tick()
@@ -36,7 +38,10 @@ public class UnitTeleport : IState
             if (timer > tpTime)
             {
                 warped = true;
+                Vector3Int randomCoord = GridManager.Instance.GetRandomGridCoordinateInRange(anchor, 6);
+                _navMeshAgent.Warp(GridManager.Instance.WorldPointFromGridCoordinate(randomCoord));
                 // Change location, emit particles, etc.
+                // Probably add offset for navAgent + ground diff 
             }
         } 
         else 

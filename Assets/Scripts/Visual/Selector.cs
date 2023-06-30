@@ -66,9 +66,7 @@ public class Selector : MonoBehaviour
                 }
 
                 // Make certain blocks non-walkable to improve navmesh compute speed
-                Vector3Int gridManagerCoordinates = new Vector3Int((int)newBlockCoordinates.x + GridManager.Instance.macroTileResolution*GridManager.Instance.tilesPerMacroTile/2,
-                                                                   (int)newBlockCoordinates.z + GridManager.Instance.macroTileResolution*GridManager.Instance.tilesPerMacroTile/2,
-                                                                   (int)newBlockCoordinates.y+10);
+                Vector3Int gridManagerCoordinates = GridManager.Instance.GetGridCoordinatesFromPoint(newBlockCoordinates);
 
                 // For ramp-on-ramp
                 if (GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z] != null){
@@ -79,8 +77,8 @@ public class Selector : MonoBehaviour
                 GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z] = go;
 
                 // For potential block underneath
-                if (GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z-1] != null){
-                    GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y, gridManagerCoordinates.z-1].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                if (GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y-1, gridManagerCoordinates.z] != null){
+                    GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y-1, gridManagerCoordinates.z].layer = LayerMask.NameToLayer("NonWalkableTerrain");
                 } 
 
                 NavMeshManager.Instance.BakeNavMesh();

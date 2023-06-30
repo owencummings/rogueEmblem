@@ -81,6 +81,61 @@ public class GridManager : MonoBehaviour
         return outputPoint;
     }
 
+    public Vector3Int GetGridCoordinatesFromPoint(Vector3 inputPoint)
+    {
+        Vector3Int gridManagerCoordinates = new Vector3Int((int)inputPoint.x + macroTileResolution*tilesPerMacroTile/2,
+                                                           (int)inputPoint.y+10,
+                                                           (int)inputPoint.z + macroTileResolution*tilesPerMacroTile/2);
+        return gridManagerCoordinates;
+    }
+
+    public Vector3 WorldPointFromGridCoordinate(Vector3Int gridCoord){
+        Vector3 worldPoint = new Vector3(gridCoord.x - macroTileResolution*tilesPerMacroTile/2,
+                                         gridCoord.y - 10,
+                                         gridCoord.z - macroTileResolution*tilesPerMacroTile/2);
+        return worldPoint;
+    }
+
+    public Vector3Int GetRandomGridCoordinateInRange(Vector3Int gridCoordinate, int range){
+        List<Vector3Int> validCoords = new List<Vector3Int>();
+        Vector3Int returnCoord = gridCoordinate;
+        for (int i = 0; i < 2*range+1; i += 1)
+        {
+            for (int j = 0; j < 2*range+1; j += 1)
+            {
+                for (int k = 0; k < 2*range+1; k += 1)
+                {
+                    Vector3Int nearbyCoord = new Vector3Int(gridCoordinate.x - range + i,
+                                                            gridCoordinate.y - range + j,
+                                                            gridCoordinate.z - range + k);
+
+                    if (nearbyCoord.x < 0 || nearbyCoord.x >= cubes.GetLength(0)
+                        || nearbyCoord.y < 0 || nearbyCoord.y > cubes.GetLength(1) 
+                        || nearbyCoord.z < 0 || nearbyCoord.z > cubes.GetLength(2))
+                    {
+                        // Not within addressable range
+                        continue;
+                    }
+                    if (cubes[nearbyCoord.x,nearbyCoord.y,nearbyCoord.z] != null 
+                        && cubes[nearbyCoord.x,nearbyCoord.y+1,nearbyCoord.z] == null)
+                    {
+                        validCoords.Add(nearbyCoord);
+                    }
+                }
+            }
+        }
+
+        if (validCoords.Count > 0){
+            returnCoord =  validCoords[UnityEngine.Random.Range(0, validCoords.Count)];
+        }
+        return returnCoord;
+    }
+
+    public Vector3Int GetRandomGridCoordinateInRange(Vector3 worldPoint, int range){
+        Vector3Int gridCoordinate = GetGridCoordinatesFromPoint(worldPoint);
+        return GetRandomGridCoordinateInRange(gridCoordinate, range);
+    }
+
     void LazySlamFeature(GameObject prefab, int x, int z)
     {
         int outputX = x;
@@ -119,14 +174,14 @@ public class GridManager : MonoBehaviour
         if (found)
         {
             Instantiate(prefab, 
-                        cubes[outputX,outputZ,outputY].transform.position + Vector3.up,
+                        cubes[outputX,outputY,outputZ].transform.position + Vector3.up,
                         Quaternion.identity);
         }
     }
 
     void LazySlamWaterFeature(GameObject prefab, int x, int z){}
 
-    // TODO: finish this...
+    // TODO: finish smarter feature slamming
     /*
     void SlamFeature2(GameObject prefab, int x, int z)
     {
@@ -176,9 +231,9 @@ public class GridManager : MonoBehaviour
                 float height = Mathf.Floor(1 + cubeSize *
                                                 (xSinAmp*(1 + Mathf.Sin(xSinPeriod*(i + xSinShift)))
                                                  + ySinAmp*(1 + Mathf.Sin(ySinPeriod*(j + ySinShift)))));
-                cubes[i,j,0] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
+                cubes[i,0,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2)*cubeSize),
                                          Quaternion.identity, this.transform);
-                cubes[i,j,0].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                cubes[i,0,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
             }
         }
     }
@@ -190,9 +245,9 @@ public class GridManager : MonoBehaviour
         for (int i = 0; i < gridSize; i++){
             for (int j = 0; j < gridSize; j++){
                 float height = 1;
-                cubes[i,j,0] = Instantiate(cubePrefab, new Vector3((i-gridSize/2f)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2f)*cubeSize),
+                cubes[i,0,j] = Instantiate(cubePrefab, new Vector3((i-gridSize/2f)*cubeSize, cubeSize * squareSize * height/2, (j-gridSize/2f)*cubeSize),
                                          Quaternion.identity, this.transform);
-                cubes[i,j,0].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
+                cubes[i,0,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
             }
         }
     }
@@ -205,7 +260,7 @@ public class GridManager : MonoBehaviour
         offsetY = 0.5f; 
         float rand;
         MacroTileType tileType;
-        cubes = new GameObject[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile, 20];
+        cubes = new GameObject[macroTileResolution*tilesPerMacroTile, 20, macroTileResolution*tilesPerMacroTile];
         heights = new int[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
         for (int i1 = 0; i1 < macroTileResolution; i1++){
             for (int j1 = 0; j1 < macroTileResolution; j1++){
@@ -236,11 +291,11 @@ public class GridManager : MonoBehaviour
                         if (height > 0){
                             for (int k = -4; k < height + 1; k++)
                             {
-                                cubes[gridI,gridJ,k+10] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (gridJ-fullResolution/2f)*cubeSize),
+                                cubes[gridI,k+10,gridJ] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (gridJ-fullResolution/2f)*cubeSize),
                                                                            Quaternion.identity, this.transform);
                                 if (k != height)
                                 {
-                                    cubes[gridI,gridJ,k+10].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                                    cubes[gridI,k+10,gridJ].layer = LayerMask.NameToLayer("NonWalkableTerrain");
                                 }
                                 //cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
                             }
