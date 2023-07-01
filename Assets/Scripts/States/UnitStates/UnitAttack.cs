@@ -13,7 +13,7 @@ public class UnitAttack : IState
 {
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
-    private Transform _transform;
+    private Transform _tf;
     private AttackData _attackData;
     private float attackCooldown = 0.25f;
     private float attackTime = 0f;
@@ -22,7 +22,7 @@ public class UnitAttack : IState
     {
         _attackData = attackData;
         _navMeshAgent = navMeshAgent;
-        _transform = transform;
+        _tf = transform;
         _rb = rb;
     }
 
@@ -37,9 +37,9 @@ public class UnitAttack : IState
     public void OnEnter()
     {
         _navMeshAgent.enabled = false;
-        _transform.LookAt(_attackData.attackTarget.transform);
+        _tf.LookAt(_attackData.attackTarget.transform);
         _rb.isKinematic = false;
-        _rb.AddForce(_transform.up * 100 + _transform.forward * 300);
+        _rb.AddForce((_tf.up * 100 + _tf.forward * 300) * _tf.localScale.magnitude * 1.5f);
         attackTime = 0f;
         _attackData.attackFinished = false;
     }
@@ -57,7 +57,7 @@ public class UnitAttack : IState
             if (damageable.Team ==  _attackData.team) { return; }
             DamageInstance damage = new DamageInstance();
             damage.damageValue = 1;
-            damage.sourcePosition = _transform.position;
+            damage.sourcePosition = _tf.position;
             damageable.OnDamage(damage);
         }
     }

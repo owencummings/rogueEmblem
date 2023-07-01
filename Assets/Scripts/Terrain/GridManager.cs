@@ -49,7 +49,7 @@ public class GridManager : MonoBehaviour
         CreateSquad(Resources.Load("Melee") as GameObject, 14, 14);
         LazySlamFeature(enemyPrefab, 23, 23);
         LazySlamFeature(Resources.Load("Wizard") as GameObject, 10, 23);
-        LazySlamFeature(Resources.Load("Lurker") as GameObject, 25, 10); 
+        LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 25, 10); 
         LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
     }
 
@@ -179,7 +179,50 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void LazySlamWaterFeature(GameObject prefab, int x, int z){}
+    void LazySlamWaterFeature(GameObject prefab, int x, int z)
+    {
+            int outputX = x;
+        int outputZ = z;
+        int outputY = 0;
+        bool found = false;
+        int rand;
+        if (heights[x, z] == 0 &&
+            (heights[x-1,z] != 0 || heights[x+1,z] != 0 || heights[x,z-1] != 0 || heights[x,z+1] != 0 ))
+        {
+            outputX = x;
+            outputZ = z;
+            outputY = heights[x,z];
+            found = true;
+        } 
+        else 
+        {
+            int i = 0;
+            int tryX = 0;
+            int tryZ = 0;
+            while (i < 100){
+                rand = UnityEngine.Random.Range(-5, 6);
+                tryX = x + rand;
+                rand = UnityEngine.Random.Range(-5, 6);
+                tryZ = z + rand;
+                if (heights[tryX, tryZ] == 0 &&
+                    (heights[tryX-1,tryZ] != 0 || heights[tryX+1,tryZ] != 0 || heights[tryX,tryZ-1] != 0 || heights[tryX,tryZ+1] != 0 ))
+                {
+                    outputX = tryX;
+                    outputZ = tryZ;
+                    outputY = heights[tryX, tryZ];
+                    found = true;
+                    break;
+                } 
+                i += 1;
+            }
+        }
+        if (found)
+        {
+            Instantiate(prefab, 
+                        WorldPointFromGridCoordinate(new Vector3Int(outputX,outputY,outputZ)),
+                        Quaternion.identity);
+        }
+    }
 
     // TODO: finish smarter feature slamming
     /*

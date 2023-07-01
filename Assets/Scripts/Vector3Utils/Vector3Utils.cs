@@ -25,5 +25,10 @@ namespace Vector3Utils
             }
             return circleDestinations;
         }
+
+        public static void LookAtXZ(Transform tf, Vector3 target){
+            Vector3 lookTarget = new Vector3(target.x, tf.position.y, target.z);
+            tf.LookAt(lookTarget);
+        }
     }
 }

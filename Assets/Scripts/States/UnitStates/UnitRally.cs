@@ -25,6 +25,7 @@ public class UnitRally : IState
     public void Tick(){
         if (_rallyData.destination != null && _rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh &&
             (Vector3.Distance(_rallyData.destinationObject.transform.position + _rallyData.destination, _cachedRallyPoint) > 0.1f))
+            // TODO: squared distance as optimization
         {    
             _navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination);
             _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
@@ -37,7 +38,7 @@ public class UnitRally : IState
         _rb.isKinematic = true;
         if (_rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh)
         {
-            _navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination);
+            Debug.Log(_navMeshAgent.SetDestination(_rallyData.destinationObject.transform.position + _rallyData.destination));
             _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
         }
         else if (_rallyData.destination != null && _navMeshAgent.isOnNavMesh)
