@@ -57,8 +57,13 @@ public class Squad : MonoBehaviour, ISelectable
         rallyFlag = Instantiate(rallyFlagPrefab, transform.position, Quaternion.identity);
 
 
+
+    }
+
+    void Start()
+    {
         // Set random color
-        squadColor = Random.ColorHSV(0f, 1f, 0.5f, 0.75f, 0.8f, 0.9f);
+        squadColor = UnitAttributes.BirdPalettes.paletteMap[unitGoArr[0].GetComponent<Unit>().unitTypeEnum].DarkColor;
         Material decalMat = decalProjector.material;
         decalProjector.material = new Material(decalProjector.material);
         decalProjector.material.SetColor("_Color", squadColor);
@@ -93,6 +98,7 @@ public class Squad : MonoBehaviour, ISelectable
         if (_isSelected){
             targetOpacity = 1f;
         }
+        targetOpacity = 1f; // Actually, I quite like it always on
         currOpacity = Mathf.MoveTowards(currOpacity, targetOpacity, opacitySpeed * Time.deltaTime);
         decalProjector.material.SetFloat("_Alpha", currOpacity);
     }

@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    //public GameObject gridManager;
-
+    // Seems like this class isn't necessary
     public static GameManager Instance { get; private set; }
     private void Awake() 
     { 
@@ -19,9 +18,4 @@ public class GameManager : MonoBehaviour
             Instance = this; 
         }
     }
-    
-    void Start(){
-        //Instantiate(gridManager);
-    }
-
 }

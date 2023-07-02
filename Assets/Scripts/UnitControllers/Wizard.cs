@@ -20,6 +20,7 @@ public class Wizard : Unit, IDamageable
     new void Awake()
     {
         UnitAwake();
+        unitTypeEnum = UnitAttributes.UnitType.Wizard;
 
         Health = 10f;
         Team = TeamEnum.Enemy;

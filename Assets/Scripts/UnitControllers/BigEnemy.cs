@@ -20,6 +20,7 @@ public class BigEnemy : Unit, IDamageable
     new void Awake()
     {
         UnitAwake();
+        unitTypeEnum = UnitAttributes.UnitType.BigEnemy;
         Health = 10f;
         Team = TeamEnum.Enemy;
 

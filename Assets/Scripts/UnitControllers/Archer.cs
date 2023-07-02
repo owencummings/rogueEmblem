@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnitCommands;
+using UnitAttributes;
 
 public class Archer : ControllableUnit
 {
@@ -12,6 +13,9 @@ public class Archer : ControllableUnit
 
     new void Awake(){
         ControllableUnitAwake();
+
+        unitTypeEnum = UnitType.Archer;
+
         attackData = new AttackData();
         attackData.attackFinished = false;
         attackData.team = Team;
