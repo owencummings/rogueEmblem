@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnitCommands;
-
+using UnitAttributes;
 
 public class Melee : ControllableUnit
 {
@@ -14,6 +14,9 @@ public class Melee : ControllableUnit
     new void Awake()
     {
         ControllableUnitAwake();
+
+        unitTypeEnum = UnitType.Melee;
+
         attackData = new AttackData();
         attackData.attackFinished = false;
         attackData.team = Team;

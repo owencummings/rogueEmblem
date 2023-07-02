@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnitCommands;
+using UnitAttributes;
 
 public class Unit : NavBody, IDamageable 
 {
@@ -16,6 +17,7 @@ public class Unit : NavBody, IDamageable
     public Transform SourceTransform { get; set; }
     public int ObjectID { get; set; }
     private Squad parentSquad;
+    public UnitType unitTypeEnum;
 
     #region Behaviors
     internal UnitRally rally;
@@ -35,6 +37,7 @@ public class Unit : NavBody, IDamageable
         Team = TeamEnum.Player;
         SourceTransform = transform;
         ObjectID = gameObject.GetInstanceID();
+        unitTypeEnum = UnitType.None;
 
         rallyData = new RallyData();
         rallyData.destination = transform.position;
@@ -64,7 +67,11 @@ public class Unit : NavBody, IDamageable
         _stateMachine.SetState(rigidIdle);
     }
 
-
+    void Start ()
+    {
+        // Just do this after Awake() so that subclasses make their necessary changes.
+        UnitAttributes.BirdPalettes.ColorizeTexture(transform, unitTypeEnum);
+    }
 
     public void OnDamage(DamageInstance damage){
         _damageQueue.Enqueue(damage);

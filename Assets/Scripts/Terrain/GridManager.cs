@@ -19,9 +19,6 @@ public class GridManager : MonoBehaviour
 
     public int macroTileResolution = 10;
     public int tilesPerMacroTile = 10;
-
-    public GameObject squadPrefab; // temp
-    public GameObject enemyPrefab; // temp
     
     public float offsetXZ = 0f;
     public float offsetY = 0.5f;
@@ -47,7 +44,7 @@ public class GridManager : MonoBehaviour
         navSurface.BuildNavMesh();
         CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
         CreateSquad(Resources.Load("Melee") as GameObject, 14, 14);
-        LazySlamFeature(enemyPrefab, 23, 23);
+        LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 23, 23);
         LazySlamFeature(Resources.Load("Wizard") as GameObject, 10, 23);
         LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 25, 10); 
         LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);

@@ -17,7 +17,7 @@ public class Lurker : Unit, IDamageable
     new void Awake()
     {
         UnitAwake();
-        
+        unitTypeEnum = UnitAttributes.UnitType.Lurker;
         transform.position = new Vector3(transform.position.x, -5, transform.position.z);
 
         Health = 10f;
@@ -33,6 +33,7 @@ public class Lurker : Unit, IDamageable
         var pounce = new UnitPounce(_navMeshAgent, _rb, transform, attackData);
         var attack = new UnitAttack(_navMeshAgent, _rb, transform, attackData);
 
+        #region TransitionConditions
         Func<bool> InLurkRange = () =>
         {
             _aggroHit = Physics.OverlapBox(transform.position, new Vector3(_lurkRange, 10, _lurkRange), Quaternion.identity, playerUnitMask);
@@ -41,6 +42,7 @@ public class Lurker : Unit, IDamageable
             }
             return _aggroHit.Length > 0;
         };
+
         Func<bool> InAggroRange = () =>
         {
             _aggroHit = Physics.OverlapSphere(transform.position, _aggroRange, playerUnitMask);
@@ -50,6 +52,7 @@ public class Lurker : Unit, IDamageable
             }
             return _aggroHit.Length > 0;
         };
+
         Func<bool> InAttackRange = () => 
         {
             _aggroHit = Physics.OverlapSphere(transform.position, _attackRange, playerUnitMask);
@@ -58,7 +61,7 @@ public class Lurker : Unit, IDamageable
             }
             return _aggroHit.Length > 0;
         };
-        Func<bool> Targetless = () => { return rallyData.destinationObject == null; };
+
         Func<bool> IsGrounded = () => {
             if (timeGrounded > 0.5f && _rb.velocity.magnitude < 0.01f)
             {
@@ -66,7 +69,10 @@ public class Lurker : Unit, IDamageable
             }
             return false;
         };
+        
+        Func<bool> Targetless = () => { return rallyData.destinationObject == null; };
         Func<bool> AttackDone = () => { return attackData.attackFinished; };
+        #endregion
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(lurk, pounce, InLurkRange);
@@ -77,6 +83,5 @@ public class Lurker : Unit, IDamageable
         At(attack, rigidIdle, AttackDone);
 
         _stateMachine.SetState(lurk);
-
     }
 }
