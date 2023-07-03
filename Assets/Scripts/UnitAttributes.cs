@@ -31,9 +31,9 @@ namespace UnitAttributes
         
         public static void PopulatePalettes()
         {
-            paletteMap[UnitType.Melee] = new BirdPalette(new Color(0.91f, 0.64f, 0.3f, 1f), 
+            paletteMap[UnitType.Melee] = new BirdPalette(new Color(0.91f, 0.64f, 0.1f, 1f), 
                                                          new Color(0.97f, 0.55f, 0.03f, 1f));
-            paletteMap[UnitType.Archer] = new BirdPalette(new Color(0.11f, 0.81f, 0.54f, 1f),
+            paletteMap[UnitType.Archer] = new BirdPalette(new Color(0.15f, 0.70f, 0.58f, 1f),
                                                           new Color(0.22f, 0.75f, 0.63f, 1f));
             paletteMap[UnitType.None] = new BirdPalette(Color.red, Color.blue);
             paletteMap[UnitType.Wizard] = new BirdPalette(Color.red, Color.blue);
