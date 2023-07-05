@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using GridSpace;
 
 // Could make a TeleportData object, but using RallyData feels good
 

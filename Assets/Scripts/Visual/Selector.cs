@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
 using Selectable;
+using GridSpace;
 
 public class Selector : MonoBehaviour
 {
