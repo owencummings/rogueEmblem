@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Unity.AI.Navigation;
 using Unity.Mathematics;
 using TerrainGeneration;
+using CustomGeometry;
 
+[RequireComponent(typeof(MeshFilter))]
 public class GridManager : MonoBehaviour
 {
     // Eventually there has to be a LevelBuilder that sets parameters and generates this
@@ -13,6 +16,8 @@ public class GridManager : MonoBehaviour
     public int[,] heights;
     public GameObject[,] features;
     public GameObject cubePrefab;
+    public List<Mesh> meshList;
+    public MeshFilter meshFilter;
     public int gridSize = 20;
     public float squareSize = 1f;
     public float cubeSize = 1f;
@@ -37,6 +42,7 @@ public class GridManager : MonoBehaviour
             Instance = this; 
         } 
         gridSize = 100;
+        meshFilter = GetComponent<MeshFilter>();
         CreateMacroTileTerrain();
     }
 
@@ -50,6 +56,7 @@ public class GridManager : MonoBehaviour
         LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
     }
 
+    // TODO: create a class to house this stuff
     void CreateSquad(GameObject unitPrefab, int x, int z){
         GameObject squad = Resources.Load("Squad") as GameObject;
         squad.GetComponent<Squad>().unitPrefab = unitPrefab;
@@ -302,6 +309,9 @@ public class GridManager : MonoBehaviour
         MacroTileType tileType;
         cubes = new GameObject[macroTileResolution*tilesPerMacroTile, 20, macroTileResolution*tilesPerMacroTile];
         heights = new int[macroTileResolution*tilesPerMacroTile,macroTileResolution*tilesPerMacroTile];
+        meshList = new List<Mesh>();
+        List<CombineInstance> combineList = new List<CombineInstance>();
+
         for (int i1 = 0; i1 < macroTileResolution; i1++){
             for (int j1 = 0; j1 < macroTileResolution; j1++){
 
@@ -331,12 +341,28 @@ public class GridManager : MonoBehaviour
                         if (height > 0){
                             for (int k = -4; k < height + 1; k++)
                             {
-                                cubes[gridI,k+10,gridJ] = Instantiate(cubePrefab, new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (gridJ-fullResolution/2f)*cubeSize),
-                                                                           Quaternion.identity, this.transform);
+                                Vector3 location = new Vector3((gridI-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (gridJ-fullResolution/2f)*cubeSize);
+                                cubes[gridI,k+10,gridJ] = Instantiate(cubePrefab, location, Quaternion.identity, this.transform);
+                                
+                                Mesh mesh = new Mesh();
+                                CombineInstance combine = new CombineInstance();
+                                CubeGenerator.CreateCube(mesh);
+                                float randomClamp = UnityEngine.Random.Range(0.0f, 1.0f);
+                                if (randomClamp < 0.1f){
+                                    CubeGenerator.ClampMeshTopXZ(mesh);
+                                }
+                                meshList.Add(mesh);
+
+                                combine.mesh = mesh;
+                                combine.transform = cubes[gridI,k+10,gridJ].transform.localToWorldMatrix;
+
+                                combineList.Add(combine);
+                                
                                 if (k != height)
                                 {
                                     cubes[gridI,k+10,gridJ].layer = LayerMask.NameToLayer("NonWalkableTerrain");
                                 }
+
                                 //cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
                             }
                             heights[gridI, gridJ] = height+10;
@@ -346,6 +372,21 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
+        // Combine meshes into one
+        // TODO: convert List to Arr then...
+        CombineInstance[] combineArray = new CombineInstance[combineList.Count];
+        int index = 0;
+        foreach (CombineInstance combInstance in combineList)
+        {
+            combineArray[index] = combInstance;
+            index += 1;
+        }
+
+        Mesh combinedMesh = new Mesh();
+        combinedMesh.indexFormat = IndexFormat.UInt32;
+        combinedMesh.CombineMeshes(combineArray);
+        meshFilter.sharedMesh = combinedMesh;
     }
 
     
