@@ -9,41 +9,6 @@ using CustomGeometry;
 namespace GridSpace{
     public partial class GridManager
     {
-        void CreateRandomTerrain()
-        {
-            // Assign some oscillation parameters for terrain variation
-            float xSinAmp = UnityEngine.Random.Range(0.0f, 2.0f);
-            float xSinPeriod = UnityEngine.Random.Range(0.2f, 0.5f);
-            float xSinShift = UnityEngine.Random.Range(0.0f, 2*Mathf.PI);
-            float ySinAmp = UnityEngine.Random.Range(0.0f, 2.0f);
-            float ySinPeriod = UnityEngine.Random.Range(0.2f, 0.5f);
-            float ySinShift = UnityEngine.Random.Range(0.0f, 2*Mathf.PI);
-            float xCellShift = UnityEngine.Random.Range(0.0f, 100.0f);
-            float yCellShift = UnityEngine.Random.Range(0.0f, 100.0f);
-
-            cubes = new GameObject[fullResolution,fullResolution,1];
-            heights = new int[fullResolution,fullResolution];
-            for (int i = 0; i < fullResolution; i++){
-                for (int j = 0; j < fullResolution; j++){
-
-                    // Input into a noise function to see if they should exist...
-                    float iScaled = (float)i/(float)fullResolution * 4; // 4 is magic number that looks good with this grid size
-                    float jScaled =  (float)j/(float)fullResolution * 4;
-                    // TODO: Add a radial vignette here...
-                    if (noise.cellular(new float2(iScaled + xCellShift, jScaled + yCellShift))[0] < 0.3f){
-                        continue;
-                    }
-
-                    float height = Mathf.Floor(1 + cubeSize *
-                                                    (xSinAmp*(1 + Mathf.Sin(xSinPeriod*(i + xSinShift)))
-                                                    + ySinAmp*(1 + Mathf.Sin(ySinPeriod*(j + ySinShift)))));
-                    cubes[i,0,j] = Instantiate(cubePrefab, new Vector3((i-fullResolution/2)*cubeSize, cubeSize * squareSize * height/2, (j-fullResolution/2)*cubeSize),
-                                            Quaternion.identity, this.transform);
-                    cubes[i,0,j].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
-                }
-            }
-        }
-
         void CreateFlatTerrain()
         {
             cubes = new GameObject[fullResolution,fullResolution,1];
