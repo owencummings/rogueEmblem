@@ -19,12 +19,12 @@ namespace GridSpace {
         public GameObject cubePrefab;
         public List<Mesh> meshList;
         public MeshFilter meshFilter;
-        public int gridSize = 20;
         public float squareSize = 1f;
         public float cubeSize = 1f;
 
         public int macroTileResolution = 10;
         public int tilesPerMacroTile = 10;
+        public int fullResolution = 100;
         
         public float offsetXZ = 0f;
         public float offsetY = 0.5f;
@@ -42,19 +42,20 @@ namespace GridSpace {
             { 
                 Instance = this; 
             } 
-            gridSize = 100;
+            fullResolution = 100; // ??
+            fullResolution = macroTileResolution * tilesPerMacroTile;
             meshFilter = GetComponent<MeshFilter>();
-            CreateMacroTileTerrain();
+            CreateNodeTerrain();
         }
 
         void Start(){
             navSurface.BuildNavMesh();
-            CreateSquad(Resources.Load("Archer") as GameObject, 15, 15);
-            CreateSquad(Resources.Load("Melee") as GameObject, 14, 14);
-            LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 23, 23);
-            LazySlamFeature(Resources.Load("Wizard") as GameObject, 10, 23);
-            LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 25, 10); 
-            LazySlamFeature(Resources.Load("Carryable") as GameObject, 20, 20);
+            CreateSquad(Resources.Load("Archer") as GameObject, 25, 25);
+            CreateSquad(Resources.Load("Melee") as GameObject, 24, 24);
+            LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 33, 33);
+            LazySlamFeature(Resources.Load("Wizard") as GameObject, 20, 33);
+            LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 35, 20); 
+            LazySlamFeature(Resources.Load("Carryable") as GameObject, 30, 30);
         }
 
     }

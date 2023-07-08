@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace TerrainGeneration {
+
     public enum MacroTileType {
+        Null,
         Land,
         Bridge,
         Water,
-        Ring
+        Ring,
+        StartNode
     }
 
     public class MacroTile {
@@ -183,6 +186,86 @@ namespace TerrainGeneration {
                 }
             }
         }
+    }
 
+    public class MacroNode {
+        MacroTileType TileType;
+        int[,] GridHeights;
+        int[,] TargetHeights;
+        Vector2Int CornerXZ;
+
+        public const int ObscuredHeight = -2;
+        public const int UndeterminedHeight = -1;
+
+
+        public MacroNode(MacroTileType tileType, int[,] gridHeights, Vector2Int cornerXZ, Vector2Int resolutionXZ)
+        {
+            TileType = tileType;
+            GridHeights = gridHeights;
+            CornerXZ = cornerXZ;
+            TargetHeights = new int[resolutionXZ.x, resolutionXZ.y];
+            HydrateTargetHeights();
+            ObscureExistingData();
+        }
+
+        public void ObscureExistingData(){
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    if (TargetHeights[i,j] != UndeterminedHeight) {
+                        TargetHeights[i,j] = ObscuredHeight;
+                    }
+                }
+            }
+        }
+
+        public void HydrateTargetHeights()
+        {
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    TargetHeights[i, j] = GridHeights[CornerXZ.x + i, CornerXZ.y + j];
+                }
+            } 
+        }
+
+        public void RehydrateMainHeights()
+        {
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    Debug.Log(TargetHeights[i,j]);
+                    if (TargetHeights[i,j] != ObscuredHeight) {
+                        Debug.Log(TargetHeights[i,j]);
+                        GridHeights[CornerXZ.x + i, CornerXZ.y + j] = TargetHeights[i,j];
+                    }
+                }
+            } 
+        }
+
+        public void PopulateGrid()
+        {
+            // Will eventually need a way of linking these enum types together
+            if (TileType == MacroTileType.StartNode)
+            {
+                PopulateStartIsland();
+            }
+        }
+
+        public void PopulateStartIsland()
+        {
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    if (TargetHeights[i,j] != ObscuredHeight) {
+                        TargetHeights[i,j] = 1;
+                    }
+                }
+            } 
+        }
     }
 }
