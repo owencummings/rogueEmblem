@@ -11,7 +11,7 @@ namespace TerrainGeneration {
         Bridge,
         Water,
         Ring,
-        StartNode
+        StartNode,
     }
 
     public class MacroTile {
@@ -191,19 +191,31 @@ namespace TerrainGeneration {
     public class MacroNode {
         MacroTileType TileType;
         int[,] GridHeights;
-        int[,] TargetHeights;
-        Vector2Int CornerXZ;
+        static int[,] TargetHeights;
+        Vector2Int StartCornerXZ;
+        Vector2Int EndCornerXZ;
+        public Vector2Int featureStart;
+        public Vector2Int featureEnd;
+        public Dictionary<MacroTileType, Action> tilePopulationMap;
 
+        public const int Water = -1;
         public const int ObscuredHeight = -2;
-        public const int UndeterminedHeight = -1;
+        public const int UndeterminedHeight = -3;
 
-
-        public MacroNode(MacroTileType tileType, int[,] gridHeights, Vector2Int cornerXZ, Vector2Int resolutionXZ)
+        public MacroNode(MacroTileType tileType, int[,] gridHeights, Vector2Int startCornerXZ, Vector2Int endCornerXZ)
         {
             TileType = tileType;
             GridHeights = gridHeights;
-            CornerXZ = cornerXZ;
-            TargetHeights = new int[resolutionXZ.x, resolutionXZ.y];
+            StartCornerXZ = startCornerXZ;
+            EndCornerXZ = endCornerXZ;
+            TargetHeights = new int[EndCornerXZ.x - StartCornerXZ.x + 1, EndCornerXZ.y - StartCornerXZ.y + 1];
+            tilePopulationMap = new Dictionary<MacroTileType, Action>()
+            {
+                { MacroTileType.StartNode, () => PopulateStartIsland() },
+                { MacroTileType.Bridge, () => PopulateBridge() },
+                { MacroTileType.Land, () => PopulateLand() }
+            };
+
             HydrateTargetHeights();
             ObscureExistingData();
         }
@@ -226,7 +238,7 @@ namespace TerrainGeneration {
             {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
-                    TargetHeights[i, j] = GridHeights[CornerXZ.x + i, CornerXZ.y + j];
+                    TargetHeights[i, j] = GridHeights[StartCornerXZ.x + i, StartCornerXZ.y + j];
                 }
             } 
         }
@@ -237,10 +249,8 @@ namespace TerrainGeneration {
             {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
-                    Debug.Log(TargetHeights[i,j]);
                     if (TargetHeights[i,j] != ObscuredHeight) {
-                        Debug.Log(TargetHeights[i,j]);
-                        GridHeights[CornerXZ.x + i, CornerXZ.y + j] = TargetHeights[i,j];
+                        GridHeights[StartCornerXZ.x + i, StartCornerXZ.y + j] = TargetHeights[i,j];
                     }
                 }
             } 
@@ -248,11 +258,7 @@ namespace TerrainGeneration {
 
         public void PopulateGrid()
         {
-            // Will eventually need a way of linking these enum types together
-            if (TileType == MacroTileType.StartNode)
-            {
-                PopulateStartIsland();
-            }
+            tilePopulationMap[TileType]();
         }
 
         public void PopulateStartIsland()
@@ -266,6 +272,32 @@ namespace TerrainGeneration {
                     }
                 }
             } 
+        }
+    
+        public void PopulateLand()
+        {
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    if (TargetHeights[i,j] != ObscuredHeight) {
+                        TargetHeights[i,j] = 1;
+                    }
+                }
+            }  
+        }
+
+        public void PopulateBridge()
+        {
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    if (TargetHeights[i,j] != ObscuredHeight && (i == 0 || j == TargetHeights.GetLength(1) - 1)) {
+                        TargetHeights[i,j] = 1;
+                    }
+                }
+            }  
         }
     }
 }

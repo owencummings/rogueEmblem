@@ -38,7 +38,6 @@ namespace GridSpace{
 
             for (int i1 = 0; i1 < macroTileResolution; i1++){
                 for (int j1 = 0; j1 < macroTileResolution; j1++){
-
                     // Determine tile type
                     tileType = MacroTileType.Null;
                     if ((i1 == 1) || (j1 == 1) || (i1 == macroTileResolution-2) || (j1 == macroTileResolution-2))
@@ -67,13 +66,12 @@ namespace GridSpace{
                     }
                 }
             }
-
             GenerateMeshFromHeights();
         }
     
         void CreateNodeTerrain()
         {
-            fullResolution = 60;
+            fullResolution = 100;
             offsetXZ = (fullResolution/2f) % 1;
             offsetY = 0.5f; 
             float rand;
@@ -84,12 +82,50 @@ namespace GridSpace{
             meshList = new List<Mesh>();
             List<CombineInstance> combineList = new List<CombineInstance>();
 
-            
-            // Try using the node approach here...
-            MacroNode startNode = new MacroNode(MacroTileType.StartNode, heights, new Vector2Int(20,20), new Vector2Int(20,20));
+            // Start node
+            MacroNode startNode = new MacroNode(MacroTileType.StartNode, heights,
+                                                new Vector2Int(fullResolution/2 - 10, fullResolution/2 - 10),
+                                                new Vector2Int(fullResolution/2 + 10, fullResolution/2 + 10));
             startNode.PopulateGrid();
             startNode.RehydrateMainHeights();
             nodeList.Add(startNode);
+
+
+            // Get random coord in the dumbest way possible
+            // TODO: MUST change this
+            bool good = false;
+            int nodeX = 0;
+            int nodeY = 0;
+            while (!good) {
+                nodeX = UnityEngine.Random.Range(0, fullResolution);
+                nodeY = UnityEngine.Random.Range(0, fullResolution);
+
+                if ((nodeX < 10 || nodeX > 50) && (nodeY < 10 || nodeY > 50))
+                {
+                    good = true;
+                }
+            }
+
+            // Bridge node
+            Vector2Int startCorner = new Vector2Int(Mathf.Max(0, Mathf.Min(50, nodeX) - 10),
+                                                    Mathf.Max(0, Mathf.Min(50, nodeY) - 10));
+            Vector2Int endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(50, nodeX) + 10),
+                                                  Mathf.Min(fullResolution-1, Mathf.Max(50, nodeY) + 10));
+            MacroNode bridgeNode = new MacroNode(MacroTileType.Bridge, heights, startCorner, endCorner);
+            bridgeNode.featureStart = new Vector2Int(nodeX, nodeY);
+            bridgeNode.featureEnd = new Vector2Int(60, 60);
+            bridgeNode.PopulateGrid();
+            bridgeNode.RehydrateMainHeights();
+
+            // Land node
+            int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(10, 20), fullResolution - 1);
+            int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(10, 20), fullResolution - 1);
+
+            MacroNode landNode = new MacroNode(MacroTileType.Land, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
+            landNode.PopulateGrid();
+            landNode.RehydrateMainHeights();
+            
+            // Path node
 
             GenerateMeshFromHeights();
         }
@@ -156,7 +192,7 @@ namespace GridSpace{
             {
                 for (int j=0; j < fullResolution; j++)
                 {
-                    heights[i,j] = -1;
+                    heights[i,j] = MacroNode.UndeterminedHeight;
                 }
             }
         }
