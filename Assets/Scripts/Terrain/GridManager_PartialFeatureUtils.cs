@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TerrainGeneration;
 
 namespace GridSpace{
     public partial class GridManager
@@ -18,7 +19,7 @@ namespace GridSpace{
             int outputY = 0;
             bool found = false;
             int rand;
-            if (heights[x, z] != 0)
+            if (heights[x, z] != MacroNode.Water && heights[x, z] != MacroNode.UndeterminedHeight && heights[x, z] != MacroNode.ObscuredHeight)
             {
                 outputX = x;
                 outputZ = z;
@@ -35,7 +36,7 @@ namespace GridSpace{
                     tryX = x + rand;
                     rand = UnityEngine.Random.Range(-5, 6);
                     tryZ = z + rand;
-                    if (heights[tryX, tryZ] != 0)
+                    if (heights[tryX, tryZ] != MacroNode.Water && heights[tryX, tryZ] != MacroNode.UndeterminedHeight && heights[tryX, tryZ] != MacroNode.ObscuredHeight)
                     {
                         outputX = tryX;
                         outputZ = tryZ;
@@ -56,13 +57,13 @@ namespace GridSpace{
 
         void LazySlamWaterFeature(GameObject prefab, int x, int z)
         {
-                int outputX = x;
+            int outputX = x;
             int outputZ = z;
             int outputY = 0;
             bool found = false;
             int rand;
-            if (heights[x, z] == 0 &&
-                (heights[x-1,z] != 0 || heights[x+1,z] != 0 || heights[x,z-1] != 0 || heights[x,z+1] != 0 ))
+            if (heights[x, z] == MacroNode.Water &&
+                (heights[x-1,z] >= 0 || heights[x+1,z] >= 0 || heights[x,z-1] >= 0 || heights[x,z+1] >= 0 ))
             {
                 outputX = x;
                 outputZ = z;
@@ -79,8 +80,8 @@ namespace GridSpace{
                     tryX = x + rand;
                     rand = UnityEngine.Random.Range(-5, 6);
                     tryZ = z + rand;
-                    if (heights[tryX, tryZ] == 0 &&
-                        (heights[tryX-1,tryZ] != 0 || heights[tryX+1,tryZ] != 0 || heights[tryX,tryZ-1] != 0 || heights[tryX,tryZ+1] != 0 ))
+                    if (heights[tryX, tryZ] == MacroNode.Water &&
+                        (heights[tryX-1,tryZ] >= 0 || heights[tryX+1,tryZ] >= 0 || heights[tryX,tryZ-1] >= 0 || heights[tryX,tryZ+1] >= 0 ))
                     {
                         outputX = tryX;
                         outputZ = tryZ;

@@ -8,7 +8,7 @@ namespace GridSpace {
         public Vector3 GetClosestGridPoint(Vector3 inputPoint){
             float outX, outY, outZ;
             // Get nearest point lower than inputPoint
-            // gridPointRoundedDown = (inPoint - inpoint%gridSize) + offset
+            // gridPointRoundedDown = (inPoint - inpoint%fullResolution) + offset
             outX = (inputPoint.x - inputPoint.x % cubeSize) - offsetXZ;
             outY = (inputPoint.y - inputPoint.y % cubeSize) - offsetY;
             outZ = (inputPoint.z - inputPoint.z % cubeSize) - offsetXZ;
