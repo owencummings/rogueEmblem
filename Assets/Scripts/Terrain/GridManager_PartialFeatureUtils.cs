@@ -23,7 +23,7 @@ namespace GridSpace{
             {
                 outputX = x;
                 outputZ = z;
-                outputY = heights[x,z];
+                outputY = heights[x,z] + 10;
                 found = true;
             } 
             else 

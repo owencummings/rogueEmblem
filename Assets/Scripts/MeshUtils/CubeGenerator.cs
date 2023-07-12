@@ -20,14 +20,7 @@ namespace CustomGeometry {
             CreateLeft(vertices, triangles, density);
             CreateRight(vertices, triangles, density);
 
-            Vector3[] vertArray = vertices.ToArray();
-            int[] triangleArray = triangles.ToArray();	
-
-            mesh.Clear();
-            mesh.vertices = vertArray;
-            mesh.triangles = triangleArray;
-            mesh.Optimize();
-            mesh.RecalculateNormals();
+            RenderMesh(mesh, vertices, triangles);
         }
 
         // TODO: generalize these plane-creation methods
@@ -137,8 +130,8 @@ namespace CustomGeometry {
             triangles.AddRange(nextTris);
         }
 
-
-        public static void ClampMeshTopXZ(Mesh mesh){
+        public static void ClampMeshTopXZ(Mesh mesh)
+        {
             // This screws up the triangles
             Vector3[] verts = mesh.vertices;
             for (int i=0; i<verts.Length; i++){
@@ -149,6 +142,17 @@ namespace CustomGeometry {
                     }
             }
             mesh.vertices = verts;
+            mesh.Optimize();
+            mesh.RecalculateNormals();
+        }
+    
+        public static void RenderMesh(Mesh mesh, List<Vector3> vertices, List<int> triangles)
+        {
+            Vector3[] vertArray = vertices.ToArray();
+            int[] triangleArray = triangles.ToArray();
+            mesh.Clear();
+            mesh.vertices = vertArray;
+            mesh.triangles = triangleArray;
             mesh.Optimize();
             mesh.RecalculateNormals();
         }

@@ -146,12 +146,37 @@ namespace GridSpace{
 
                             // Create mesh
                             Mesh mesh = new Mesh();
+                            int density = 2;
+                            List<Vector3> vertices = new List<Vector3>();
+                            List<int> triangles = new List<int>();
                             CombineInstance combine = new CombineInstance();
-                            CubeGenerator.CreateCube(mesh);
-                            float randomClamp = UnityEngine.Random.Range(0.0f, 1.0f);
-                            if (randomClamp < 0.1f){
-                                CubeGenerator.ClampMeshTopXZ(mesh);
+
+                            // Determine which faces of cube to render
+                            if (k == height){
+                                CubeGenerator.CreateTop(vertices, triangles,density);
                             }
+                            if (k == -4){
+                                // Not sure if we really ever need this..
+                                CubeGenerator.CreateBottom(vertices, triangles, density);
+                            }
+                            if (i+1 < heights.GetLength(0) && heights[i+1,j] < height)
+                            {
+                                CubeGenerator.CreateRight(vertices, triangles, density);
+                            }
+                            if (i-1 > 0 && heights[i-1,j] < height)
+                            {
+                                CubeGenerator.CreateLeft(vertices, triangles, density);
+                            }
+                            if (j+1 < heights.GetLength(1) && heights[i,j+1] < height)
+                            {
+                                CubeGenerator.CreateForward(vertices, triangles, density);
+                            }
+                            if (j-1 > 0 && heights[i,j-1] < height)
+                            {
+                                CubeGenerator.CreateBack(vertices, triangles, density);
+                            }
+
+                            CubeGenerator.RenderMesh(mesh, vertices, triangles);
                             meshList.Add(mesh);
 
                             // Memoize mesh to combine later
@@ -161,7 +186,7 @@ namespace GridSpace{
 
                             //cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
                         }
-                        heights[i, j] = height+10;
+                        //heights[i, j] = height+10;
                     }
 
                 }
@@ -181,6 +206,7 @@ namespace GridSpace{
             Mesh combinedMesh = new Mesh();
             combinedMesh.indexFormat = IndexFormat.UInt32;
             combinedMesh.CombineMeshes(combineArray);
+            Debug.Log(combinedMesh.vertices.Length);
             meshFilter.sharedMesh = combinedMesh;
         }
     
