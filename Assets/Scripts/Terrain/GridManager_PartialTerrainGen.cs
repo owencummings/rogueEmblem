@@ -130,7 +130,10 @@ namespace GridSpace{
     
         void GenerateMeshFromHeights()
         {
+            Vector3[] vertArray;
+            int[] triangleArray;
             List<CombineInstance> combineList = new List<CombineInstance>();
+            int density = 5;
             for (int i = 0; i < fullResolution; i++){
                 for (int j = 0; j < fullResolution; j++){
                     int height = heights[i, j];
@@ -146,7 +149,6 @@ namespace GridSpace{
 
                             // Create mesh
                             Mesh mesh = new Mesh();
-                            int density = 2;
                             List<Vector3> vertices = new List<Vector3>();
                             List<int> triangles = new List<int>();
                             CombineInstance combine = new CombineInstance();
@@ -176,17 +178,27 @@ namespace GridSpace{
                                 CubeGenerator.CreateBack(vertices, triangles, density);
                             }
 
-                            CubeGenerator.RenderMesh(mesh, vertices, triangles);
+
+                            
+                            vertArray = vertices.ToArray();
+                            triangleArray = triangles.ToArray();
+
+                            //Offset mesh by noise
+                            for (int v = 0; v < vertArray.Length; v++)
+                            {
+                                vertArray[v][0] = vertArray[v][0] + Mathf.PerlinNoise(vertArray[v].y + k, vertArray[v].z + j) * 0.5f - 0.25f;
+                                vertArray[v][2] = vertArray[v][2] + Mathf.PerlinNoise(vertArray[v].y + k, vertArray[v].x + i) * 0.5f - 0.25f;
+                            }
+
+                            CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
+
                             meshList.Add(mesh);
 
                             // Memoize mesh to combine later
                             combine.mesh = mesh;
                             combine.transform = cubes[i,k+10,j].transform.localToWorldMatrix;
                             combineList.Add(combine);
-
-                            //cubes[gridI,gridJ,height+10].transform.localScale = new Vector3(cubeSize*squareSize, cubeSize * squareSize * height, cubeSize * squareSize);
                         }
-                        //heights[i, j] = height+10;
                     }
 
                 }
@@ -207,6 +219,19 @@ namespace GridSpace{
             combinedMesh.indexFormat = IndexFormat.UInt32;
             combinedMesh.CombineMeshes(combineArray);
             Debug.Log(combinedMesh.vertices.Length);
+
+            // Some noise edits to the combines mesh
+            /*
+            Vector3 v;
+            Vector3[] verts = combinedMesh.vertices;
+            for (int i=0; i < verts.Length; i++)
+            {
+                v = verts[i];
+                combinedMesh.vertices[i][0] = v.x + Mathf.PerlinNoise(v.x, v.z);
+            }
+            */
+            combinedMesh.Optimize();
+            combinedMesh.RecalculateNormals();
             meshFilter.sharedMesh = combinedMesh;
         }
     
