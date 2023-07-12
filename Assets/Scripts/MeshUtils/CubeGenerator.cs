@@ -10,7 +10,6 @@ namespace CustomGeometry {
             List<int> triangles = new List<int>();
             List<Vector3> nextVerts = new List<Vector3>();
             List<int> nextTris = new List<int>();
-            Matrix4x4 rot;
 
             // Create each face
             CreateTop(vertices, triangles, density);
@@ -20,7 +19,10 @@ namespace CustomGeometry {
             CreateLeft(vertices, triangles, density);
             CreateRight(vertices, triangles, density);
 
-            RenderMesh(mesh, vertices, triangles);
+            Vector3[] vertArray = vertices.ToArray();
+            int[] triangleArray = triangles.ToArray();
+
+            RenderMesh(mesh, vertArray, triangleArray);
         }
 
         // TODO: generalize these plane-creation methods
@@ -146,13 +148,11 @@ namespace CustomGeometry {
             mesh.RecalculateNormals();
         }
     
-        public static void RenderMesh(Mesh mesh, List<Vector3> vertices, List<int> triangles)
+        public static void RenderMesh(Mesh mesh, Vector3[] vertices, int[] triangles)
         {
-            Vector3[] vertArray = vertices.ToArray();
-            int[] triangleArray = triangles.ToArray();
             mesh.Clear();
-            mesh.vertices = vertArray;
-            mesh.triangles = triangleArray;
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
             mesh.Optimize();
             mesh.RecalculateNormals();
         }
