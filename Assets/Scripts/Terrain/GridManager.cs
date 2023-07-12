@@ -45,17 +45,18 @@ namespace GridSpace {
             fullResolution = 100; // ??
             fullResolution = macroTileResolution * tilesPerMacroTile;
             meshFilter = GetComponent<MeshFilter>();
+            GetComponent<MeshRenderer>().material.color = new Color(0.64f, 0.72f, 0.75f, 1f);
             CreateNodeTerrain();
         }
 
         void Start(){
             navSurface.BuildNavMesh();
-            CreateSquad(Resources.Load("Archer") as GameObject, 25, 25);
-            CreateSquad(Resources.Load("Melee") as GameObject, 24, 24);
+            CreateSquad(Resources.Load("Archer") as GameObject, 50, 50);
+            CreateSquad(Resources.Load("Melee") as GameObject, 52, 52);
             LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 33, 33);
             LazySlamFeature(Resources.Load("Wizard") as GameObject, 20, 33);
             LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 35, 20); 
-            LazySlamFeature(Resources.Load("Carryable") as GameObject, 30, 30);
+            LazySlamFeature(Resources.Load("Carryable") as GameObject, 48, 48);
         }
 
     }

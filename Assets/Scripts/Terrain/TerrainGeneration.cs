@@ -192,8 +192,8 @@ namespace TerrainGeneration {
         MacroTileType TileType;
         int[,] GridHeights;
         static int[,] TargetHeights;
-        Vector2Int StartCornerXZ;
-        Vector2Int EndCornerXZ;
+        Vector2Int StartCorner;
+        Vector2Int EndCorner;
         public Vector2Int featureStart;
         public Vector2Int featureEnd;
         public Dictionary<MacroTileType, Action> tilePopulationMap;
@@ -351,13 +351,13 @@ namespace TerrainGeneration {
 
         #endregion
 
-        public MacroNode(MacroTileType tileType, int[,] gridHeights, Vector2Int startCornerXZ, Vector2Int endCornerXZ)
+        public MacroNode(MacroTileType tileType, int[,] gridHeights, Vector2Int startCorner, Vector2Int endCorner)
         {
             TileType = tileType;
             GridHeights = gridHeights;
-            StartCornerXZ = startCornerXZ;
-            EndCornerXZ = endCornerXZ;
-            TargetHeights = new int[EndCornerXZ.x - StartCornerXZ.x + 1, EndCornerXZ.y - StartCornerXZ.y + 1];
+            StartCorner = startCorner;
+            EndCorner = endCorner;
+            TargetHeights = new int[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             tilePopulationMap = new Dictionary<MacroTileType, Action>()
             {
                 { MacroTileType.StartNode, () => PopulateStartIsland() },
@@ -387,7 +387,7 @@ namespace TerrainGeneration {
             {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
-                    TargetHeights[i, j] = GridHeights[StartCornerXZ.x + i, StartCornerXZ.y + j];
+                    TargetHeights[i, j] = GridHeights[StartCorner.x + i, StartCorner.y + j];
                 }
             } 
         }
@@ -399,7 +399,7 @@ namespace TerrainGeneration {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
                     if (TargetHeights[i,j] != ObscuredHeight) {
-                        GridHeights[StartCornerXZ.x + i, StartCornerXZ.y + j] = TargetHeights[i,j];
+                        GridHeights[StartCorner.x + i, StartCorner.y + j] = TargetHeights[i,j];
                     }
                 }
             } 
@@ -412,22 +412,26 @@ namespace TerrainGeneration {
 
         public void PopulateStartIsland()
         {
-            WfcCell[,] wfcCells = new WfcCell[EndCornerXZ.x - StartCornerXZ.x + 1, EndCornerXZ.y - StartCornerXZ.y + 1];
+            WfcCell[,] wfcCells = new WfcCell[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             ClearWfcCells(wfcCells);
 
             // Some seeding values to start building from
-            wfcCells[8, 8].AssignValue(3);
-            wfcCells[12, 8].AssignValue(3);
-            wfcCells[8, 12].AssignValue(3);
-            wfcCells[12, 12].AssignValue(3);
+            wfcCells[8, 8].AssignValue(4);
+            wfcCells[12, 8].AssignValue(4);
+            wfcCells[8, 12].AssignValue(4);
+            wfcCells[12, 12].AssignValue(4);
             wfcCells[5, 5].AssignValue(1);
             wfcCells[15, 5].AssignValue(1);
             wfcCells[5, 15].AssignValue(1);
             wfcCells[15, 15].AssignValue(1);
-            wfcCells[1, 1].AssignValue(0);
-            wfcCells[19, 1].AssignValue(0);
-            wfcCells[1, 19].AssignValue(0);
-            wfcCells[19, 19].AssignValue(0);
+            wfcCells[2, 2].AssignValue(0);
+            wfcCells[18, 2].AssignValue(0);
+            wfcCells[2, 18].AssignValue(0);
+            wfcCells[18, 18].AssignValue(0);
+            wfcCells[1, 10].AssignValue(0);
+            wfcCells[10, 1].AssignValue(0);
+            wfcCells[10, 19].AssignValue(0);
+            wfcCells[19, 10].AssignValue(0);
             AssignAllEntropies(wfcCells);
 
             // Can probably generalize this a little bit...
@@ -436,7 +440,6 @@ namespace TerrainGeneration {
             while (collapsing)
             {
                 Tuple<List<Vector2Int>, int> maxEntropyResult = GetHighestEntropy(wfcCells);
-                Debug.Log(maxEntropyResult.Item2);
                 if (maxEntropyResult.Item2 == 0 || maxEntropyResult.Item1.Count == 0 || count > 1000)
                 {
                     collapsing = false;
@@ -457,7 +460,6 @@ namespace TerrainGeneration {
     
         public void PopulateLand()
         {
-
             for (int i=0; i < TargetHeights.GetLength(0); i++)
             {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
@@ -471,15 +473,109 @@ namespace TerrainGeneration {
 
         public void PopulateBridge()
         {
-            for (int i=0; i < TargetHeights.GetLength(0); i++)
-            {
-                for (int j=0; j < TargetHeights.GetLength(1); j++)
-                {
-                    if (TargetHeights[i,j] != ObscuredHeight && (i == 0 || j == TargetHeights.GetLength(1) - 1)) {
-                        TargetHeights[i,j] = 1;
-                    }
+            // Ugly function, still WIP
+            int startHeight = 10;
+            int endHeight = 11;
+            TargetHeights[featureStart.x - StartCorner.x, featureStart.y - StartCorner.y] = startHeight;
+            TargetHeights[featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y] = endHeight;
+
+            Vector2Int currStart = new Vector2Int(featureStart.x - StartCorner.x, featureStart.y - StartCorner.y);
+            Vector2Int currEnd = new Vector2Int(featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y);
+
+            bool connected = false;
+            int distance;
+            List<int> distanceChoices = new List<int>(){1, 2, 3, 3, 3, 4};
+            List<Vector2Int> directions = new List<Vector2Int>(){
+                new Vector2Int(1, 0),
+                new Vector2Int(-1, 0),
+                new Vector2Int(0, 1),
+                new Vector2Int(0, -1)
+            };
+            List<Vector2Int> viableDirections;
+            Vector2Int chosenDirection;
+            int jumps = 0;
+
+            while (!connected && jumps < 1000){
+                // Move start first
+                distance = distanceChoices[UnityEngine.Random.Range(0, distanceChoices.Count)];
+                viableDirections = new List<Vector2Int>();
+                foreach(Vector2Int d in directions){
+                    if (currStart.x + d.x*distance > 0 && currStart.x + d.x*distance < TargetHeights.GetLength(0) && 
+                        currStart.y + d.y*distance  > 0 && currStart.y + d.y*distance  < TargetHeights.GetLength(1) &&
+                        TargetHeights[currStart.x + d.x*distance, currStart.y + d.y*distance] != startHeight)
+                        {
+                            viableDirections.Add(d);
+                            // TODO: also check covering of obscured cells
+                        } 
                 }
-            }  
+
+                if (viableDirections.Count > 0)
+                {
+                    Debug.Log("viable");
+                    chosenDirection = viableDirections[UnityEngine.Random.Range(0, viableDirections.Count)];
+                    for (int i=1; i<=distance; i++)
+                    {
+                        if (TargetHeights[currStart.x + chosenDirection.x*i, currStart.y + chosenDirection.y*i] == endHeight)
+                        {
+                            connected = true;
+                            break;
+                        }
+                        TargetHeights[currStart.x + chosenDirection.x*i, currStart.y + chosenDirection.y*i] = startHeight;
+                    }
+                    currStart = new Vector2Int(currStart.x + chosenDirection.x, currStart.y + chosenDirection.y);
+                }
+
+
+                // Then do the same for end
+                distance = distanceChoices[UnityEngine.Random.Range(0, distanceChoices.Count)];
+                directions = new List<Vector2Int>(){
+                    new Vector2Int(1, 0),
+                    new Vector2Int(-1, 0),
+                    new Vector2Int(0, 1),
+                    new Vector2Int(0, -1)
+                };
+                viableDirections = new List<Vector2Int>();
+                foreach(Vector2Int d in directions){
+                    if (currEnd.x + d.x*distance > 0 && currEnd.x + d.x*distance < TargetHeights.GetLength(0) && 
+                        currEnd.y + d.y*distance  > 0 && currEnd.y + d.y*distance  < TargetHeights.GetLength(1) &&
+                        TargetHeights[currEnd.x + d.x*distance, currEnd.y + d.y*distance] != endHeight)
+                        {
+                            viableDirections.Add(d);
+                            // TODO: also check covering of obscured cells
+                        } 
+                }
+
+                if (viableDirections.Count > 0)
+                {
+                    chosenDirection = viableDirections[UnityEngine.Random.Range(0, viableDirections.Count)];
+                    for (int i=1; i<=distance; i++)
+                    {
+                        if (distance == 4 & i != distance) { continue; }
+                        if (TargetHeights[currEnd.x + chosenDirection.x*i, currEnd.y + chosenDirection.y*i] == startHeight)
+                        {
+                            connected = true;
+                            break;
+                        }
+                        TargetHeights[currEnd.x + chosenDirection.x*i, currEnd.y + chosenDirection.y*i] = endHeight;
+                    }
+                    currEnd = new Vector2Int(currEnd.x + chosenDirection.x, currEnd.y + chosenDirection.y);
+                }
+
+                jumps += 1;
+            }
+
+            // Set path heights to 1
+            Debug.Log(jumps);
+            for (int i=0; i<TargetHeights.GetLength(0); i += 1)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j += 1)
+                {
+                    if (TargetHeights[i,j] == startHeight || TargetHeights[i,j] == endHeight)
+                    {
+                        TargetHeights[i,j] = 1;
+                    } 
+                }
+            }
         }
     }
 }
