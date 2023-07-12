@@ -73,9 +73,7 @@ namespace GridSpace{
         {
             fullResolution = 100;
             offsetXZ = (fullResolution/2f) % 1;
-            offsetY = 0.5f; 
-            float rand;
-            MacroTileType tileType;
+            offsetY = 0.5f;
             cubes = new GameObject[fullResolution, 20, fullResolution];
             ResetHeights();
             List<MacroNode> nodeList = new List<MacroNode>();
@@ -113,9 +111,9 @@ namespace GridSpace{
                                                   Mathf.Min(fullResolution-1, Mathf.Max(50, nodeY) + 10));
             MacroNode bridgeNode = new MacroNode(MacroTileType.Bridge, heights, startCorner, endCorner);
             bridgeNode.featureStart = new Vector2Int(nodeX, nodeY);
-            bridgeNode.featureEnd = new Vector2Int(60, 60);
-            bridgeNode.PopulateGrid();
-            bridgeNode.RehydrateMainHeights();
+            bridgeNode.featureEnd = new Vector2Int(50, 50);
+            //bridgeNode.PopulateGrid();
+            //bridgeNode.RehydrateMainHeights();
 
             // Land node
             int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(10, 20), fullResolution - 1);
