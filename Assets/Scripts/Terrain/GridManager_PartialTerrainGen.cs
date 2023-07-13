@@ -134,6 +134,7 @@ namespace GridSpace{
             int[] triangleArray;
             List<CombineInstance> combineList = new List<CombineInstance>();
             int density = 5;
+            // Create terrain meshes + rigidbodies
             for (int i = 0; i < fullResolution; i++){
                 for (int j = 0; j < fullResolution; j++){
                     int height = heights[i, j];
@@ -178,7 +179,6 @@ namespace GridSpace{
                                 CubeGenerator.CreateBack(vertices, triangles, density);
                             }
 
-
                             
                             vertArray = vertices.ToArray();
                             triangleArray = triangles.ToArray();
@@ -191,7 +191,7 @@ namespace GridSpace{
                             }
 
                             CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
-
+                            if (k == height){ CubeGenerator.ShrinkMeshTop(mesh); }
                             meshList.Add(mesh);
 
                             // Memoize mesh to combine later
@@ -214,25 +214,42 @@ namespace GridSpace{
                 combineArray[index] = combInstance;
                 index += 1;
             }
-
             Mesh combinedMesh = new Mesh();
             combinedMesh.indexFormat = IndexFormat.UInt32;
             combinedMesh.CombineMeshes(combineArray);
             Debug.Log(combinedMesh.vertices.Length);
-
-            // Some noise edits to the combines mesh
-            /*
-            Vector3 v;
-            Vector3[] verts = combinedMesh.vertices;
-            for (int i=0; i < verts.Length; i++)
-            {
-                v = verts[i];
-                combinedMesh.vertices[i][0] = v.x + Mathf.PerlinNoise(v.x, v.z);
-            }
-            */
             combinedMesh.Optimize();
             combinedMesh.RecalculateNormals();
             meshFilter.sharedMesh = combinedMesh;
+
+            // Add grass mesh on top
+            GameObject grassObj = new GameObject("GrassObject");
+            MeshFilter grassFilter = grassObj.AddComponent<MeshFilter>();
+            MeshRenderer grassRenderer = grassObj.AddComponent<MeshRenderer>();
+            grassRenderer.material = Resources.Load("Grass") as Material;
+            List<Vector3> verts = new List<Vector3>();
+            List<int> tris = new List<int>();
+            Vector3 offsetVector = new Vector3();
+            for (int i=0; i< heights.GetLength(0); i++)
+            {
+                for (int j=0; j < heights.GetLength(1); j++)
+                {
+                    if (heights[i,j] > 0)
+                    {
+                        offsetVector[0] = (i-fullResolution/2f) * cubeSize;
+                        offsetVector[1] = heights[i,j]          * cubeSize;
+                        offsetVector[2] = (j-fullResolution/2f) * cubeSize;
+                        CubeGenerator.CreateTop(verts, tris, density, offsetVector);
+                    }
+                }
+            }
+            Mesh grassMesh = new Mesh();
+            grassMesh.vertices = verts.ToArray();
+            grassMesh.triangles = tris.ToArray();
+            Debug.Log(grassMesh.vertices.Length);
+            grassMesh.Optimize();
+            grassMesh.RecalculateNormals();
+            grassFilter.sharedMesh = grassMesh;
         }
     
         void ResetHeights(){
