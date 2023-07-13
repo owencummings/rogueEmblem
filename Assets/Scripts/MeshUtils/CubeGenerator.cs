@@ -34,6 +34,24 @@ namespace CustomGeometry {
             for (int i=0; i<nextVerts.Count; i++){
                 nextVerts[i] += Vector3.up * 0.5f;
             }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+        public static void CreateTop(List<Vector3> vertices, List<int> triangles, int density, Vector3 offset)
+        {
+            List<Vector3> nextVerts = new List<Vector3>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.right * offset.x + Vector3.up * offset.y + Vector3.forward * offset.z;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
             vertices.AddRange(nextVerts);
             triangles.AddRange(nextTris);
         }
@@ -148,6 +166,20 @@ namespace CustomGeometry {
             mesh.RecalculateNormals();
         }
     
+        public static void ShrinkMeshTop(Mesh mesh)
+        {
+            Vector3[] verts = mesh.vertices;
+            for (int i=0; i<verts.Length; i++)
+            {
+                if (verts[i].y > 0f){
+                    verts[i][1] *= 0.9f;
+                }
+            }
+            mesh.vertices = verts;
+            mesh.Optimize();
+            mesh.RecalculateNormals();
+        }
+
         public static void RenderMesh(Mesh mesh, Vector3[] vertices, int[] triangles)
         {
             mesh.Clear();
@@ -156,5 +188,7 @@ namespace CustomGeometry {
             mesh.Optimize();
             mesh.RecalculateNormals();
         }
+    
+    
     }
 }

@@ -45,7 +45,7 @@ namespace GridSpace {
             fullResolution = 100; // ??
             fullResolution = macroTileResolution * tilesPerMacroTile;
             meshFilter = GetComponent<MeshFilter>();
-            GetComponent<MeshRenderer>().material.color = new Color(0.64f, 0.72f, 0.75f, 1f);
+            GetComponent<MeshRenderer>().material.color = new Color(0.75f, 0.9f, 0.9f, 1f);
             CreateNodeTerrain();
         }
 
