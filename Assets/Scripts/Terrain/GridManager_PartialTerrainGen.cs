@@ -112,8 +112,8 @@ namespace GridSpace{
             MacroNode bridgeNode = new MacroNode(MacroTileType.Bridge, heights, startCorner, endCorner);
             bridgeNode.featureStart = new Vector2Int(nodeX, nodeY);
             bridgeNode.featureEnd = new Vector2Int(50, 50);
-            //bridgeNode.PopulateGrid();
-            //bridgeNode.RehydrateMainHeights();
+            bridgeNode.PopulateGrid();
+            bridgeNode.RehydrateMainHeights();
 
             // Land node
             int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(10, 20), fullResolution - 1);
@@ -162,19 +162,19 @@ namespace GridSpace{
                                 // Not sure if we really ever need this..
                                 CubeGenerator.CreateBottom(vertices, triangles, density);
                             }
-                            if (i+1 < heights.GetLength(0) && heights[i+1,j] < height)
+                            if (i == heights.GetLength(0) - 1 || (i+1 < heights.GetLength(0) && heights[i+1,j] < height))
                             {
                                 CubeGenerator.CreateRight(vertices, triangles, density);
                             }
-                            if (i-1 > 0 && heights[i-1,j] < height)
+                            if (i == 0 || (i-1 >= 0 && heights[i-1,j] < height))
                             {
                                 CubeGenerator.CreateLeft(vertices, triangles, density);
                             }
-                            if (j+1 < heights.GetLength(1) && heights[i,j+1] < height)
+                            if (j == heights.GetLength(1) - 1 || (j+1 < heights.GetLength(1) && heights[i,j+1] < height))
                             {
                                 CubeGenerator.CreateForward(vertices, triangles, density);
                             }
-                            if (j-1 > 0 && heights[i,j-1] < height)
+                            if (j == 0 || (j-1 >= 0 && heights[i,j-1] < height))
                             {
                                 CubeGenerator.CreateBack(vertices, triangles, density);
                             }
@@ -186,8 +186,8 @@ namespace GridSpace{
                             //Offset mesh by noise
                             for (int v = 0; v < vertArray.Length; v++)
                             {
-                                vertArray[v][0] = vertArray[v][0] + Mathf.PerlinNoise(vertArray[v].y + k, vertArray[v].z + j) * 0.5f - 0.25f;
-                                vertArray[v][2] = vertArray[v][2] + Mathf.PerlinNoise(vertArray[v].y + k, vertArray[v].x + i) * 0.5f - 0.25f;
+                                vertArray[v][0] = vertArray[v][0] + Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].z + j) * 0.5f - 0.25f;
+                                vertArray[v][2] = vertArray[v][2] + Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].x + i) * 0.5f - 0.25f;
                             }
 
                             CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
