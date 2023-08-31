@@ -39,10 +39,10 @@ public class CameraController : MonoBehaviour
 
         // Get cam rotate input
         if (Input.GetKey(KeyCode.Q)){
-            destinationAngle += 0.4f;
+            destinationAngle += 100f * Time.deltaTime;
         }
         if (Input.GetKey(KeyCode.E)){
-            destinationAngle -= 0.4f;
+            destinationAngle -= 100f * Time.deltaTime;
         }
 
         // Rotate cam
