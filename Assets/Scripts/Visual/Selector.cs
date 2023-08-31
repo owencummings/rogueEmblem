@@ -94,7 +94,7 @@ public class Selector : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             // Display selectables
             foreach (ISelectable selectable in selectableSet){
@@ -102,7 +102,7 @@ public class Selector : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Alpha1))
         {
             // Hide selectables
             foreach (ISelectable selectable in selectableSet){
@@ -145,6 +145,7 @@ public class Selector : MonoBehaviour
             }
         }
 
+        // Pretty easy generalize-refactor here.
         if (Input.GetMouseButtonDown(1) && selectedObject != null)
         {
             SelectableCommand command = new SelectableCommand(KeyCode.Mouse1, ray);
@@ -154,6 +155,12 @@ public class Selector : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift) && selectedObject != null)
         {
             SelectableCommand command = new SelectableCommand(KeyCode.LeftShift, ray);
+            selectedObject.OnCommand(command);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && selectedObject != null)
+        {
+            SelectableCommand command = new SelectableCommand(KeyCode.Space, ray);
             selectedObject.OnCommand(command);
         }
     }

@@ -13,11 +13,13 @@ public interface ICommandable{
 public class ControllableUnit : Unit, ICommandable
 {
     public CarryData carryData;
+    public AttackData jumpData;
 
     private bool newCommand = false;
     internal UnitCommand mostRecentCommand;
     internal UnitCarry carry;
     internal UnitRally carryRally;
+    internal UnitJump jump;
     internal Func<bool> NewValidCommand;
 
     new void Awake()
@@ -34,8 +36,13 @@ public class ControllableUnit : Unit, ICommandable
         carryData.carryTarget = null;
         carryData.carryPivot = Vector3.zero;
 
+        jumpData = new AttackData();
+        jumpData.attackFinished = false;
+        jumpData.team = Team;
+
         carryRally = new UnitRally(_navMeshAgent, _rb, rallyData);
         carry = new UnitCarry(_navMeshAgent, _rb, transform, carryData);
+        jump = new UnitJump(_navMeshAgent, _rb, transform, jumpData);
 
         Func<bool> NearCarryTarget = () => {
             return (rallyData.destinationObject != null && rallyData.destination != null &&
@@ -59,6 +66,7 @@ public class ControllableUnit : Unit, ICommandable
             }
             return false;
         };
+
         Func<bool> NewCarry = () => {
             if (mostRecentCommand.CommandEnum == UnitCommandEnum.Carry)
             {
@@ -88,6 +96,16 @@ public class ControllableUnit : Unit, ICommandable
             return false;
         };
 
+        Func<bool> NewJump = () => {
+            if (mostRecentCommand.CommandEnum == UnitCommandEnum.Jump){
+                mostRecentCommand = new UnitCommand(UnitCommandEnum.None, Vector3.zero, null);
+                return true;
+            }
+            return false;
+        };
+
+        Func<bool> JumpFinished = () => (timeGrounded > 0.25f && jumpData.attackFinished);
+
         #region StateMachineTransitions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(rally, idle, NewValidCommand);
@@ -96,6 +114,9 @@ public class ControllableUnit : Unit, ICommandable
         At(idle, carryRally, NewCarry);
         At(carryRally, carry, NearCarryTarget);
         At(carry, findNavMesh, NewCancel);
+        At(rally, jump, NewJump);
+        At(idle, jump, NewJump);
+        At(jump, findNavMesh, JumpFinished);
         #endregion
 
     }
