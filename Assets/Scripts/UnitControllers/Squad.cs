@@ -166,6 +166,14 @@ public class Squad : MonoBehaviour, ISelectable
                 unitArr[i].OnCommand(cancelCommand);
             } 
         }
+    
+        if (command.KeyPressed == KeyCode.Space)
+        {
+            for (int i = 0; i < unitArr.Length; i++){
+                UnitCommand jumpCommand = new UnitCommand(UnitCommandEnum.Jump, Vector3.zero, null);
+                unitArr[i].OnCommand(jumpCommand);
+            } 
+        }
     }
 
     void OnDestroy(){
