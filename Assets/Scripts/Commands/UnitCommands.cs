@@ -20,6 +20,12 @@ namespace UnitCommands
             TargetGameObject = targetGameObject;
         }
 
+        public UnitCommand(UnitCommandEnum unitCommandEnum){
+            CommandEnum = unitCommandEnum;
+            TargetDestination = Vector3.zero;
+            TargetGameObject = null;
+        }
+
         public UnitCommandEnum CommandEnum {
             get;
         }
