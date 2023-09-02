@@ -191,4 +191,119 @@ namespace CustomGeometry {
     
     
     }
+
+    /*
+    static class FixedCubeGenerator
+    {
+        public static void CreateTop(List<Vector3Int> vertices, List<int> triangles, int density)
+        {
+            List<Vector3Int> nextVerts = new List<Vector3Int>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateFixedQuad(density);
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3Int.up * density;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+        public static void CreateBottom(List<Vector3Int> vertices, List<int> triangles, int density){
+            List<Vector3Int> nextVerts = new List<Vector3Int>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateFixedQuad(density);
+            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(180, 0, 0));
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
+            }
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.down * 0.5f;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+        public static void CreateForward(List<Vector3Int> vertices, List<int> triangles, int density)
+        {
+            List<Vector3Int> nextVerts = new List<Vector3Int>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateFixedQuad(density);
+            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(90, 0, 0));
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
+            }
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.forward * 0.5f;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+        public static void CreateBack(List<Vector3Int> vertices, List<int> triangles, int density)
+        {
+            List<Vector3Int> nextVerts = new List<Vector3Int>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateFixedQuad(density);
+            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(270, 0, 0));
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
+            }
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.back * 0.5f;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+        public static void CreateLeft(List<Vector3Int> vertices, List<int> triangles, int density)
+        {
+            List<Vector3Int> nextVerts = new List<Vector3Int>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateFixedQuad(density);
+            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 90));
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
+            }
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.left * 0.5f;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+        public static void CreateRight(List<Vector3Int> vertices, List<int> triangles, int density)
+        {
+            List<Vector3> nextVerts = new List<Vector3>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateFixedQuad(density);
+            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 270));
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
+            }
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.right * 0.5f;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+    }
+    */
 }
