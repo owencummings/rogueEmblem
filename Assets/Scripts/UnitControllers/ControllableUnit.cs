@@ -135,7 +135,7 @@ public class ControllableUnit : Unit, ICommandable
             return false;
         };
 
-        Func<bool> NearGround = () => {w
+        Func<bool> NearGround = () => {
             if (timeGrounded > 0.5f) {
                 mostRecentCommand = cachedCommand;
                 return true;
