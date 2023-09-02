@@ -19,6 +19,8 @@ public abstract class NavBody : MonoBehaviour
     internal UnitFindNavMesh findNavMesh;
     internal UnitRigidIdle rigidIdle;
 
+    internal Func<bool> IsGrounded;
+
     internal void Awake()
     {
         NavBodyAwake();
@@ -37,7 +39,7 @@ public abstract class NavBody : MonoBehaviour
         findNavMesh = new UnitFindNavMesh(_navMeshAgent, _rb);
         rigidIdle  = new UnitRigidIdle(_navMeshAgent, _rb);
 
-        Func<bool> IsGrounded = () => (timeGrounded > 0.5f && _rb.velocity.magnitude < 0.01f && rigidIdle.timeIdling > rigidIdle.timeToIdle);
+        IsGrounded = () => (timeGrounded > 0.5f && _rb.velocity.magnitude < 0.01f && rigidIdle.timeIdling > rigidIdle.timeToIdle);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
