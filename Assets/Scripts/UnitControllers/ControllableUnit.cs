@@ -179,6 +179,13 @@ public class ControllableUnit : Unit, ICommandable
             return;
         } 
 
+        if (_stateMachine.currentState == glide)
+        {
+            // Complete this functionality & probably put it somewhere else
+            if (unitCommand.TargetGameObject != null){ glideRallyData.destinationObject = unitCommand.TargetGameObject; }
+            else if (unitCommand.TargetDestination != null){ glideRallyData.destination = unitCommand.TargetDestination; glide._cachedRallyPoint = unitCommand.TargetDestination; }
+        }
+
         newCommand = true;
         mostRecentCommand = unitCommand;
     }
