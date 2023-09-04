@@ -9,7 +9,8 @@ public class UnitGlide : IState
     private Rigidbody _rb;
     private Transform _transform;
     private RallyData _rallyData;
-    private Vector3 _cachedRallyPoint = Vector3.zero;
+    public Vector3 _cachedRallyPoint = Vector3.zero;
+    private Vector3 direction;
 
     public UnitGlide(NavMeshAgent navMeshAgent, Rigidbody rb, Transform transform, RallyData rallyData)
     {
@@ -24,10 +25,15 @@ public class UnitGlide : IState
         if (_rallyData.destination != null && _rallyData.destinationObject != null && _navMeshAgent.isOnNavMesh &&
             (Vector3.Distance(_rallyData.destinationObject.transform.position + _rallyData.destination, _cachedRallyPoint) > 0.1f))
             // TODO: squared distance as optimization
+            // Isn't doing these checks just as bad as updating the value every tick?
         {    
             _cachedRallyPoint = _rallyData.destinationObject.transform.position + _rallyData.destination;
         }
-        _rb.AddForce((_transform.up * 10 + _transform.forward * 300) * _transform.localScale.magnitude * 1.5f * Time.deltaTime);
+        direction = (_cachedRallyPoint - _transform.position);
+        direction.y = _rb.transform.position.y;
+        Vector3 torque = Vector3.Cross(direction.normalized, _rb.transform.forward);
+        _rb.AddTorque(_transform.up * Vector3.Dot(direction.normalized, _rb.transform.right) * Time.deltaTime * 50f * _transform.localScale.magnitude);
+        _rb.AddForce((_transform.up * 10 + _transform.forward * 400) * _transform.localScale.magnitude * 1.5f * Time.deltaTime);
     }
 
     public void OnEnter()
