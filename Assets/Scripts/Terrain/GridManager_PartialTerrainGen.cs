@@ -184,10 +184,14 @@ namespace GridSpace{
                             triangleArray = triangles.ToArray();
 
                             //Offset mesh by noise
+                            float coeff = 1;
                             for (int v = 0; v < vertArray.Length; v++)
                             {
-                                vertArray[v][0] = vertArray[v][0] + Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].z + j) * 0.5f - 0.25f;
-                                vertArray[v][2] = vertArray[v][2] + Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].x + i) * 0.5f - 0.25f;
+                                if (k==height){
+                                    coeff = 1 - vertArray[v].y - 0.5f; 
+                                }
+                                vertArray[v][0] = vertArray[v][0] + coeff*(Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].z + j) * 0.5f - 0.25f);
+                                vertArray[v][2] = vertArray[v][2] + coeff*(Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].x + i) * 0.5f - 0.25f);
                             }
 
                             CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
