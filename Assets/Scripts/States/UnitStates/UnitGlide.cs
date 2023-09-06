@@ -31,9 +31,11 @@ public class UnitGlide : IState
         }
         direction = (_cachedRallyPoint - _transform.position);
         direction.y = _rb.transform.position.y;
-        Vector3 torque = Vector3.Cross(direction.normalized, _rb.transform.forward);
-        _rb.AddTorque(_transform.up * Vector3.Dot(direction.normalized, _rb.transform.right) * Time.deltaTime * 50f * _transform.localScale.magnitude);
-        _rb.AddForce((_transform.up * 10 + _transform.forward * 400) * _transform.localScale.magnitude * 1.5f * Time.deltaTime);
+        float angle = Vector3.SignedAngle(direction, _rb.transform.forward, Vector3.up);
+        Vector3 torque = _transform.up * -1*angle/90f * Time.deltaTime * 50f * _transform.localScale.magnitude;
+        Vector3 dampeningTerm = _rb.angularVelocity * -0.5f * Time.deltaTime;
+        _rb.AddTorque(dampeningTerm + torque);
+        _rb.AddForce((_transform.up * 75f + _transform.forward * 450f) * _transform.localScale.magnitude * Time.deltaTime);
     }
 
     public void OnEnter()
