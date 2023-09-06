@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using CustomGeometry;
 
 public class RampMeshGenerator : MonoBehaviour
 {
 	void Start () {
-		CreateRamp();
+		// This ramp mesh needs to be kept as a prefab so that it exists on instantiation
 
+		//CreateRamp();
+		//AssetDatabase.CreateAsset(GetComponent<MeshFilter>().mesh, "Assets/RampMesh.mesh");
 	}
 
     // TODO: Move this to CustomGeometry namespace, add resolution as param

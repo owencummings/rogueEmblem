@@ -50,7 +50,6 @@ namespace GridSpace {
         }
 
         void Start(){
-            navSurface.BuildNavMesh();
             CreateSquad(Resources.Load("Archer") as GameObject, 50, 50);
             CreateSquad(Resources.Load("Melee") as GameObject, 52, 52);
             LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 33, 33);

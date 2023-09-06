@@ -42,6 +42,8 @@ public class Selector : MonoBehaviour
         Ray ray = gameCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         int gridMask = (1 << (gridLayer-1));
+        go = null;
+
 
         // Test building feature here for now, will want to add this to a unit behavior
         if (Input.GetKeyDown(KeyCode.R))
@@ -82,15 +84,10 @@ public class Selector : MonoBehaviour
                     GridManager.Instance.cubes[gridManagerCoordinates.x, gridManagerCoordinates.y-1, gridManagerCoordinates.z].layer = LayerMask.NameToLayer("NonWalkableTerrain");
                 } 
 
-                NavMeshManager.Instance.BakeNavMesh();
-                /*
                 if (go != null){
                     Debug.Log(go);
-                    NavMeshData navData = go.GetComponent<NavMeshSurface>().navMeshData;
-                    NavMeshManager.Instance.UpdateNavMesh(navData);
-                    //go = null;
+                    NavMeshManager.Instance.UpdateNavMesh(go.transform);
                 }
-                */
             }
         }
 
