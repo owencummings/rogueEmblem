@@ -34,7 +34,7 @@ public class UnitJump : IState
         navMeshVelocity = new Vector3(_navMeshAgent.velocity.x, 0, _navMeshAgent.velocity.z);
         _navMeshAgent.enabled = false;
         _rb.isKinematic = false;
-        _rb.AddForce((_transform.up * 150 + navMeshVelocity * 40) * _transform.localScale.magnitude * 1.5f);
+        _rb.AddForce((_transform.up * 250f + navMeshVelocity * 60f) * _transform.localScale.magnitude);
 
         jumpTime = 0f;
         _attackData.attackFinished = false;

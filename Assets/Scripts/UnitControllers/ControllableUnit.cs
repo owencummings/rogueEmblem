@@ -179,12 +179,24 @@ public class ControllableUnit : Unit, ICommandable
             return;
         } 
 
-        if (_stateMachine.currentState == glide)
+        if (_stateMachine.currentState == glide || _stateMachine.currentState == rigidIdle || _stateMachine.currentState == jump)
         {
             // Complete this functionality & probably put it somewhere else
-            if (unitCommand.TargetGameObject != null){ glideRallyData.destinationObject = unitCommand.TargetGameObject; }
-            else if (unitCommand.TargetDestination != null){ glideRallyData.destination = unitCommand.TargetDestination; glide._cachedRallyPoint = unitCommand.TargetDestination; }
-        }
+            if (unitCommand.CommandEnum == UnitCommandEnum.Rally || unitCommand.CommandEnum == UnitCommandEnum.Attack ||
+                unitCommand.CommandEnum == UnitCommandEnum.Carry)
+            { 
+                cachedCommand = unitCommand;
+                if (unitCommand.TargetGameObject != null)
+                { 
+                    glideRallyData.destinationObject = unitCommand.TargetGameObject; 
+                    glideRallyData.destination = unitCommand.TargetDestination;
+                } else if (unitCommand.TargetDestination != null)
+                { 
+                    glideRallyData.destination = unitCommand.TargetDestination; 
+                    glide._cachedRallyPoint = unitCommand.TargetDestination;
+                }
+            }
+       }
 
         newCommand = true;
         mostRecentCommand = unitCommand;
