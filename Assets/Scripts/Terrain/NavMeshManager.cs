@@ -39,12 +39,13 @@ public class NavMeshManager : MonoBehaviour
         NavMesh.AddNavMeshData(navData);
         navBounds = new Bounds(new Vector3(0,0,0), new Vector3(100,100,100));
         sources = new List<NavMeshBuildSource>();
-        NavMeshBuilder.CollectSources(navBounds, navSurface.layerMask, NavMeshCollectGeometry.PhysicsColliders, navSurface.defaultArea, new List<NavMeshBuildMarkup>(), sources);
+        NavMeshBuilder.CollectSources(navBounds, navSurface.layerMask, navSurface.useGeometry, navSurface.defaultArea, new List<NavMeshBuildMarkup>(), sources);
         NavMeshBuilder.UpdateNavMeshData(navData, navSurface.GetBuildSettings(), sources, navBounds);
         //navData = NavMeshBuilder.BuildNavMeshData(navSurface.GetBuildSettings(), sources, new Bounds(), navSurface.transform.position, Quaternion.identity);
+        navSurface.navMeshData = navData;
     }
 
-    public void BakeNavMesh(){ navSurface.BuildNavMesh(); }
+    //public void BakeNavMesh(){ navSurface.BuildNavMesh(); }
 
     private IEnumerator UpdateNavMeshCoroutine(Transform root)
     {
@@ -56,7 +57,7 @@ public class NavMeshManager : MonoBehaviour
         {
             yield return new WaitForSeconds(0.016f);
         }
-        NavMesh.AddNavMeshData(navData);
+        navSurface.navMeshData = navData;
     }
 
     public void UpdateNavMesh(Transform root)
