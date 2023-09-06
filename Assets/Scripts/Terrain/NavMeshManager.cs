@@ -35,10 +35,13 @@ public class NavMeshManager : MonoBehaviour
 
     private void InitializeNavMesh()
     {
+        navData = new NavMeshData();
+        NavMesh.AddNavMeshData(navData);
         navBounds = new Bounds(new Vector3(0,0,0), new Vector3(100,100,100));
         sources = new List<NavMeshBuildSource>();
         NavMeshBuilder.CollectSources(navBounds, navSurface.layerMask, NavMeshCollectGeometry.PhysicsColliders, navSurface.defaultArea, new List<NavMeshBuildMarkup>(), sources);
-        navData = NavMeshBuilder.BuildNavMeshData(navSurface.GetBuildSettings(), new List<NavMeshBuildSource>(), new Bounds(), navSurface.transform.position, Quaternion.identity);
+        NavMeshBuilder.UpdateNavMeshData(navData, navSurface.GetBuildSettings(), sources, navBounds);
+        //navData = NavMeshBuilder.BuildNavMeshData(navSurface.GetBuildSettings(), sources, new Bounds(), navSurface.transform.position, Quaternion.identity);
     }
 
     public void BakeNavMesh(){ navSurface.BuildNavMesh(); }
@@ -46,15 +49,14 @@ public class NavMeshManager : MonoBehaviour
     private IEnumerator UpdateNavMeshCoroutine(Transform root)
     {
         List<NavMeshBuildSource> newSources = new List<NavMeshBuildSource>();
-        NavMeshBuilder.CollectSources(root, navSurface.layerMask, NavMeshCollectGeometry.PhysicsColliders, navSurface.defaultArea, new List<NavMeshBuildMarkup>(), newSources);
+        NavMeshBuilder.CollectSources(root, navSurface.layerMask, navSurface.useGeometry, navSurface.defaultArea, new List<NavMeshBuildMarkup>(), newSources);
         sources.AddRange(newSources);
         AsyncOperation operation = NavMeshBuilder.UpdateNavMeshDataAsync(navData, navSurface.GetBuildSettings(), sources, navBounds);
         while (!operation.isDone)
         {
             yield return new WaitForSeconds(0.016f);
         }
-        navSurface.navMeshData = navData;
-        navSurface.AddData();
+        NavMesh.AddNavMeshData(navData);
     }
 
     public void UpdateNavMesh(Transform root)
