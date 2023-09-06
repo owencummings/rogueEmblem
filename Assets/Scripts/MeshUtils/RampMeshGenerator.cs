@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using CustomGeometry;
 
 public class RampMeshGenerator : MonoBehaviour
 {
 	void Start () {
-		CreateRamp();
-
+		//CreateRamp();
+		//AssetDatabase.CreateAsset(GetComponent<MeshFilter>().mesh, "Assets/RampMesh.mesh");
 	}
 
     // TODO: Move this to CustomGeometry namespace, add resolution as param
