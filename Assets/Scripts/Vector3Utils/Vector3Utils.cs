@@ -30,5 +30,11 @@ namespace Vector3Utils
             Vector3 lookTarget = new Vector3(target.x, tf.position.y, target.z);
             tf.LookAt(lookTarget);
         }
+
+        public static Vector3 perFrameLerp(Vector3 curr, Vector3 destination, float changeRatio)
+        {   
+            // Not exactly sure how this works
+            return Vector3.Lerp(destination, curr, Mathf.Pow(1 - changeRatio, Time.deltaTime));
+        }
     }
 }

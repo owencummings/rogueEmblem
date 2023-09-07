@@ -11,7 +11,6 @@ public class Selector : MonoBehaviour
     public Camera gameCam;
     private int gridLayer = 1;
     private ISelectable selectedObject;
-    private MeshRenderer selectedMesh;
 
     private HashSet<ISelectable> selectableSet;
 
@@ -26,7 +25,7 @@ public class Selector : MonoBehaviour
         // Singleton
         if (Instance != null && Instance != this) 
         { 
-            Destroy(this); 
+            Destroy(this);
         } 
         else 
         { 
@@ -169,6 +168,12 @@ public class Selector : MonoBehaviour
     public void RemoveSelectable(ISelectable selectable){
         if (selectableSet.Contains(selectable)){
             selectableSet.Remove(selectable);
+        }
+    }
+
+    public void ReleaseObjectIfSelected(int instanceId){
+        if (selectedObject.InstanceID == instanceId){
+            selectedObject = null;
         }
     }
 }

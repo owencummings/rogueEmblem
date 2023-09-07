@@ -35,10 +35,17 @@ public class Squad : MonoBehaviour, ISelectable
         set => _isSelected = value;
     }
 
+    public int InstanceID
+    {
+        get => gameObject.GetInstanceID();
+    }    
+
     public Vector3 Position
     {
         get => transform.position;
     }
+
+    public float squadRange = 3f;
 
     void Awake()
     {
@@ -71,7 +78,6 @@ public class Squad : MonoBehaviour, ISelectable
 
     void Update(){
         if (PauseManager.paused){ return; }
-
         // Change position based on aggregate of units
         Vector3 aggregatePosition = Vector3.zero;
         int unitCount = 0;
@@ -82,10 +88,24 @@ public class Squad : MonoBehaviour, ISelectable
             unitCount += 1;
         }
 
+        if (unitCount == 0){ Object.Destroy(this); }
+
+        aggregatePosition = aggregatePosition/unitCount;
+
+        for (int i=0; i<unitGoArr.Length; i +=1)
+        {
+            if (unitGoArr[i] == null) { continue; }
+            if (Vector3.Distance(aggregatePosition, unitGoArr[i].transform.position) > squadRange && unitCount > 1)
+            { 
+                unitGoArr[i] = null;
+                unitArr[i] = null;
+                unitCount -= 1;
+            } 
+        }
+
         if (unitCount > 0)
         {
-            selectableLocation = aggregatePosition/unitCount;
-            transform.position = selectableLocation;
+            transform.position = Vector3UtilsClass.perFrameLerp(transform.position, aggregatePosition, 0.999f);
         }
 
 
@@ -136,6 +156,7 @@ public class Squad : MonoBehaviour, ISelectable
                     rallyFlag.transform.position = rallyLocation;
                     Vector3[] destinations = Vector3UtilsClass.getDestinationCircle(rallyLocation, unitArr.Length);
                     for (int i = 0; i < unitArr.Length; i++){
+                        if (unitArr[i] == null){ continue; }
                         UnitCommand rallyCommand = new UnitCommand(UnitCommandEnum.Rally, destinations[i], null);
                         unitArr[i].OnCommand(rallyCommand);
                     }
@@ -143,6 +164,7 @@ public class Squad : MonoBehaviour, ISelectable
                 else if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Attackable")){
                     UnitCommand attackCommand = new UnitCommand(UnitCommandEnum.Attack, Vector3.zero, hit.transform.gameObject);
                     for (int i = 0; i < unitArr.Length; i++){
+                        if (unitArr[i] == null){ continue; }
                         unitArr[i].OnCommand(attackCommand);
                     }
                 }
@@ -151,6 +173,7 @@ public class Squad : MonoBehaviour, ISelectable
                     {
                         // Get unit destinations
                         for (int i = 0; i < unitArr.Length; i++){
+                            if (unitArr[i] == null){ continue; }
                             UnitCommand carryCommand = new UnitCommand(UnitCommandEnum.Carry, carryable.CarryPivots[i], hit.transform.gameObject);
                             unitArr[i].OnCommand(carryCommand);
                         } 
@@ -162,6 +185,7 @@ public class Squad : MonoBehaviour, ISelectable
         if (command.KeyPressed == KeyCode.LeftShift)
         {
             for (int i = 0; i < unitArr.Length; i++){
+                if (unitArr[i] == null){ continue; }
                 UnitCommand cancelCommand = new UnitCommand(UnitCommandEnum.Cancel, Vector3.zero, null);
                 unitArr[i].OnCommand(cancelCommand);
             } 
@@ -170,6 +194,7 @@ public class Squad : MonoBehaviour, ISelectable
         if (command.KeyPressed == KeyCode.Space)
         {
             for (int i = 0; i < unitArr.Length; i++){
+                if (unitArr[i] == null){ continue; }
                 UnitCommand jumpCommand = new UnitCommand(UnitCommandEnum.Jump, Vector3.zero, null);
                 unitArr[i].OnCommand(jumpCommand);
             } 
@@ -178,5 +203,10 @@ public class Squad : MonoBehaviour, ISelectable
 
     void OnDestroy(){
         (this as ISelectable).UnsubscribeFromSelector();
+        (this as ISelectable).DestroySelectable();
+        Object.Destroy(this.gameObject);
+        Object.Destroy(rallyFlag);
+        Object.Destroy(this);
+        
     }
 }
