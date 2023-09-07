@@ -25,6 +25,8 @@ public class ControllableUnit : Unit, ICommandable
     internal UnitJump jump;
     internal UnitGlide glide;
     internal Func<bool> NewValidCommand;
+    private int waterMask;
+
 
     new void Awake()
     {
@@ -34,6 +36,7 @@ public class ControllableUnit : Unit, ICommandable
     internal void ControllableUnitAwake()
     {
         UnitAwake();
+        waterMask = LayerMask.GetMask("Water");
         mostRecentCommand = new UnitCommand(UnitCommandEnum.None, Vector3.zero, null);
 
         carryData = new CarryData();
@@ -51,6 +54,7 @@ public class ControllableUnit : Unit, ICommandable
         jump = new UnitJump(_navMeshAgent, _rb, transform, jumpData);
         glide = new UnitGlide(_navMeshAgent, _rb, transform, glideRallyData);
 
+        #region StateMachineConditions
         Func<bool> NearCarryTarget = () => {
             return (rallyData.destinationObject != null && rallyData.destination != null &&
                     Vector3.Distance(rallyData.destinationObject.transform.position + rallyData.destination, this.transform.position) < 0.3f);
@@ -143,6 +147,13 @@ public class ControllableUnit : Unit, ICommandable
             return false;
         };
 
+        Func<bool> TouchingWater = () => {
+            return Physics.OverlapSphere(transform.position,
+                                         transform.localScale.x/2,
+                                         waterMask).Length != 0;
+        };
+        #endregion
+
         #region StateMachineTransitions
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(rally, idle, NewValidCommand);
@@ -158,6 +169,8 @@ public class ControllableUnit : Unit, ICommandable
         At(glide, rigidIdle, NewGlide);
         At(rigidIdle, glide, NewGlide);
         At(glide, rigidIdle, NearGround);
+        _stateMachine.AddAnyTransition(death, TouchingWater);
+
         #endregion
 
     }

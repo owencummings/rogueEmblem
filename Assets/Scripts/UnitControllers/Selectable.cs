@@ -30,6 +30,10 @@ namespace Selectable{
             set;
         }
 
+        int InstanceID {
+            get;
+        }
+
         void OnSelect();
 
         void OnDeselect();
@@ -47,6 +51,10 @@ namespace Selectable{
 
         public void UnsubscribeFromSelector(){
             Selector.Instance.RemoveSelectable(this);
+        }
+
+        public void DestroySelectable(){
+            Selector.Instance.ReleaseObjectIfSelected(InstanceID);
         }
     }
 }
