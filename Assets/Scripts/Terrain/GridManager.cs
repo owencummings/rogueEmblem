@@ -52,9 +52,9 @@ namespace GridSpace {
         void Start(){
             CreateSquad(Resources.Load("Archer") as GameObject, 50, 50);
             CreateSquad(Resources.Load("Melee") as GameObject, 52, 52);
-            LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 33, 33);
-            LazySlamFeature(Resources.Load("Wizard") as GameObject, 20, 33);
-            LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 35, 20); 
+            LazySlamFeature(Resources.Load("BigEnemy") as GameObject, 45, 45);
+            LazySlamFeature(Resources.Load("Wizard") as GameObject, 45, 55);
+            LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, 55, 45); 
             LazySlamFeature(Resources.Load("Carryable") as GameObject, 48, 48);
         }
 
