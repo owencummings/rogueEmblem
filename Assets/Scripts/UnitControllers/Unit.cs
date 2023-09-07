@@ -33,7 +33,7 @@ public class Unit : NavBody, IDamageable
     internal void UnitAwake()
     {
         NavBodyAwake();
-        Health = 10f;
+        Health = 3f;
         Team = TeamEnum.Player;
         SourceTransform = transform;
         ObjectID = gameObject.GetInstanceID();
