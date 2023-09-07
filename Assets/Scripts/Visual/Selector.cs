@@ -172,7 +172,7 @@ public class Selector : MonoBehaviour
     }
 
     public void ReleaseObjectIfSelected(int instanceId){
-        if (selectedObject.InstanceID == instanceId){
+        if (selectedObject && selectedObject.InstanceID == instanceId){
             selectedObject = null;
         }
     }
