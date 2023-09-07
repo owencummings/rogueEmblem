@@ -71,7 +71,7 @@ public class UnitBigAttack : IState
             damage.sourcePosition = _transform.position;
             Vector3 directionVector = damageable.SourceTransform.position - _transform.position;
             Vector3 xzVector = new Vector3(directionVector.x, 0f, directionVector.z);
-            damage.forceVector = xzVector.normalized * 150;
+            damage.forceVector = xzVector.normalized * 300;
             damageable.OnDamage(damage);
             objectsHit.Add(damageable.ObjectID);
         }

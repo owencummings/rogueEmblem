@@ -49,11 +49,12 @@ public class Unit : NavBody, IDamageable
 
         rally = new UnitRally(_navMeshAgent, _rb, rallyData);
         takeDamage = new UnitDamage(_navMeshAgent, _rb, _damageQueue, (this as IDamageable));
+        takeDamage.team = Team;
         death = new UnitDeath(_navMeshAgent, _rb, this.gameObject);
 
 
         #region TransitionConditions        
-        Func<bool> DamageFinished = () => (timeGrounded > 0.5f && takeDamage.timeRecoiled > 0.5f);
+        Func<bool> DamageFinished = () => (timeGrounded > 0.5f && takeDamage.timeRecoiled > takeDamage.timeToRecoil);
         Func<bool> NoHealth = () => (Health <= 0.0f);
         #endregion
 
