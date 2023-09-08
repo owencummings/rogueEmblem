@@ -119,7 +119,7 @@ namespace GridSpace{
             int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(10, 20), fullResolution - 1);
             int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(10, 20), fullResolution - 1);
 
-            MacroNode landNode = new MacroNode(MacroTileType.Land, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
+            MacroNode landNode = new MacroNode(MacroTileType.Featureless, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
             
