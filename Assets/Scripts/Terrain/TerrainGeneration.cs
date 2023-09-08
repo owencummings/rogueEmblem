@@ -12,6 +12,7 @@ namespace TerrainGeneration {
         Water,
         Ring,
         StartNode,
+        Featureless,
     }
 
     public class MacroTile {
@@ -201,6 +202,7 @@ namespace TerrainGeneration {
         public const int Water = -1;
         public const int ObscuredHeight = -2;
         public const int UndeterminedHeight = -3;
+        public const int Resolved = -1;
 
         #region WFCUtils
         public struct WfcCell
@@ -235,7 +237,7 @@ namespace TerrainGeneration {
         public static void AssignWfcCell(ref WfcCell cell, int val)
         {
             cell.Height = val;
-            cell.Entropy = -1;
+            cell.Entropy = Resolved;
         }
 
         public static void PropogateEntropy(WfcCell[,] wfcCells, int x, int z)
@@ -249,9 +251,9 @@ namespace TerrainGeneration {
 
             foreach (Vector2Int n in neighbors)
             {
-                if (n.x > 0 && n.x < wfcCells.GetLength(0) && n.y > 0 && n.y < wfcCells.GetLength(1))
+                if (n.x >= 0 && n.x < wfcCells.GetLength(0) && n.y >= 0 && n.y < wfcCells.GetLength(1))
                 {
-                    if (wfcCells[n.x, n.y].Entropy != -1)
+                    if (wfcCells[n.x, n.y].Entropy != Resolved)
                     {
                         wfcCells[n.x, n.y].Entropy += 1;
                     }
@@ -279,9 +281,9 @@ namespace TerrainGeneration {
 
                     foreach (Vector2Int n in neighbors)
                     {
-                        if (n.x > 0 && n.x < wfcCells.GetLength(0) && n.y > 0 && n.y < wfcCells.GetLength(1))
+                        if (n.x >= 0 && n.x < wfcCells.GetLength(0) && n.y >= 0 && n.y < wfcCells.GetLength(1))
                         {
-                            if (wfcCells[n.x, n.y].Entropy == -1){
+                            if (wfcCells[n.x, n.y].Entropy == Resolved){
                                 ent += 1;
                             }
                         }
@@ -317,7 +319,7 @@ namespace TerrainGeneration {
                     }
                     if (wfcCells[i,j].Entropy > maxEntropy) {
                         maxEntropy = wfcCells[i,j].Entropy;
-                        outList = new List<Vector2Int>();
+                        outList.Clear();
                         outList.Add(new Vector2Int(i,j));
                     }
                 }
@@ -337,9 +339,9 @@ namespace TerrainGeneration {
 
             foreach (Vector2Int n in neighbors)
             {
-                if (n.x > 0 && n.x < wfcCells.GetLength(0) && n.y > 0 && n.y < wfcCells.GetLength(1))
+                if (n.x >= 0 && n.x < wfcCells.GetLength(0) && n.y >= 0 && n.y < wfcCells.GetLength(1))
                 {
-                    if (wfcCells[n.x, n.y].Entropy == -1)
+                    if (wfcCells[n.x, n.y].Entropy == Resolved)
                     {
                         heights.Add(wfcCells[n.x, n.y].Height);
                     }
@@ -362,7 +364,8 @@ namespace TerrainGeneration {
             {
                 { MacroTileType.StartNode, () => PopulateStartIsland() },
                 { MacroTileType.Bridge, () => PopulateBridge() },
-                { MacroTileType.Land, () => PopulateLand() }
+                { MacroTileType.Land, () => PopulateLand() },
+                { MacroTileType.Featureless, () => PopulateFeatureless() }
             };
 
             HydrateTargetHeights();
@@ -625,6 +628,55 @@ namespace TerrainGeneration {
                     } 
                 }
             }
+        }
+
+        public void PopulateFeatureless()
+        {
+            WfcCell[,] wfcCells = new WfcCell[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
+            ClearWfcCells(wfcCells);
+            int x2 = wfcCells.GetLength(0)/2;
+            int y2 = wfcCells.GetLength(1)/2;
+            int x4 = wfcCells.GetLength(0)/4;
+            int y4 = wfcCells.GetLength(1)/4;
+            int x34 = 3*wfcCells.GetLength(0)/4;
+            int y34 = 3*wfcCells.GetLength(1)/4;           
+            wfcCells[x2, y2].AssignValue(2);
+            wfcCells[x4, y4].AssignValue(0);
+            wfcCells[x34, y4].AssignValue(1);
+            wfcCells[x4, y34].AssignValue(1);
+            wfcCells[x34, y34].AssignValue(0);
+            wfcCells[x4, y4].AssignValue(1);
+            wfcCells[x34, y4].AssignValue(0);
+            wfcCells[x4, y34].AssignValue(0);
+            wfcCells[x34, y34].AssignValue(1);
+            wfcCells[x4, y2].AssignValue(1);
+            wfcCells[x2, y4].AssignValue(1);
+            wfcCells[x2, y34].AssignValue(1);
+            wfcCells[x34, y2].AssignValue(1);
+            AssignAllEntropies(wfcCells);
+
+            // Can probably generalize this a little bit...
+            bool collapsing = true;
+            int count = 0;
+            while (collapsing)
+            {
+                Tuple<List<Vector2Int>, int> maxEntropyResult = GetHighestEntropy(wfcCells);
+                if (maxEntropyResult.Item2 == 0 || maxEntropyResult.Item1.Count == 0 || count > 1000)
+                {
+                    collapsing = false;
+                } else {
+                    int rand = UnityEngine.Random.Range(0, maxEntropyResult.Item1.Count);
+                    Vector2Int chosen = maxEntropyResult.Item1[rand];
+                    List<int> neighborHeights = GetNeighborHeights(wfcCells, chosen.x, chosen.y);
+                    //neighborHeights.AddRange(neighborHeights);
+                    //neighborHeights.Add(1);
+                    wfcCells[chosen.x, chosen.y].AssignValue(neighborHeights[UnityEngine.Random.Range(0,neighborHeights.Count)]);
+                    PropogateEntropy(wfcCells, chosen.x, chosen.y);
+                    count += 1;
+                }
+            }
+
+            CopyWfcHeightsToNodeHeights(wfcCells, TargetHeights);
         }
     }
 }
