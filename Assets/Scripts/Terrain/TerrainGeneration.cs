@@ -295,6 +295,20 @@ namespace TerrainGeneration {
 
         }
 
+        public static void CopyHeightsToWfc(int[,] heights, WfcCell[,] wfcCells)
+        {
+            for (int i=0; i < heights.GetLength(0); i++)
+            {
+                for (int j=0; j < heights.GetLength(1); j++)
+                {
+                    if (heights[i,j] != UndeterminedHeight) {
+                        wfcCells[i,j] = new WfcCell(heights[i,j]);
+                        wfcCells[i,j].Entropy = -1;
+                    }
+                }
+            }
+        }
+
         public static void CopyWfcHeightsToNodeHeights(WfcCell[,] wfcCells, int[,] heights)
         {
             for (int i=0; i < wfcCells.GetLength(0); i++)
@@ -369,7 +383,6 @@ namespace TerrainGeneration {
             };
 
             HydrateTargetHeights();
-            ObscureExistingData();
         }
 
         public void ObscureExistingData(){
@@ -407,9 +420,11 @@ namespace TerrainGeneration {
                 }
             } 
         }
-
+ 
         public void PopulateGrid()
         {
+            if (TileType == MacroTileType.Bridge || TileType == MacroTileType.Land
+                || TileType == MacroTileType.Water || TileType == MacroTileType.Null){ ObscureExistingData(); }
             tilePopulationMap[TileType]();
         }
 
@@ -417,6 +432,7 @@ namespace TerrainGeneration {
         {
             WfcCell[,] wfcCells = new WfcCell[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             ClearWfcCells(wfcCells);
+            CopyHeightsToWfc(TargetHeights, wfcCells);
 
             // Some seeding values to start building from
             wfcCells[8, 8].AssignValue(4);
@@ -634,6 +650,8 @@ namespace TerrainGeneration {
         {
             WfcCell[,] wfcCells = new WfcCell[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             ClearWfcCells(wfcCells);
+            CopyHeightsToWfc(TargetHeights, wfcCells);
+
             int x2 = wfcCells.GetLength(0)/2;
             int y2 = wfcCells.GetLength(1)/2;
             int x4 = wfcCells.GetLength(0)/4;
@@ -645,7 +663,7 @@ namespace TerrainGeneration {
             wfcCells[x34, y4].AssignValue(1);
             wfcCells[x4, y34].AssignValue(1);
             wfcCells[x34, y34].AssignValue(0);
-            wfcCells[x4, y4].AssignValue(1);
+            wfcCells[x4, y4].AssignValue(0);
             wfcCells[x34, y4].AssignValue(0);
             wfcCells[x4, y34].AssignValue(0);
             wfcCells[x34, y34].AssignValue(1);
