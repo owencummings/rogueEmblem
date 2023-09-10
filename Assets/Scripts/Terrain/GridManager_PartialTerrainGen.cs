@@ -226,27 +226,139 @@ namespace GridSpace{
             combinedMesh.RecalculateNormals();
             meshFilter.sharedMesh = combinedMesh;
 
-            // Add grass mesh on top
+            CreateGrassBase();
+        }
+
+        void CreateGrassBase(){
+            // Add grass mesh on top of heights
             GameObject grassObj = new GameObject("GrassObject");
             MeshFilter grassFilter = grassObj.AddComponent<MeshFilter>();
             MeshRenderer grassRenderer = grassObj.AddComponent<MeshRenderer>();
             grassRenderer.material = Resources.Load("Grass") as Material;
+            int density = 5;
             List<Vector3> verts = new List<Vector3>();
             List<int> tris = new List<int>();
+            List<Vector3> newVerts = new List<Vector3>();
+            List<int> newTris = new List<int>();
+            List<Vector3> edgeVerts = new List<Vector3>();
+            List<int> edgeTris = new List<int>();
             Vector3 offsetVector = new Vector3();
             for (int i=0; i< heights.GetLength(0); i++)
             {
                 for (int j=0; j < heights.GetLength(1); j++)
                 {
-                    if (heights[i,j] > 0)
-                    {
-                        offsetVector[0] = (i-fullResolution/2f) * cubeSize;
-                        offsetVector[1] = heights[i,j]          * cubeSize;
-                        offsetVector[2] = (j-fullResolution/2f) * cubeSize;
-                        CubeGenerator.CreateTop(verts, tris, density, offsetVector);
+                    if (heights[i,j] < 1) { continue; }
+                    newTris.Clear();
+                    newVerts.Clear();
+                    edgeVerts.Clear();
+                    edgeTris.Clear();
+                    offsetVector[0] = (i-fullResolution/2f) * cubeSize;
+                    offsetVector[1] = heights[i,j]          * cubeSize;
+                    offsetVector[2] = (j-fullResolution/2f) * cubeSize;
+                    CubeGenerator.CreateTop(newVerts, newTris, density);
+
+                    bool shorterLeft = (i-1 >= 0 && i-1 < heights.GetLength(0) && heights[i-1, j] < heights[i,j]);
+                    bool shorterRight = (i+1 >= 0 && i+1 < heights.GetLength(0) && heights[i+1, j] < heights[i,j]);
+                    bool shorterBack = (j-1 >= 0 && j-1 < heights.GetLength(1) && heights[i, j-1] < heights[i,j]);
+                    bool shorterForward = (j+1 >= 0 && j+1 < heights.GetLength(1) && heights[i, j+1] < heights[i,j]);
+
+                    // Add edges as needed
+                    if (shorterBack){
+                        CubeGenerator.CreateBack(edgeVerts, edgeTris, density);
                     }
+                    if (shorterForward){
+                        CubeGenerator.CreateForward(edgeVerts, edgeTris, density);
+                    }
+                    if (shorterRight){
+                        CubeGenerator.CreateRight(edgeVerts, edgeTris, density);
+                    }
+                    if (shorterLeft){
+                        CubeGenerator.CreateLeft(edgeVerts, edgeTris, density);
+                    }
+
+                    // Add edge tris
+                    for (int t=0; t< edgeTris.Count; t++){
+                        edgeTris[t] += newVerts.Count;
+                    }
+                    newVerts.AddRange(edgeVerts);
+                    newTris.AddRange(edgeTris);
+
+                    Vector3[] newVertsArr = newVerts.ToArray();
+                    int[] newTrisArr = newTris.ToArray();
+
+                    // Transform this mesh square
+                    float coeff;
+                    int k = heights[i,j];
+                    for (int t=0; t < newVertsArr.Length; t++)
+                    {
+                        newVertsArr[t].y = (newVertsArr[t].y/4) + 0.5f * (3f/4f);
+                    }
+
+                    if (shorterBack){
+                        for (int t=0; t < newVertsArr.Length; t++)
+                        {
+                            if (newVertsArr[t].z < 0f){
+                                coeff = 1f - newVertsArr[t].y - 0.5f;
+                                newVertsArr[t].z *= (.2f - Mathf.Abs(newVertsArr[t].y - 0.4f)) + 1f;
+                                newVertsArr[t].x = newVertsArr[t].x + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].z + j) * 0.5f - 0.25f);
+                                newVertsArr[t].z = newVertsArr[t].z + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].x + i) * 0.5f - 0.25f);
+                            }
+                        }
+                    }
+                    if (shorterForward){
+                        for (int t=0; t < newVertsArr.Length; t++)
+                        {
+                            if (newVertsArr[t].z > 0f){
+                                coeff = 1f - newVertsArr[t].y - 0.5f;
+                                newVertsArr[t].z *= (.2f - Mathf.Abs(newVertsArr[t].y - 0.4f)) + 1f;
+                                newVertsArr[t].x = newVertsArr[t].x + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].z + j) * 0.5f - 0.25f);
+                                newVertsArr[t].z = newVertsArr[t].z + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].x + i) * 0.5f - 0.25f);
+                            }
+                        }
+                    }
+                    if (shorterLeft){
+                        for (int t=0; t < newVertsArr.Length; t++)
+                        {
+                            if (newVertsArr[t].x < 0f){
+                                coeff = 1f - newVertsArr[t].y - 0.5f;
+                                newVertsArr[t].x *= (.2f - Mathf.Abs(newVertsArr[t].y - 0.4f)) + 1f;
+                                newVertsArr[t].x = newVertsArr[t].x + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].z + j) * 0.5f - 0.25f);
+                                newVertsArr[t].z = newVertsArr[t].z + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].x + i) * 0.5f - 0.25f);
+                            }
+                        }
+                    }
+                    if (shorterRight){
+                        for (int t=0; t < newVertsArr.Length; t++)
+                        {
+                            if (newVertsArr[t].x > 0f){
+                                coeff = 1f - newVertsArr[t].y - 0.5f;
+                                newVertsArr[t].x *= (.2f - Mathf.Abs(newVertsArr[t].y - 0.4f)) + 1f;
+                                newVertsArr[t].x = newVertsArr[t].x + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].z + j) * 0.5f - 0.25f);
+                                newVertsArr[t].z = newVertsArr[t].z + coeff*(Mathf.PerlinNoise((newVertsArr[t].y + k) * 0.1f, newVertsArr[t].x + i) * 0.5f - 0.25f);
+                            }
+                        }
+                    }
+
+
+
+                    // Offset square
+                    offsetVector.x = (i-fullResolution/2f) * cubeSize;
+                    offsetVector.y = (heights[i,j] - 0.5f) * cubeSize;
+                    offsetVector.z = (j-fullResolution/2f) * cubeSize;
+                    for (int t=0; t < newVertsArr.Length; t++)
+                    {
+                        newVertsArr[t] += offsetVector;
+                    }
+
+                    // Aggregate this squares tris
+                    for (int t=0; t< newTrisArr.Length; t++){
+                        newTrisArr[t] += verts.Count;
+                    }
+                    verts.AddRange(newVertsArr);
+                    tris.AddRange(newTrisArr);
                 }
             }
+
             Mesh grassMesh = new Mesh();
             grassMesh.vertices = verts.ToArray();
             grassMesh.triangles = tris.ToArray();

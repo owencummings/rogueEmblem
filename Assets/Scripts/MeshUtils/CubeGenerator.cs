@@ -112,6 +112,27 @@ namespace CustomGeometry {
             triangles.AddRange(nextTris);
         }
 
+
+        public static void CreateBack(List<Vector3> vertices, List<int> triangles, int density, Vector3 offset)
+        {
+            List<Vector3> nextVerts = new List<Vector3>();
+            List<int> nextTris = new List<int>();
+            (nextVerts, nextTris) = QuadGenerator.GenerateQuad(new Vector2(1,1), density);
+            Matrix4x4 rot = Matrix4x4.Rotate(Quaternion.Euler(270, 0, 0));
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] = rot.MultiplyPoint3x4(nextVerts[i]);
+            }
+            for (int i=0; i<nextVerts.Count; i++){
+                nextVerts[i] += Vector3.back * 0.5f + offset;
+            }
+            for (int i=0; i<nextTris.Count; i++){
+                nextTris[i] += vertices.Count;
+            }
+            vertices.AddRange(nextVerts);
+            triangles.AddRange(nextTris);
+        }
+
+
         public static void CreateLeft(List<Vector3> vertices, List<int> triangles, int density)
         {
             List<Vector3> nextVerts = new List<Vector3>();
@@ -171,8 +192,8 @@ namespace CustomGeometry {
             Vector3[] verts = mesh.vertices;
             for (int i=0; i<verts.Length; i++)
             {
-                if (verts[i].y > 0f){
-                    verts[i][1] *= 0.9f;
+                if (verts[i].y > 0.4f){
+                    verts[i] *= 0.98f;
                 }
             }
             mesh.vertices = verts;
