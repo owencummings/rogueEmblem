@@ -202,7 +202,7 @@ namespace TerrainGeneration {
         public const int Water = -1;
         public const int ObscuredHeight = -2;
         public const int UndeterminedHeight = -3;
-        public const int Resolved = -1;
+        public const int Resolved = -1; // For entropy
 
         #region WFCUtils
         public struct WfcCell
