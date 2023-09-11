@@ -123,7 +123,10 @@ namespace GridSpace{
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
             
-            // Path node
+            // Fill ocean simply
+            MacroNode waterNode = new MacroNode(MacroTileType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
+            waterNode.PopulateGrid();
+            waterNode.RehydrateMainHeights();
 
             GenerateMeshFromHeights();
         }

@@ -379,7 +379,8 @@ namespace TerrainGeneration {
                 { MacroTileType.StartNode, () => PopulateStartIsland() },
                 { MacroTileType.Bridge, () => PopulateBridge() },
                 { MacroTileType.Land, () => PopulateLand() },
-                { MacroTileType.Featureless, () => PopulateFeatureless() }
+                { MacroTileType.Featureless, () => PopulateFeatureless() },
+                { MacroTileType.Water, () => PopulateWater() }
             };
 
             HydrateTargetHeights();
@@ -695,6 +696,18 @@ namespace TerrainGeneration {
             }
 
             CopyWfcHeightsToNodeHeights(wfcCells, TargetHeights);
+        }
+    
+        public void PopulateWater(){
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    if (TargetHeights[i,j] != ObscuredHeight) {
+                        TargetHeights[i,j] = MacroNode.Water;
+                    }
+                }
+            }  
         }
     }
 }
