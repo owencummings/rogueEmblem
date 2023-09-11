@@ -72,6 +72,8 @@ public class Lurker : Unit, IDamageable
         
         Func<bool> Targetless = () => { return rallyData.destinationObject == null; };
         Func<bool> AttackDone = () => { return attackData.attackFinished; };
+        Func<bool> Underwater = () => { return transform.position.y < -4f; }; 
+        Func<bool> LostTarget = () => { return pounce.lostTarget; };
         #endregion
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
@@ -81,7 +83,8 @@ public class Lurker : Unit, IDamageable
         At(rally, idle, Targetless);
         At(rally, attack, InAttackRange);
         At(attack, rigidIdle, AttackDone);
-
+        At(rigidIdle, lurk, Underwater);
+        At(pounce, rigidIdle, LostTarget);
         _stateMachine.SetState(lurk);
     }
 }
