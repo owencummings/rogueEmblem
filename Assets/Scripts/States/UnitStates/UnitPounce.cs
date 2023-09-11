@@ -12,6 +12,7 @@ public class UnitPounce : IState
     private float pounceSpeed = 7f;
     private AttackData _attackData;
     private bool pounced = false;
+    public bool lostTarget = false;
 
     public UnitPounce(NavMeshAgent navMeshAgent,  Rigidbody rb, Transform tf, AttackData attackData)
     {
@@ -22,6 +23,10 @@ public class UnitPounce : IState
     }
 
     public void Tick(){
+        if (_attackData.attackTarget == null) {
+            lostTarget = true;
+            return;
+        }
         if (!pounced){
             if (_tf.position.y < _attackData.attackTarget.transform.position.y + 2f){
                 _tf.position = _tf.position + Vector3.up * Time.deltaTime * pounceSpeed;
@@ -41,6 +46,8 @@ public class UnitPounce : IState
         _navMeshAgent.enabled = false; 
         _rb.isKinematic = true;
         _rb.detectCollisions = false;
+        pounced = false;
+        lostTarget = false;
     }
 
     public void OnExit(){ _rb.detectCollisions = true; }

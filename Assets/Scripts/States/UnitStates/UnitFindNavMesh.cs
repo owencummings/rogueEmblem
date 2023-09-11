@@ -16,15 +16,7 @@ public class UnitFindNavMesh : IState
         _rb = rb;
     }
 
-    public void Tick(){
-        if (_navMeshAgent.isOnNavMesh){
-            /*
-            Debug.Log(entryPosition);
-            Debug.Log(_navMeshAgent.Warp(entryPosition)); // Without some tampering, navagent will resnap to surface strangely.
-            Debug.Log(_navMeshAgent.nextPosition);
-            */
-        }
-    }
+    public void Tick(){}
 
     public void OnEnter()
     {
