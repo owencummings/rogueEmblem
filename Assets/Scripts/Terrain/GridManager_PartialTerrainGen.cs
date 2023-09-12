@@ -133,7 +133,7 @@ namespace GridSpace{
             Vector3[] vertArray;
             int[] triangleArray;
             List<CombineInstance> combineList = new List<CombineInstance>();
-            int density = 5;
+            int density = 10;
             // Create terrain meshes + rigidbodies
             for (int i = 0; i < fullResolution; i++){
                 for (int j = 0; j < fullResolution; j++){
@@ -222,8 +222,10 @@ namespace GridSpace{
             combinedMesh.indexFormat = IndexFormat.UInt32;
             combinedMesh.CombineMeshes(combineArray);
             Debug.Log(combinedMesh.vertices.Length);
-            combinedMesh.Optimize();
             combinedMesh.RecalculateNormals();
+            combinedMesh.RecalculateTangents();
+            combinedMesh.RecalculateBounds();
+            combinedMesh.Optimize();
             meshFilter.sharedMesh = combinedMesh;
 
             CreateGrassBase();
