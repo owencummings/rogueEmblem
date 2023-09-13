@@ -35,16 +35,33 @@ namespace TerrainGeneration {
         {
             public WfcCell(int height){
                 Height = height;
+                Depth = 0;
+                Entropy = 0;
+            }
+
+            public WfcCell(int height, int depth){
+                Height = height;
+                Depth = depth;
                 Entropy = 0;
             }
 
             public int Height;
+            public int Depth;
             public int Entropy;
 
-            public void AssignValue(int val)
+            public void AssignValue(int height)
             {
                 if (Height != ObscuredHeight) {
-                    Height = val;
+                    Height = height;
+                    Depth = 0;
+                    Entropy = -1;
+                }
+            }
+
+            public void AssignValue(int height, int depth){
+                if (Height != ObscuredHeight) {
+                    Height = height;
+                    Depth = depth;
                     Entropy = -1;
                 }
             }
@@ -204,10 +221,10 @@ namespace TerrainGeneration {
             TargetHeights = new int[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             tilePopulationMap = new Dictionary<MacroNodeType, Action>()
             {
-                { MacroNodeType.StartNode, () => PopulateStartIsland() },
+                { MacroNodeType.StartNode, () => PopulateWithWfc(InitializeStart, ResolveStart) },
                 { MacroNodeType.Bridge, () => PopulateBridge() },
                 { MacroNodeType.Land, () => PopulateLand() },
-                { MacroNodeType.Featureless, () => PopulateFeatureless() },
+                { MacroNodeType.Featureless, () => PopulateWithWfc(InitializeFeatureless, ResolveFeatureless) },
                 { MacroNodeType.Water, () => PopulateWater() }
             };
 
@@ -226,7 +243,6 @@ namespace TerrainGeneration {
             }
         }
 
-        // Obviously too naive... I like the idea of just cutting the island its 3rds or 4ths and removing exterior subgraphs
         public void ObscureRandomSubset(){
             int obscuredAreas = UnityEngine.Random.Range(0, 4);
             Debug.Log(obscuredAreas);
@@ -273,55 +289,6 @@ namespace TerrainGeneration {
             if (TileType == MacroNodeType.Bridge || TileType == MacroNodeType.Land
                 || TileType == MacroNodeType.Water || TileType == MacroNodeType.Null){ ObscureExistingData(); }
             tilePopulationMap[TileType]();
-        }
-
-        public void PopulateStartIsland()
-        {
-            WfcCell[,] wfcCells = new WfcCell[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
-            ClearWfcCells(wfcCells);
-            CopyHeightsToWfc(TargetHeights, wfcCells);
-
-            // Some seeding values to start building from
-            wfcCells[8, 8].AssignValue(4);
-            wfcCells[12, 8].AssignValue(4);
-            wfcCells[8, 12].AssignValue(4);
-            wfcCells[12, 12].AssignValue(4);
-            wfcCells[5, 5].AssignValue(1);
-            wfcCells[15, 5].AssignValue(1);
-            wfcCells[5, 15].AssignValue(1);
-            wfcCells[15, 15].AssignValue(1);
-            wfcCells[2, 2].AssignValue(0);
-            wfcCells[18, 2].AssignValue(0);
-            wfcCells[2, 18].AssignValue(0);
-            wfcCells[18, 18].AssignValue(0);
-            wfcCells[1, 10].AssignValue(0);
-            wfcCells[10, 1].AssignValue(0);
-            wfcCells[10, 19].AssignValue(0);
-            wfcCells[19, 10].AssignValue(0);
-            AssignAllEntropies(wfcCells);
-
-            // Can probably generalize this a little bit...
-            bool collapsing = true;
-            int count = 0;
-            while (collapsing)
-            {
-                Tuple<List<Vector2Int>, int> maxEntropyResult = GetHighestEntropy(wfcCells);
-                if (maxEntropyResult.Item2 == 0 || maxEntropyResult.Item1.Count == 0 || count > 1000)
-                {
-                    collapsing = false;
-                } else {
-                    int rand = UnityEngine.Random.Range(0, maxEntropyResult.Item1.Count);
-                    Vector2Int chosen = maxEntropyResult.Item1[rand];
-                    List<int> neighborHeights = GetNeighborHeights(wfcCells, chosen.x, chosen.y);
-                    //neighborHeights.AddRange(neighborHeights);
-                    //neighborHeights.Add(1);
-                    wfcCells[chosen.x, chosen.y].AssignValue(neighborHeights[UnityEngine.Random.Range(0,neighborHeights.Count)]);
-                    PropogateEntropy(wfcCells, chosen.x, chosen.y);
-                    count += 1;
-                }
-            }
-
-            CopyWfcHeightsToNodeHeights(wfcCells, TargetHeights);
         }
     
         public void PopulateLand()
@@ -501,12 +468,76 @@ namespace TerrainGeneration {
             }
         }
 
-        public void PopulateFeatureless()
+        public void PopulateWater(){
+            for (int i=0; i < TargetHeights.GetLength(0); i++)
+            {
+                for (int j=0; j < TargetHeights.GetLength(1); j++)
+                {
+                    if (TargetHeights[i,j] != ObscuredHeight) {
+                        TargetHeights[i,j] = MacroNode.Water;
+                    }
+                }
+            }  
+        }
+    
+        public void PopulateWithWfc(Action<WfcCell[,]> InitializeWfcCells, 
+                                    Action<Vector2Int, WfcCell[,]> ResolveCellDecision)
         {
             WfcCell[,] wfcCells = new WfcCell[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             ClearWfcCells(wfcCells);
             CopyHeightsToWfc(TargetHeights, wfcCells);
 
+            InitializeWfcCells(wfcCells);
+            AssignAllEntropies(wfcCells);
+
+                        bool collapsing = true;
+            int count = 0;
+            while (collapsing)
+            {
+                Tuple<List<Vector2Int>, int> maxEntropyResult = GetHighestEntropy(wfcCells);
+                if (maxEntropyResult.Item2 == 0 || maxEntropyResult.Item1.Count == 0 || count > 1000)
+                {
+                    collapsing = false;
+                } else {
+                    int rand = UnityEngine.Random.Range(0, maxEntropyResult.Item1.Count);
+                    Vector2Int chosen = maxEntropyResult.Item1[rand];
+                    ResolveCellDecision(chosen,wfcCells);
+                    PropogateEntropy(wfcCells, chosen.x, chosen.y);
+                    count += 1;
+                }
+            }
+            CopyWfcHeightsToNodeHeights(wfcCells, TargetHeights);
+        }
+
+        public void InitializeStart(WfcCell[,] wfcCells)
+        {
+            wfcCells[8, 8].AssignValue(4);
+            wfcCells[12, 8].AssignValue(4);
+            wfcCells[8, 12].AssignValue(4);
+            wfcCells[12, 12].AssignValue(4);
+            wfcCells[5, 5].AssignValue(1);
+            wfcCells[15, 5].AssignValue(1);
+            wfcCells[5, 15].AssignValue(1);
+            wfcCells[15, 15].AssignValue(1);
+            wfcCells[2, 2].AssignValue(0);
+            wfcCells[18, 2].AssignValue(0);
+            wfcCells[2, 18].AssignValue(0);
+            wfcCells[18, 18].AssignValue(0);
+            wfcCells[1, 10].AssignValue(0);
+            wfcCells[10, 1].AssignValue(0);
+            wfcCells[10, 19].AssignValue(0);
+            wfcCells[19, 10].AssignValue(0);
+            AssignAllEntropies(wfcCells);
+        }
+
+        public void ResolveStart(Vector2Int chosen, WfcCell[,] wfcCells)
+        {
+            List<int> neighborHeights = GetNeighborHeights(wfcCells, chosen.x, chosen.y);
+            wfcCells[chosen.x, chosen.y].AssignValue(neighborHeights[UnityEngine.Random.Range(0,neighborHeights.Count)]);
+        }
+
+        public void InitializeFeatureless(WfcCell[,] wfcCells)
+        {
             int x2 = wfcCells.GetLength(0)/2;
             int y2 = wfcCells.GetLength(1)/2;
             int x4 = wfcCells.GetLength(0)/4;
@@ -526,42 +557,13 @@ namespace TerrainGeneration {
             wfcCells[x2, y4].AssignValue(1);
             wfcCells[x2, y34].AssignValue(1);
             wfcCells[x34, y2].AssignValue(1);
-            AssignAllEntropies(wfcCells);
+        }
 
-            // Can probably generalize this a little bit...
-            bool collapsing = true;
-            int count = 0;
-            while (collapsing)
-            {
-                Tuple<List<Vector2Int>, int> maxEntropyResult = GetHighestEntropy(wfcCells);
-                if (maxEntropyResult.Item2 == 0 || maxEntropyResult.Item1.Count == 0 || count > 1000)
-                {
-                    collapsing = false;
-                } else {
-                    int rand = UnityEngine.Random.Range(0, maxEntropyResult.Item1.Count);
-                    Vector2Int chosen = maxEntropyResult.Item1[rand];
+        public void ResolveFeatureless(Vector2Int chosen, WfcCell[,] wfcCells)
+        {
                     List<int> neighborHeights = GetNeighborHeights(wfcCells, chosen.x, chosen.y);
-                    //neighborHeights.AddRange(neighborHeights);
-                    //neighborHeights.Add(1);
                     wfcCells[chosen.x, chosen.y].AssignValue(neighborHeights[UnityEngine.Random.Range(0,neighborHeights.Count)]);
-                    PropogateEntropy(wfcCells, chosen.x, chosen.y);
-                    count += 1;
-                }
-            }
+        }
 
-            CopyWfcHeightsToNodeHeights(wfcCells, TargetHeights);
-        }
-    
-        public void PopulateWater(){
-            for (int i=0; i < TargetHeights.GetLength(0); i++)
-            {
-                for (int j=0; j < TargetHeights.GetLength(1); j++)
-                {
-                    if (TargetHeights[i,j] != ObscuredHeight) {
-                        TargetHeights[i,j] = MacroNode.Water;
-                    }
-                }
-            }  
-        }
     }
 }
