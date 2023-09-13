@@ -43,6 +43,6 @@ public class Carryable1 : NavBody, ICarryable
         At(idle, carried, Carried);
         At(carried, rigidIdle, Uncarried);
 
-        _stateMachine.SetState(idle);
+        _stateMachine.SetState(rigidIdle);
     }
 }
