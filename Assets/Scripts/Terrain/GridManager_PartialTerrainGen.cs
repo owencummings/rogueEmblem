@@ -23,52 +23,6 @@ namespace GridSpace{
             }
         }
 
-        void CreateMacroTileTerrain()
-        {
-            macroTileResolution = 6;
-            fullResolution = macroTileResolution * tilesPerMacroTile;
-            offsetXZ = (fullResolution/2f) % 1;
-            offsetY = 0.5f; 
-            float rand;
-            MacroTileType tileType;
-            cubes = new GameObject[fullResolution, 20, fullResolution];
-            heights = new int[fullResolution,fullResolution];
-            meshList = new List<Mesh>();
-            List<CombineInstance> combineList = new List<CombineInstance>();
-
-            for (int i1 = 0; i1 < macroTileResolution; i1++){
-                for (int j1 = 0; j1 < macroTileResolution; j1++){
-                    // Determine tile type
-                    tileType = MacroTileType.Null;
-                    if ((i1 == 1) || (j1 == 1) || (i1 == macroTileResolution-2) || (j1 == macroTileResolution-2))
-                    {
-                        tileType = MacroTileType.Water;
-                    }
-                    else
-                    {
-                        rand = UnityEngine.Random.Range(0f, 1f);
-                        if (rand > 0.7){
-                            tileType = MacroTileType.Ring;
-                        } else {
-                            tileType = MacroTileType.Land;
-                        }
-                    }
-
-                    // Create tile
-                    MacroTile macroTile = new MacroTile(tileType, tilesPerMacroTile);
-                    macroTile.PopulateGrid();
-                    for (int i2 = 0; i2 < tilesPerMacroTile; i2++)
-                    {
-                        for (int j2 = 0; j2 < tilesPerMacroTile; j2++)
-                        {
-                            heights[i1*tilesPerMacroTile + i2, j1*tilesPerMacroTile + j2] = macroTile.gridHeights[i2, j2];
-                        }
-                    }
-                }
-            }
-            GenerateMeshFromHeights();
-        }
-    
         void CreateNodeTerrain()
         {
             fullResolution = 100;
@@ -81,7 +35,7 @@ namespace GridSpace{
             List<CombineInstance> combineList = new List<CombineInstance>();
 
             // Start node
-            MacroNode startNode = new MacroNode(MacroTileType.StartNode, heights,
+            MacroNode startNode = new MacroNode(MacroNodeType.StartNode, heights,
                                                 new Vector2Int(fullResolution/2 - 10, fullResolution/2 - 10),
                                                 new Vector2Int(fullResolution/2 + 10, fullResolution/2 + 10));
             startNode.PopulateGrid();
@@ -109,7 +63,7 @@ namespace GridSpace{
                                                     Mathf.Max(0, Mathf.Min(50, nodeY) - 10));
             Vector2Int endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(50, nodeX) + 10),
                                                   Mathf.Min(fullResolution-1, Mathf.Max(50, nodeY) + 10));
-            MacroNode bridgeNode = new MacroNode(MacroTileType.Bridge, heights, startCorner, endCorner);
+            MacroNode bridgeNode = new MacroNode(MacroNodeType.Bridge, heights, startCorner, endCorner);
             bridgeNode.featureStart = new Vector2Int(nodeX, nodeY);
             bridgeNode.featureEnd = new Vector2Int(50, 50);
             bridgeNode.PopulateGrid();
@@ -119,13 +73,13 @@ namespace GridSpace{
             int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(10, 20), fullResolution - 1);
             int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(10, 20), fullResolution - 1);
 
-            MacroNode landNode = new MacroNode(MacroTileType.Featureless, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
+            MacroNode landNode = new MacroNode(MacroNodeType.Featureless, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
             landNode.ObscureRandomSubset();
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
             
             // Fill ocean simply
-            MacroNode waterNode = new MacroNode(MacroTileType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
+            MacroNode waterNode = new MacroNode(MacroNodeType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
             waterNode.PopulateGrid();
             waterNode.RehydrateMainHeights();
 
