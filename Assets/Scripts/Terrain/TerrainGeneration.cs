@@ -217,8 +217,10 @@ namespace TerrainGeneration {
 
             public void AssignValue(int val)
             {
-                Height = val;
-                Entropy = -1;
+                if (Height != ObscuredHeight) {
+                    Height = val;
+                    Entropy = -1;
+                }
             }
         }
 
@@ -392,6 +394,24 @@ namespace TerrainGeneration {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
                     if (TargetHeights[i,j] != UndeterminedHeight) {
+                        TargetHeights[i,j] = ObscuredHeight;
+                    }
+                }
+            }
+        }
+
+        // Obviously too naive... I like the idea of just cutting the island its 3rds or 4ths and removing exterior subgraphs
+        public void ObscureRandomSubset(){
+            int obscuredAreas = UnityEngine.Random.Range(0, 4);
+            Debug.Log(obscuredAreas);
+            for (int t=0; t < obscuredAreas; t++){
+                int x = UnityEngine.Random.Range(0, 3);
+                int y = UnityEngine.Random.Range(0, 3);
+                if (x == 1 && y == 1){ continue; }
+                for (int i= (x * TargetHeights.GetLength(0))/3; i < ((x+1) * TargetHeights.GetLength(0))/3; i++)
+                {
+                    for (int j=(y * TargetHeights.GetLength(1))/3; j < ((y+1) * TargetHeights.GetLength(1))/3; j++)
+                    {
                         TargetHeights[i,j] = ObscuredHeight;
                     }
                 }
