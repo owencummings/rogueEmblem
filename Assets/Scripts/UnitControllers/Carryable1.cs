@@ -18,6 +18,7 @@ public class Carryable1 : NavBody, ICarryable
 
     new void Awake(){
         base.Awake();
+        _rb.drag = 4f;
         Carriers = 0;
         CarriersNeeded = 3;
         CarryRadius = 0.4f;
@@ -33,7 +34,7 @@ public class Carryable1 : NavBody, ICarryable
         Func<bool> Uncarried = () => {
             if (Carriers < CarriersNeeded)
             {
-                rigidIdle.entryForce = 200f * Vector3.up;
+                rigidIdle.entryForce = 400f * Vector3.up;
                 return true;
             }
             return false;

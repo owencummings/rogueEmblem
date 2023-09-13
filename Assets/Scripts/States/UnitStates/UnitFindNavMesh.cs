@@ -26,7 +26,7 @@ public class UnitFindNavMesh : IState
         entryPosition = _rb.position;
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
-        _navMeshAgent.ResetPath();
+        if (_navMeshAgent.isOnNavMesh){ _navMeshAgent.ResetPath(); }
         timeFinding = 0f;
     }
 
