@@ -9,6 +9,7 @@ public class UnitFindNavMesh : IState
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
     private Vector3 entryPosition;
+    public float timeFinding = 0f;
 
     public UnitFindNavMesh(NavMeshAgent navMeshAgent, Rigidbody rb)
     {
@@ -17,13 +18,7 @@ public class UnitFindNavMesh : IState
     }
 
     public void Tick(){
-        if (_navMeshAgent.isOnNavMesh){
-            /*
-            Debug.Log(entryPosition);
-            Debug.Log(_navMeshAgent.Warp(entryPosition)); // Without some tampering, navagent will resnap to surface strangely.
-            Debug.Log(_navMeshAgent.nextPosition);
-            */
-        }
+        timeFinding += Time.deltaTime;
     }
 
     public void OnEnter()
@@ -32,6 +27,7 @@ public class UnitFindNavMesh : IState
         _navMeshAgent.enabled = true;
         _rb.isKinematic = true;
         _navMeshAgent.ResetPath();
+        timeFinding = 0f;
     }
 
     public void OnExit(){}

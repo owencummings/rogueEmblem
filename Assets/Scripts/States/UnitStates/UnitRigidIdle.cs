@@ -30,6 +30,7 @@ public class UnitRigidIdle : IState
 
     public void OnExit(){
         timeIdling = 0f;
+        entryForce = Vector3.zero;
     }
     public void OnCollisionEnter(Collision collision){}
 }

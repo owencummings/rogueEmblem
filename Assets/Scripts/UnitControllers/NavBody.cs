@@ -41,10 +41,21 @@ public abstract class NavBody : MonoBehaviour
 
         IsGrounded = () => (timeGrounded > 0.5f && _rb.velocity.magnitude < 0.01f && rigidIdle.timeIdling > rigidIdle.timeToIdle);
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
+        Func<bool> NotAttaching = () => {
+            if (findNavMesh.timeFinding > 1f){ 
+                Debug.Log("Detaching");
+                rigidIdle.entryForce = new Vector3(UnityEngine.Random.Range(-100f, 100f), 
+                                                   UnityEngine.Random.Range(0f, 100f), 
+                                                   UnityEngine.Random.Range(-100f, 100f)); 
+                return true; 
+            }
+            return false;
+        };
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(rigidIdle, findNavMesh, IsGrounded);
         At(findNavMesh, idle, FoundNavMesh);
+        At(findNavMesh, rigidIdle, NotAttaching);
 
         _stateMachine.SetState(rigidIdle);
     }

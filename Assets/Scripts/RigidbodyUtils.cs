@@ -12,6 +12,7 @@ static class RigidbodyUtils
         //rb.inertiaTensorRotation = Quaternion.identity;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         rb.drag = 2f;
+        rb.angularDrag = 0.1f;
     }
 
     public static void AddRandomTorque(Rigidbody rb, float magnitude)
