@@ -24,8 +24,7 @@ namespace GridSpace {
 
         public int macroTileResolution = 10;
         public int tilesPerMacroTile = 10;
-        public int fullResolution = 100;
-        
+        public int fullResolution = 100;        
         public float offsetXZ = 0f;
         public float offsetY = 0.5f;
 
@@ -42,7 +41,6 @@ namespace GridSpace {
             { 
                 Instance = this; 
             } 
-            fullResolution = 100; // ??
             fullResolution = macroTileResolution * tilesPerMacroTile;
             meshFilter = GetComponent<MeshFilter>();
             GetComponent<MeshRenderer>().material.color = new Color(0.75f, 0.9f, 0.9f, 1f);
