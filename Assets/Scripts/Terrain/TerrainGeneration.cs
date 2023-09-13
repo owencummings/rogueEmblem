@@ -343,16 +343,13 @@ namespace TerrainGeneration {
             int startHeight = 10;
             int endHeight = 11;
             int fillHeight = 12;
-            TargetHeights[featureStart.x - StartCorner.x, featureStart.y - StartCorner.y] = startHeight;
-            TargetHeights[featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y] = endHeight;
-
-            Vector2Int currStart = new Vector2Int(featureStart.x - StartCorner.x, featureStart.y - StartCorner.y);
-            Vector2Int currEnd = new Vector2Int(featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y);
+            int[,] holderHeights = (int[,]) TargetHeights.Clone();
             Vector2Int curr;
 
 
             bool connected = false;
             int distance;
+            int jumps = 0;
             List<Vector2Int> directions = new List<Vector2Int>(){
                 new Vector2Int(1, 0),
                 new Vector2Int(-1, 0),
@@ -361,90 +358,101 @@ namespace TerrainGeneration {
             };
             List<Vector2Int> viableDirections = new List<Vector2Int>();
             Vector2Int chosenD;
-            int jumps = 0;
 
             // Make path (still something wacky where path is going over itself often)
-            while (!connected && jumps < 1000){
-                // Move start first
-                // Determine a direction to move in
-                viableDirections.Clear();
-                foreach(Vector2Int d in directions){
-                    if (currStart.x + d.x*4 > 0 && currStart.x + d.x*4 < TargetHeights.GetLength(0) && 
-                        currStart.y + d.y*4  > 0 && currStart.y + d.y*4  < TargetHeights.GetLength(1) &&
-                        TargetHeights[currStart.x + d.x*4, currStart.y + d.y*4] != startHeight)
-                        {
-                            viableDirections.Add(d);
-                            // TODO: also check covering of obscured cells
-                        } 
-                }
-
-                //if (viableDirections.Count == 0) { Debug.Log("too far gone"); break; } // Probably need a reset here
-
-                if (viableDirections.Count > 0)
-                {
-                    chosenD = viableDirections[UnityEngine.Random.Range(0, viableDirections.Count)];
-                    bool moving = true;
-                    int squaresMoved = 0;
-                    while (moving){
-                        if (currStart.x + chosenD.x*2 < 0 || currStart.x + chosenD.x*2 > TargetHeights.GetLength(0) - 1 || 
-                            currStart.y + chosenD.y*2  < 0 || currStart.y + chosenD.y*2 > TargetHeights.GetLength(1) - 1)
-                        { 
-                            break; 
-                        }
-                        else
-                        {
-                            currStart += chosenD;
-                            if (TargetHeights[currStart.x, currStart.y] == endHeight) { connected = true; break; }
-                            TargetHeights[currStart.x, currStart.y] = startHeight;
-                            squaresMoved++;
-                            if (squaresMoved > 4)
+            while (!connected)
+            {
+                holderHeights = (int[,]) TargetHeights.Clone();
+                holderHeights[featureStart.x - StartCorner.x, featureStart.y - StartCorner.y] = startHeight;
+                holderHeights[featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y] = endHeight;
+                jumps = 0;
+                Vector2Int currStart = new Vector2Int(featureStart.x - StartCorner.x, featureStart.y - StartCorner.y);
+                Vector2Int currEnd = new Vector2Int(featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y);
+                while (!connected && jumps < 1000){
+                    // Move start first
+                    // Determine a direction to move in
+                    viableDirections.Clear();
+                    foreach(Vector2Int d in directions){
+                        if (currStart.x + d.x*4 > 0 && currStart.x + d.x*4 < holderHeights.GetLength(0) && 
+                            currStart.y + d.y*4  > 0 && currStart.y + d.y*4  < holderHeights.GetLength(1) &&
+                            holderHeights[currStart.x + d.x*4, currStart.y + d.y*4] != startHeight)
                             {
-                                if (UnityEngine.Random.value < 0.1f){ break; }
-                            }
-                        } 
+                                viableDirections.Add(d);
+                                // TODO: also check covering of obscured cells
+                            } 
                     }
-                }
 
-                // Move end as well... could generalize approach but a little overcomplicating
-                viableDirections.Clear();
-                foreach(Vector2Int d in directions){
-                    if (currEnd.x + d.x*4 > 0 && currEnd.x + d.x*4 < TargetHeights.GetLength(0) && 
-                        currEnd.y + d.y*4  > 0 && currEnd.y + d.y*4  < TargetHeights.GetLength(1) &&
-                        TargetHeights[currEnd.x + d.x*4, currEnd.y + d.y*4] != endHeight)
-                        {
-                            viableDirections.Add(d);
-                            // TODO: also check covering of obscured cells
-                        } 
-                }
+                    //if (viableDirections.Count == 0) { Debug.Log("too far gone"); break; } // Probably need a reset here
 
-                if (viableDirections.Count > 0)
-                {
-                    chosenD = viableDirections[UnityEngine.Random.Range(0, viableDirections.Count)];
-                    bool moving = true;
-                    int squaresMoved = 0;
-                    while (moving){
-                        if (currEnd.x + chosenD.x*2 < 0 || currEnd.x + chosenD.x*2 > TargetHeights.GetLength(0) - 1 || 
-                            currEnd.y + chosenD.y*2  < 0 || currEnd.y + chosenD.y*2 > TargetHeights.GetLength(1) - 1)
-                        { 
-                            break; 
-                        }
-                        else
-                        {
-                            currEnd += chosenD;
-                            if (TargetHeights[currEnd.x, currEnd.y] == startHeight) { connected = true; break; }
-                            TargetHeights[currEnd.x, currEnd.y] = endHeight;
-                            squaresMoved++;
-                            if (squaresMoved > 4)
+                    if (viableDirections.Count > 0)
+                    {
+                        chosenD = viableDirections[UnityEngine.Random.Range(0, viableDirections.Count)];
+                        bool moving = true;
+                        int squaresMoved = 0;
+                        while (moving){
+                            if (currStart.x + chosenD.x < 0 || currStart.x + chosenD.x > holderHeights.GetLength(0) - 1 || 
+                                currStart.y + chosenD.y  < 0 || currStart.y + chosenD.y > holderHeights.GetLength(1) - 1 ||
+                                holderHeights[currStart.x + chosenD.x, currStart.y + + chosenD.y] == startHeight)
+                            { 
+                                break; 
+                            }
+                            else
                             {
-                                if (UnityEngine.Random.value < 0.1f){ break; }
-                            }
-                        } 
+                                currStart += chosenD;
+                                if (holderHeights[currStart.x, currStart.y] == endHeight) { connected = true; break; }
+                                holderHeights[currStart.x, currStart.y] = startHeight;
+                                squaresMoved++;
+                                if (squaresMoved > 4)
+                                {
+                                    if (UnityEngine.Random.value < 0.2f){ break; }
+                                }
+                            } 
+                        }
                     }
+
+                    // Move end as well... could generalize approach but a little overcomplicating
+                    viableDirections.Clear();
+                    foreach(Vector2Int d in directions){
+                        if (currEnd.x + d.x*4 > 0 && currEnd.x + d.x*4 < holderHeights.GetLength(0) && 
+                            currEnd.y + d.y*4  > 0 && currEnd.y + d.y*4  < holderHeights.GetLength(1) &&
+                            holderHeights[currEnd.x + d.x*4, currEnd.y + d.y*4] != endHeight)
+                            {
+                                viableDirections.Add(d);
+                                // TODO: also check covering of obscured cells
+                            } 
+                    }
+
+                    if (viableDirections.Count > 0)
+                    {
+                        chosenD = viableDirections[UnityEngine.Random.Range(0, viableDirections.Count)];
+                        bool moving = true;
+                        int squaresMoved = 0;
+                        while (moving){
+                            if (currEnd.x + chosenD.x < 0 || currEnd.x + chosenD.x > holderHeights.GetLength(0) - 1 || 
+                                currEnd.y + chosenD.y  < 0 || currEnd.y + chosenD.y > holderHeights.GetLength(1) - 1 ||
+                                holderHeights[currEnd.x + chosenD.x, currEnd.y + + chosenD.y] == endHeight) 
+                            { 
+                                break; 
+                            }
+                            else
+                            {
+                                currEnd += chosenD;
+                                if (holderHeights[currEnd.x, currEnd.y] == startHeight) { connected = true; break; }
+                                holderHeights[currEnd.x, currEnd.y] = endHeight;
+                                squaresMoved++;
+                                if (squaresMoved > 4)
+                                {
+                                    if (UnityEngine.Random.value < 0.2f){ break; }
+                                }
+                            } 
+                        }
+                    }
+                    
+                    jumps++;
                 }
-                
-                jumps++;
             }
 
+            TargetHeights = (int[,]) holderHeights.Clone();
             // Create border around path (so that path is 3 squares wide instead of 1)
             List<Vector2Int> neighborDirections = new List<Vector2Int>(){
                 new Vector2Int(1, 0),
