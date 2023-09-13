@@ -120,6 +120,7 @@ namespace GridSpace{
             int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(10, 20), fullResolution - 1);
 
             MacroNode landNode = new MacroNode(MacroTileType.Featureless, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
+            landNode.ObscureRandomSubset();
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
             
@@ -224,7 +225,6 @@ namespace GridSpace{
             Mesh combinedMesh = new Mesh();
             combinedMesh.indexFormat = IndexFormat.UInt32;
             combinedMesh.CombineMeshes(combineArray);
-            Debug.Log(combinedMesh.vertices.Length);
             combinedMesh.Optimize();
             combinedMesh.RecalculateNormals();
             meshFilter.sharedMesh = combinedMesh;
@@ -363,9 +363,9 @@ namespace GridSpace{
             }
 
             Mesh grassMesh = new Mesh();
+            grassMesh.indexFormat = IndexFormat.UInt32;
             grassMesh.vertices = verts.ToArray();
             grassMesh.triangles = tris.ToArray();
-            Debug.Log(grassMesh.vertices.Length);
             grassMesh.Optimize();
             grassMesh.RecalculateNormals();
             grassFilter.sharedMesh = grassMesh;
