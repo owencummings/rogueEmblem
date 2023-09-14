@@ -42,6 +42,7 @@ namespace GridSpace {
             return worldPoint;
         }
 
+        // TODO: Address some bug here
         public Vector3Int GetRandomGridCoordinateInRange(Vector3Int gridCoordinate, int range){
             List<Vector3Int> validCoords = new List<Vector3Int>();
             Vector3Int returnCoord = gridCoordinate;

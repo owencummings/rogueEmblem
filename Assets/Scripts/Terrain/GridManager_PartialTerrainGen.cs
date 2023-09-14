@@ -25,7 +25,7 @@ namespace GridSpace{
 
         void CreateNodeTerrain()
         {
-            fullResolution = 100;
+            fullResolution = 200;
             offsetXZ = (fullResolution/2f) % 1;
             offsetY = 0.5f;
             cubes = new GameObject[fullResolution, 20, fullResolution];
@@ -65,15 +65,15 @@ namespace GridSpace{
                                                   Mathf.Min(fullResolution-1, Mathf.Max(50, nodeY) + 10));
             MacroNode bridgeNode = new MacroNode(MacroNodeType.Bridge, heights, startCorner, endCorner);
             bridgeNode.featureStart = new Vector2Int(nodeX, nodeY);
-            bridgeNode.featureEnd = new Vector2Int(50, 50);
+            bridgeNode.featureEnd = new Vector2Int(70, 70);
             bridgeNode.PopulateGrid();
             bridgeNode.RehydrateMainHeights();
 
             // Land node
-            int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(10, 20), fullResolution - 1);
-            int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(10, 20), fullResolution - 1);
+            int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(20, 30), fullResolution - 1);
+            int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(20, 30), fullResolution - 1);
 
-            MacroNode landNode = new MacroNode(MacroNodeType.Featureless, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
+            MacroNode landNode = new MacroNode(MacroNodeType.Pillars, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
             landNode.ObscureRandomSubset();
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
