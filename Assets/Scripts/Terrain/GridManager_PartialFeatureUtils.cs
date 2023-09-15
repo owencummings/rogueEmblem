@@ -23,8 +23,10 @@ namespace GridSpace{
             {
                 outputX = x;
                 outputZ = z;
-                outputY = heights[x,z] + 10;
-                found = true;
+                outputY = heights[x,z];
+                if (cubes[outputX, outputY, outputZ] != null) {
+                    found = true;
+                }
             } 
             else 
             {
@@ -41,8 +43,10 @@ namespace GridSpace{
                         outputX = tryX;
                         outputZ = tryZ;
                         outputY = heights[tryX, tryZ];
-                        found = true;
-                        break;
+                        if (cubes[outputX, outputY, outputZ] != null) {
+                            found = true;
+                            break;
+                        }
                     } 
                     i += 1;
                 }

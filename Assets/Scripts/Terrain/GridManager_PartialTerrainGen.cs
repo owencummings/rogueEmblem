@@ -52,22 +52,11 @@ namespace GridSpace{
                 nodeX = UnityEngine.Random.Range(0, fullResolution);
                 nodeY = UnityEngine.Random.Range(0, fullResolution);
 
-                if ((nodeX < 10 || nodeX > 50) && (nodeY < 10 || nodeY > 50))
+                if (((nodeX > 130 && nodeX < 190) || (nodeX < 70 && nodeX > 10)) && ((nodeY < 70 && nodeY > 10) || (nodeY > 130 && nodeY < 190)))
                 {
                     good = true;
                 }
             }
-
-            // Bridge node
-            Vector2Int startCorner = new Vector2Int(Mathf.Max(0, Mathf.Min(50, nodeX) - 10),
-                                                    Mathf.Max(0, Mathf.Min(50, nodeY) - 10));
-            Vector2Int endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(50, nodeX) + 10),
-                                                  Mathf.Min(fullResolution-1, Mathf.Max(50, nodeY) + 10));
-            MacroNode bridgeNode = new MacroNode(MacroNodeType.Bridge, heights, startCorner, endCorner);
-            bridgeNode.featureStart = new Vector2Int(nodeX, nodeY);
-            bridgeNode.featureEnd = new Vector2Int(70, 70);
-            bridgeNode.PopulateGrid();
-            bridgeNode.RehydrateMainHeights();
 
             // Land node
             int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(20, 30), fullResolution - 1);
@@ -78,6 +67,18 @@ namespace GridSpace{
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
             
+            // Bridge node
+            Vector2Int startCorner = new Vector2Int(Mathf.Max(0, Mathf.Min(startNode.GetCenter().x, landNode.GetCenter().x, (landNode.GetCenter().x + startNode.GetCenter().x)/2 - 20)),
+                                                    Mathf.Max(0, Mathf.Min(startNode.GetCenter().y, landNode.GetCenter().y, (landNode.GetCenter().y + startNode.GetCenter().y)/2 - 20)));
+            Vector2Int endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(startNode.GetCenter().x, landNode.GetCenter().x, (landNode.GetCenter().x + startNode.GetCenter().x)/2 + 20)),
+                                                  Mathf.Min(fullResolution-1, Mathf.Max(startNode.GetCenter().y, landNode.GetCenter().y, (landNode.GetCenter().y + startNode.GetCenter().y)/2 + 20)));
+            MacroNode bridgeNode = new MacroNode(MacroNodeType.Bridge, heights, startCorner, endCorner);
+            bridgeNode.featureStart = landNode.GetCenter();
+            bridgeNode.featureEnd = startNode.GetCenter();
+            bridgeNode.PopulateGrid();
+            bridgeNode.RehydrateMainHeights();
+
+
             // Fill ocean simply
             MacroNode waterNode = new MacroNode(MacroNodeType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
             waterNode.PopulateGrid();

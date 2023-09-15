@@ -20,8 +20,8 @@ namespace TerrainGeneration {
         MacroNodeType TileType;
         int[,] GridHeights;
         static int[,] TargetHeights;
-        Vector2Int StartCorner;
-        Vector2Int EndCorner;
+        public Vector2Int StartCorner;
+        public Vector2Int EndCorner;
         public Vector2Int featureStart;
         public Vector2Int featureEnd;
         public Dictionary<MacroNodeType, Action> tilePopulationMap;
@@ -234,6 +234,10 @@ namespace TerrainGeneration {
             HydrateTargetHeights();
         }
 
+        public Vector2Int GetCenter(){
+            return new Vector2Int((StartCorner.x + EndCorner.x)/2, (StartCorner.y + EndCorner.y)/2);
+        }
+
         public void ObscureExistingData(){
             for (int i=0; i < TargetHeights.GetLength(0); i++)
             {
@@ -422,7 +426,7 @@ namespace TerrainGeneration {
                 }
             }
 
-            TargetHeights = (int[,]) holderHeights.Clone();
+            //TargetHeights = (int[,]) holderHeights.Clone();
             // Create border around path (so that path is 3 squares wide instead of 1)
             List<Vector2Int> neighborDirections = new List<Vector2Int>(){
                 new Vector2Int(1, 0),
@@ -435,21 +439,21 @@ namespace TerrainGeneration {
                 new Vector2Int(1, -1)
             };
             Vector2Int neighbor;
-            for (int i=0; i<TargetHeights.GetLength(0); i += 1)
+            for (int i=0; i<holderHeights.GetLength(0); i += 1)
             {
-                for (int j=0; j < TargetHeights.GetLength(1); j += 1)
+                for (int j=0; j < holderHeights.GetLength(1); j += 1)
                 {
-                    if (TargetHeights[i,j] == startHeight || TargetHeights[i,j] == endHeight)
+                    if (holderHeights[i,j] == startHeight || holderHeights[i,j] == endHeight)
                     {
                         foreach(Vector2Int direction in neighborDirections)
                         {
                             neighbor = direction + new Vector2Int(i, j);
-                            if (neighbor.x >= 0 && neighbor.x < TargetHeights.GetLength(0) && 
-                                neighbor.y >= 0 && neighbor.y < TargetHeights.GetLength(1) && 
-                                TargetHeights[neighbor.x, neighbor.y] != startHeight && 
-                                TargetHeights[neighbor.x, neighbor.y] != endHeight)
+                            if (neighbor.x >= 0 && neighbor.x < holderHeights.GetLength(0) && 
+                                neighbor.y >= 0 && neighbor.y < holderHeights.GetLength(1) && 
+                                holderHeights[neighbor.x, neighbor.y] != startHeight && 
+                                holderHeights[neighbor.x, neighbor.y] != endHeight)
                             {
-                                TargetHeights[neighbor.x, neighbor.y] = fillHeight;        
+                                holderHeights[neighbor.x, neighbor.y] = fillHeight;        
                             }
                         }
                     } 
@@ -458,17 +462,22 @@ namespace TerrainGeneration {
 
             // Set path heights to 1
             Debug.Log(jumps);
-            for (int i=0; i<TargetHeights.GetLength(0); i += 1)
+            for (int i=0; i<holderHeights.GetLength(0); i += 1)
             {
-                for (int j=0; j < TargetHeights.GetLength(1); j += 1)
+                for (int j=0; j < holderHeights.GetLength(1); j += 1)
                 {
-                    if (TargetHeights[i,j] == startHeight || TargetHeights[i,j] == endHeight
-                        || TargetHeights[i,j] == fillHeight)
+                    if (holderHeights[i,j] == startHeight || holderHeights[i,j] == endHeight
+                        || holderHeights[i,j] == fillHeight)
                     {
-                        TargetHeights[i,j] = 1;
+                        holderHeights[i,j] = 1;
+                        if (TargetHeights[i,j] != ObscuredHeight){
+                            TargetHeights[i,j] = holderHeights[i,j];
+                        }
                     } 
                 }
             }
+
+
         }
 
         public void PopulateWater(){
