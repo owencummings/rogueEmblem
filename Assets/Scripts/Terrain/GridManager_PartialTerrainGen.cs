@@ -52,15 +52,15 @@ namespace GridSpace{
                 nodeX = UnityEngine.Random.Range(0, fullResolution);
                 nodeY = UnityEngine.Random.Range(0, fullResolution);
 
-                if (((nodeX > 130 && nodeX < 190) || (nodeX < 70 && nodeX > 10)) && ((nodeY < 70 && nodeY > 10) || (nodeY > 130 && nodeY < 190)))
+                if (((nodeX > 110 && nodeX < 160) || (nodeX < 60 && nodeX > 10)) && ((nodeY < 60 && nodeY > 10) || (nodeY > 110 && nodeY < 160)))
                 {
                     good = true;
                 }
             }
 
             // Land node
-            int cornerEndX = Mathf.Min(nodeX + UnityEngine.Random.Range(20, 30), fullResolution - 1);
-            int cornerEndY = Mathf.Min(nodeY + UnityEngine.Random.Range(20, 30), fullResolution - 1);
+            int cornerEndX = Mathf.Min(nodeX + 30, fullResolution - 1);
+            int cornerEndY = Mathf.Min(nodeY + 30, fullResolution - 1);
 
             MacroNode landNode = new MacroNode(MacroNodeType.Pillars, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
             landNode.ObscureRandomSubset();

@@ -55,7 +55,7 @@ namespace TerrainGeneration {
                 if (Height != ObscuredHeight) {
                     Height = height;
                     Depth = 1;
-                    Entropy = -1;
+                    Entropy = Resolved;
                 }
             }
 
@@ -63,7 +63,7 @@ namespace TerrainGeneration {
                 if (Height != ObscuredHeight) {
                     Height = height;
                     Depth = depth;
-                    Entropy = -1;
+                    Entropy = Resolved;
                 }
             }
         }
@@ -85,6 +85,26 @@ namespace TerrainGeneration {
         {
             cell.Height = val;
             cell.Entropy = Resolved;
+        }
+
+        public static void AssignWfcCellChunk(WfcCell[,] wfcCells, Vector2Int center, int size, int val, int depth)
+        {
+            int x;
+            int y;
+            for (int i=0; i < 2 * size + 1; i++)
+            {
+                for (int j=0; j < 2 * size + 1; j++)
+                {
+                    x = center.x - i;
+                    y = center.y - j;
+                    if (x >= 0 && x < wfcCells.GetLength(0) && y >= 0 && y < wfcCells.GetLength(1))
+                    {
+                        if (wfcCells[x,y].Entropy == Resolved){ continue; }
+                        wfcCells[x,y].AssignValue(val);
+                        PropogateEntropy(wfcCells, x, y);
+                    }
+                }
+            }
         }
 
         public static void PropogateEntropy(WfcCell[,] wfcCells, int x, int z)
@@ -322,7 +342,7 @@ namespace TerrainGeneration {
 
             bool connected = false;
             int connectionTries = 0;
-            int maxConnectionTries = 10;
+            int maxConnectionTries = 100;
             int distance;
             int jumps = 0;
             List<Vector2Int> directions = new List<Vector2Int>(){
@@ -559,6 +579,7 @@ namespace TerrainGeneration {
         public void ResolveStart(Vector2Int chosen, WfcCell[,] wfcCells)
         {
             List<WfcCell> neighborCells = GetNeighborCells(wfcCells, chosen.x, chosen.y);
+            if (neighborCells.Count == 0 ){ return; } 
             WfcCell deepest = GetDeepestCell(neighborCells);
             int height = 0;
             int depth = 0;
@@ -646,8 +667,8 @@ namespace TerrainGeneration {
             int x4 = wfcCells.GetLength(0)/4;
             int y4 = wfcCells.GetLength(1)/4;
             int x34 = 3*wfcCells.GetLength(0)/4;
-            int y34 = 3*wfcCells.GetLength(1)/4;           
-            wfcCells[x2, y2].AssignValue(1, 3);
+            int y34 = 3*wfcCells.GetLength(1)/4;    
+            wfcCells[x2, y2].AssignValue(1, 4);
             wfcCells[x4, y4].AssignValue(6, 3);
             wfcCells[x34, y4].AssignValue(6, 3);
             wfcCells[x4, y34].AssignValue(6, 3);
@@ -657,29 +678,36 @@ namespace TerrainGeneration {
         public void ResolvePillars(Vector2Int chosen, WfcCell[,] wfcCells)
         {
             List<WfcCell> neighborCells = GetNeighborCells(wfcCells, chosen.x, chosen.y);
+            if (neighborCells.Count == 0 ){ return; } 
             WfcCell deepest = GetDeepestCell(neighborCells);
             int height = 0;
             int depth = 0;
+            int size = 0;
             if (deepest.Depth > 1){
-                if (UnityEngine.Random.value > (depth + 2f)/(depth + 3f))
+                if (UnityEngine.Random.value > (depth + 4f)/(depth + 5f))
                 {
                     height = deepest.Height;
                     depth = deepest.Depth;
+                    size = 2;
                 } else {
                     height = deepest.Height;
-                    depth = deepest.Depth - 1;
+                    depth = 1;
+                    size = deepest.Depth - 1;
                 }
             } else {
                 if (UnityEngine.Random.value > 0.5f){
                     height = 1;
                     if (deepest.Height == 1 || deepest.Height == 0) { height = 0; }
-                    depth = UnityEngine.Random.Range(2, 5);
+                    depth = 1;
+                    size = UnityEngine.Random.Range(1, 3);
                 } else {
                     height = deepest.Height;
                     depth = deepest.Depth + 1;
+                    size = UnityEngine.Random.Range(1, 3);
                 }
             }
-            wfcCells[chosen.x, chosen.y].AssignValue(height, depth);
+            size = UnityEngine.Random.Range(1, 4);
+            AssignWfcCellChunk(wfcCells, chosen, depth, height, 1);
         }
 
 
