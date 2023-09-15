@@ -293,8 +293,7 @@ namespace TerrainGeneration {
  
         public void PopulateGrid()
         {
-            if (TileType == MacroNodeType.Bridge || TileType == MacroNodeType.Land
-                || TileType == MacroNodeType.Water || TileType == MacroNodeType.Null){ ObscureExistingData(); }
+            if (TileType == MacroNodeType.Land || TileType == MacroNodeType.Water || TileType == MacroNodeType.Null){ ObscureExistingData(); }
             tilePopulationMap[TileType]();
         }
     
@@ -322,6 +321,8 @@ namespace TerrainGeneration {
 
 
             bool connected = false;
+            int connectionTries = 0;
+            int maxConnectionTries = 10;
             int distance;
             int jumps = 0;
             List<Vector2Int> directions = new List<Vector2Int>(){
@@ -333,9 +334,11 @@ namespace TerrainGeneration {
             List<Vector2Int> viableDirections = new List<Vector2Int>();
             Vector2Int chosenD;
 
-            // Make path (still something wacky where path is going over itself often)
-            while (!connected)
+            // Make path
+        
+            while (!connected && connectionTries < maxConnectionTries)
             {
+                connectionTries++;
                 holderHeights = (int[,]) TargetHeights.Clone();
                 holderHeights[featureStart.x - StartCorner.x, featureStart.y - StartCorner.y] = startHeight;
                 holderHeights[featureEnd.x - StartCorner.x, featureEnd.y - StartCorner.y] = endHeight;
@@ -470,7 +473,7 @@ namespace TerrainGeneration {
                         || holderHeights[i,j] == fillHeight)
                     {
                         holderHeights[i,j] = 1;
-                        if (TargetHeights[i,j] != ObscuredHeight){
+                        if (TargetHeights[i,j] < 1){
                             TargetHeights[i,j] = holderHeights[i,j];
                         }
                     } 

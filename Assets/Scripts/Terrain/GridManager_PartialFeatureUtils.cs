@@ -23,10 +23,10 @@ namespace GridSpace{
             {
                 outputX = x;
                 outputZ = z;
-                outputY = heights[x,z];
+                outputY = heights[x,z] + 10;
                 if (cubes[outputX, outputY, outputZ] != null) {
-                    found = true;
                 }
+                found = true;
             } 
             else 
             {
@@ -42,11 +42,12 @@ namespace GridSpace{
                     {
                         outputX = tryX;
                         outputZ = tryZ;
-                        outputY = heights[tryX, tryZ];
+                        outputY = heights[tryX, tryZ] + 10;
                         if (cubes[outputX, outputY, outputZ] != null) {
-                            found = true;
-                            break;
+
                         }
+                        found = true;
+                        break;
                     } 
                     i += 1;
                 }
@@ -54,7 +55,7 @@ namespace GridSpace{
             if (found)
             {
                 Instantiate(prefab, 
-                            cubes[outputX,outputY,outputZ].transform.position + Vector3.up,
+                            WorldPointFromGridCoordinate(new Vector3Int(outputX,outputY,outputZ)),
                             Quaternion.identity);
             }
         }

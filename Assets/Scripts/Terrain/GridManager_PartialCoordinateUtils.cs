@@ -29,16 +29,16 @@ namespace GridSpace {
 
         public Vector3Int GetGridCoordinatesFromPoint(Vector3 inputPoint)
         {
-            Vector3Int gridManagerCoordinates = new Vector3Int((int)inputPoint.x + macroTileResolution*tilesPerMacroTile/2,
-                                                            (int)inputPoint.y+10,
-                                                            (int)inputPoint.z + macroTileResolution*tilesPerMacroTile/2);
+            Vector3Int gridManagerCoordinates = new Vector3Int((int)inputPoint.x + fullResolution/2,
+                                                               (int)inputPoint.y+10,
+                                                               (int)inputPoint.z + fullResolution/2);
             return gridManagerCoordinates;
         }
 
         public Vector3 WorldPointFromGridCoordinate(Vector3Int gridCoord){
-            Vector3 worldPoint = new Vector3(gridCoord.x - macroTileResolution*tilesPerMacroTile/2,
-                                            gridCoord.y - 10,
-                                            gridCoord.z - macroTileResolution*tilesPerMacroTile/2);
+            Vector3 worldPoint = new Vector3(gridCoord.x - fullResolution/2,
+                                             gridCoord.y - 10,
+                                             gridCoord.z - fullResolution/2);
             return worldPoint;
         }
 
