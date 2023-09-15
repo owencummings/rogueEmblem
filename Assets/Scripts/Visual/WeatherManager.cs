@@ -22,7 +22,7 @@ public class WeatherManager : MonoBehaviour
     // TODO: add plane underneath to block light near nighttime
     void FixedUpdate()
     {
-        lightSource.transform.rotation *= Quaternion.AngleAxis(0.02f, Vector3.right);
+        lightSource.transform.rotation *= Quaternion.AngleAxis(0.01f, Vector3.right);
         if (lightSource.transform.eulerAngles.x > -10f && lightSource.transform.eulerAngles.x < 190f)
         {
             lightSource.intensity = maxIntensity;
