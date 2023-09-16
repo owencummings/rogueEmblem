@@ -13,7 +13,8 @@ namespace TerrainGeneration {
         Ring,
         StartNode,
         Featureless,
-        Pillars
+        Pillars,
+        Oasis
     }
 
     public class MacroNode {
@@ -248,7 +249,8 @@ namespace TerrainGeneration {
                 { MacroNodeType.Land, () => PopulateLand() },
                 { MacroNodeType.Featureless, () => PopulateWithWfc(InitializeFeatureless, ResolveFeatureless) },
                 { MacroNodeType.Water, () => PopulateWater() },
-                { MacroNodeType.Pillars, () => PopulateWithWfc(InitializePillars, ResolvePillars)}
+                { MacroNodeType.Pillars, () => PopulateWithWfc(InitializePillars, ResolvePillars)},
+                { MacroNodeType.Oasis, () => PopulateWithWfc(InitializeOasis, ResolveOasis)},
             };
 
             HydrateTargetHeights();
@@ -337,13 +339,10 @@ namespace TerrainGeneration {
             int endHeight = 11;
             int fillHeight = 12;
             int[,] holderHeights = (int[,]) TargetHeights.Clone();
-            Vector2Int curr;
-
 
             bool connected = false;
             int connectionTries = 0;
             int maxConnectionTries = 100;
-            int distance;
             int jumps = 0;
             List<Vector2Int> directions = new List<Vector2Int>(){
                 new Vector2Int(1, 0),
@@ -710,6 +709,29 @@ namespace TerrainGeneration {
             AssignWfcCellChunk(wfcCells, chosen, depth, height, 1);
         }
 
+        public void InitializeOasis(WfcCell[,] wfcCells)
+        {
+            for (int i = 0; i < wfcCells.GetLength(0); i++){
+                for(int j = 0; j < wfcCells.GetLength(1); j++){
+                    if (i == 0 || i == 1 || i == wfcCells.GetLength(0) - 1 || i == wfcCells.GetLength(0) - 2 ||
+                        j == 0 || j == 1 || j == wfcCells.GetLength(1) - 1 || j == wfcCells.GetLength(1) - 2)
+                    {
+                        wfcCells[i,j].AssignValue(1, 1);
+                    }
+                    else if (i == 2 || i == wfcCells.GetLength(0) - 3 || j == 2 || j == wfcCells.GetLength(1) - 3)
+                    {
+                        wfcCells[i,j].AssignValue(0,1);
+                    }
+                }
+            }
+
+            wfcCells[wfcCells.GetLength(0)/2, wfcCells.GetLength(1)/2].AssignValue(3, 5);
+        }
+
+        public void ResolveOasis(Vector2Int chosen, WfcCell[,] wfcCells)
+        {
+            ResolvePillars(chosen, wfcCells);
+        }
 
     }
 }
