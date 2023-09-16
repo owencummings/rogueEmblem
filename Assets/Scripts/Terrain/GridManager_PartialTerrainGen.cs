@@ -62,7 +62,7 @@ namespace GridSpace{
             int cornerEndX = Mathf.Min(nodeX + 30, fullResolution - 1);
             int cornerEndY = Mathf.Min(nodeY + 30, fullResolution - 1);
 
-            MacroNode landNode = new MacroNode(MacroNodeType.Pillars, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
+            MacroNode landNode = new MacroNode(MacroNodeType.Oasis, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
             landNode.ObscureRandomSubset();
             landNode.PopulateGrid();
             landNode.RehydrateMainHeights();
