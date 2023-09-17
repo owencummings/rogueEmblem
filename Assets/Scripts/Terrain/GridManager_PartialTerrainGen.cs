@@ -23,51 +23,70 @@ namespace GridSpace{
             }
         }
 
+
+        public enum NodeAvailability {
+            Available, 
+            Occupied,
+            Unavailable
+        } 
+        
+        static void PropogateNodeAvailability(NodeAvailability[,] unavailableNodes, List<Vector2Int> availableNodes, Vector2Int node)
+        {
+            for (int i=-2; i<3; i++)
+            {
+                for (int j=-2; j<3; j++)
+                {
+                    if (i + node.x >= 0 && i + node.x < unavailableNodes.GetLength(0) && j + node.y >= 0 && j + node.y < unavailableNodes.GetLength(1))
+                    {
+                        if(i == -2 || i == 2 || j == -2 || j == 2)
+                        {
+                            if (unavailableNodes[i+node.x,j+node.y] == NodeAvailability.Unavailable){
+                                unavailableNodes[i+node.x, j+node.y] = NodeAvailability.Available;
+                                availableNodes.Add(new Vector2Int(node.x + i, node.y + j));
+                            }
+                        } else {
+                            if (unavailableNodes[i+node.x,j+node.y] == NodeAvailability.Available){ availableNodes.Remove(new Vector2Int(node.x + i, node.y + j)); }
+                            unavailableNodes[i+node.x, j+node.y] = NodeAvailability.Occupied;
+                        }
+
+                    }
+                }
+            }
+        }
+
         void CreateNodeTerrain()
         {
-            fullResolution = 200;
+            tilesPerMacroTile = 20;
+            macroTileResolution = 11;
+            List<Vector2Int> availableNodes = new List<Vector2Int>(){ new Vector2Int(5,5) };
+            NodeAvailability[,] unavailableNodes = new NodeAvailability[macroTileResolution, macroTileResolution];
+            for (int i=0;i<macroTileResolution*macroTileResolution;i++) unavailableNodes[i%macroTileResolution,i/macroTileResolution]=NodeAvailability.Unavailable; 
+            int nodesToBuild = 5;
+            TerrainGeneration.MacroNodeType typeToBuild;
+            MacroNode currNode;
+            fullResolution = 220;
             offsetXZ = (fullResolution/2f) % 1;
             offsetY = 0.5f;
             cubes = new GameObject[fullResolution, 20, fullResolution];
             ResetHeights();
             List<MacroNode> nodeList = new List<MacroNode>();
-            meshList = new List<Mesh>();
             List<CombineInstance> combineList = new List<CombineInstance>();
 
-            // Start node
-            MacroNode startNode = new MacroNode(MacroNodeType.StartNode, heights,
-                                                new Vector2Int(fullResolution/2 - 10, fullResolution/2 - 10),
-                                                new Vector2Int(fullResolution/2 + 10, fullResolution/2 + 10));
-            startNode.PopulateGrid();
-            startNode.RehydrateMainHeights();
-            nodeList.Add(startNode);
-
-
-            // Get random coord in the dumbest way possible
-            // TODO: MUST change this
-            bool good = false;
-            int nodeX = 0;
-            int nodeY = 0;
-            while (!good) {
-                nodeX = UnityEngine.Random.Range(0, fullResolution);
-                nodeY = UnityEngine.Random.Range(0, fullResolution);
-
-                if (((nodeX > 110 && nodeX < 160) || (nodeX < 60 && nodeX > 10)) && ((nodeY < 60 && nodeY > 10) || (nodeY > 110 && nodeY < 160)))
-                {
-                    good = true;
-                }
+            for (int curr = 0; curr < nodesToBuild; curr++){
+                Debug.Log(availableNodes.Count);
+                Vector2Int location = availableNodes[UnityEngine.Random.Range(0, availableNodes.Count)];
+                typeToBuild = MacroNodeType.Oasis;
+                if (curr == 0) { typeToBuild = MacroNodeType.Start; }
+                Vector2Int startCorner = new Vector2Int(location.x*tilesPerMacroTile, location.y*tilesPerMacroTile);
+                Vector2Int endCorner = new Vector2Int((location.x + 1)*tilesPerMacroTile, (location.y + 1)*tilesPerMacroTile);
+                currNode = new MacroNode(typeToBuild, heights, startCorner, endCorner);
+                currNode.PopulateGrid();
+                currNode.RehydrateMainHeights();
+                PropogateNodeAvailability(unavailableNodes, availableNodes, location);
             }
 
-            // Land node
-            int cornerEndX = Mathf.Min(nodeX + 30, fullResolution - 1);
-            int cornerEndY = Mathf.Min(nodeY + 30, fullResolution - 1);
-
-            MacroNode landNode = new MacroNode(MacroNodeType.Oasis, heights, new Vector2Int(nodeX,nodeY), new Vector2Int(cornerEndX,cornerEndY));
-            landNode.ObscureRandomSubset();
-            landNode.PopulateGrid();
-            landNode.RehydrateMainHeights();
-            
             // Bridge node
+            /*
             Vector2Int startCorner = new Vector2Int(Mathf.Max(0, Mathf.Min(startNode.GetCenter().x, landNode.GetCenter().x, (landNode.GetCenter().x + startNode.GetCenter().x)/2 - 20)),
                                                     Mathf.Max(0, Mathf.Min(startNode.GetCenter().y, landNode.GetCenter().y, (landNode.GetCenter().y + startNode.GetCenter().y)/2 - 20)));
             Vector2Int endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(startNode.GetCenter().x, landNode.GetCenter().x, (landNode.GetCenter().x + startNode.GetCenter().x)/2 + 20)),
@@ -77,7 +96,7 @@ namespace GridSpace{
             bridgeNode.featureEnd = startNode.GetCenter();
             bridgeNode.PopulateGrid();
             bridgeNode.RehydrateMainHeights();
-
+            */
 
             // Fill ocean simply
             MacroNode waterNode = new MacroNode(MacroNodeType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
@@ -155,7 +174,6 @@ namespace GridSpace{
 
                             CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
                             if (k == height){ CubeGenerator.ShrinkMeshTop(mesh); }
-                            meshList.Add(mesh);
 
                             // Memoize mesh to combine later
                             combine.mesh = mesh;

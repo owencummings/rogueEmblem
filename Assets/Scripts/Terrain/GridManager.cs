@@ -17,7 +17,6 @@ namespace GridSpace {
         public int[,] heights;
         public GameObject[,] features;
         public GameObject cubePrefab;
-        public List<Mesh> meshList;
         public MeshFilter meshFilter;
         public float squareSize = 1f;
         public float cubeSize = 1f;
