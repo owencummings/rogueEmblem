@@ -82,7 +82,7 @@ namespace GridSpace{
 
             for (int curr = 0; curr < nodesToBuild; curr++){
                 Vector2Int location = availableNodes[UnityEngine.Random.Range(0, availableNodes.Count)];
-                typeToBuild = MacroNodeType.Oasis;
+                typeToBuild = MacroNode.SimpleNodes[UnityEngine.Random.Range(0, MacroNode.SimpleNodes.Count)];
                 if (curr == 0) { typeToBuild = MacroNodeType.Start; }
                 Vector2Int startCorner = new Vector2Int(location.x*tilesPerMacroTile, location.y*tilesPerMacroTile);
                 Vector2Int endCorner = new Vector2Int((location.x + 1)*tilesPerMacroTile, (location.y + 1)*tilesPerMacroTile);
