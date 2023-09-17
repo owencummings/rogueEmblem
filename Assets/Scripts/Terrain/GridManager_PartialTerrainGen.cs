@@ -64,14 +64,15 @@ namespace GridSpace{
         {
             tilesPerMacroTile = 20;
             macroTileResolution = 11;
+            fullResolution = tilesPerMacroTile * macroTileResolution;
             List<Vector2Int> availableNodes = new List<Vector2Int>(){ new Vector2Int(5,5) };
             Dictionary<Vector2Int, List<Vector2Int>> neighborNodes = new Dictionary<Vector2Int, List<Vector2Int>>();
             NodeAvailability[,] unavailableNodes = new NodeAvailability[macroTileResolution, macroTileResolution];
-            for (int i=0;i<macroTileResolution*macroTileResolution;i++) unavailableNodes[i%macroTileResolution,i/macroTileResolution]=NodeAvailability.Unavailable; 
+                for (int i=0;i<macroTileResolution*macroTileResolution;i++){ unavailableNodes[i%macroTileResolution,i/macroTileResolution]=NodeAvailability.Unavailable; }
+            unavailableNodes[5, 5] = NodeAvailability.Available;
             int nodesToBuild = 5;
             TerrainGeneration.MacroNodeType typeToBuild;
             MacroNode currNode = null;
-            fullResolution = 220;
             offsetXZ = (fullResolution/2f) % 1;
             offsetY = 0.5f;
             cubes = new GameObject[fullResolution, 20, fullResolution];
