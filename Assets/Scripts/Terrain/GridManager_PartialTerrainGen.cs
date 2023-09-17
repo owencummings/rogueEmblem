@@ -30,7 +30,8 @@ namespace GridSpace{
             Unavailable
         } 
         
-        static void PropogateNodeAvailability(NodeAvailability[,] unavailableNodes, List<Vector2Int> availableNodes, Vector2Int node)
+        static void PropogateNodeAvailability(NodeAvailability[,] unavailableNodes, List<Vector2Int> availableNodes,
+                                              Dictionary<Vector2Int,List<Vector2Int>> neighborNodes, Vector2Int node)
         {
             for (int i=-2; i<3; i++)
             {
@@ -43,6 +44,11 @@ namespace GridSpace{
                             if (unavailableNodes[i+node.x,j+node.y] == NodeAvailability.Unavailable){
                                 unavailableNodes[i+node.x, j+node.y] = NodeAvailability.Available;
                                 availableNodes.Add(new Vector2Int(node.x + i, node.y + j));
+                                if (!neighborNodes.ContainsKey(new Vector2Int(node.x + i, node.y + j)))
+                                {
+                                    neighborNodes.Add(new Vector2Int(node.x + i, node.y + j), new List<Vector2Int>());
+                                }
+                                neighborNodes[new Vector2Int(node.x + i, node.y + j)].Add(node);
                             }
                         } else {
                             if (unavailableNodes[i+node.x,j+node.y] == NodeAvailability.Available){ availableNodes.Remove(new Vector2Int(node.x + i, node.y + j)); }
@@ -59,11 +65,12 @@ namespace GridSpace{
             tilesPerMacroTile = 20;
             macroTileResolution = 11;
             List<Vector2Int> availableNodes = new List<Vector2Int>(){ new Vector2Int(5,5) };
+            Dictionary<Vector2Int, List<Vector2Int>> neighborNodes = new Dictionary<Vector2Int, List<Vector2Int>>();
             NodeAvailability[,] unavailableNodes = new NodeAvailability[macroTileResolution, macroTileResolution];
             for (int i=0;i<macroTileResolution*macroTileResolution;i++) unavailableNodes[i%macroTileResolution,i/macroTileResolution]=NodeAvailability.Unavailable; 
             int nodesToBuild = 5;
             TerrainGeneration.MacroNodeType typeToBuild;
-            MacroNode currNode;
+            MacroNode currNode = null;
             fullResolution = 220;
             offsetXZ = (fullResolution/2f) % 1;
             offsetY = 0.5f;
@@ -73,7 +80,6 @@ namespace GridSpace{
             List<CombineInstance> combineList = new List<CombineInstance>();
 
             for (int curr = 0; curr < nodesToBuild; curr++){
-                Debug.Log(availableNodes.Count);
                 Vector2Int location = availableNodes[UnityEngine.Random.Range(0, availableNodes.Count)];
                 typeToBuild = MacroNodeType.Oasis;
                 if (curr == 0) { typeToBuild = MacroNodeType.Start; }
@@ -82,21 +88,22 @@ namespace GridSpace{
                 currNode = new MacroNode(typeToBuild, heights, startCorner, endCorner);
                 currNode.PopulateGrid();
                 currNode.RehydrateMainHeights();
-                PropogateNodeAvailability(unavailableNodes, availableNodes, location);
+                PropogateNodeAvailability(unavailableNodes, availableNodes, neighborNodes, location);
+                if (neighborNodes.ContainsKey(location)){
+                    Vector2Int prev = neighborNodes[location][UnityEngine.Random.Range(0, neighborNodes[location].Count)];
+                    int prevX = (prev.x * tilesPerMacroTile) + tilesPerMacroTile/2;
+                    int prevY = (prev.y * tilesPerMacroTile) + tilesPerMacroTile/2;
+                    startCorner = new Vector2Int(Mathf.Max(0, Mathf.Min(prevX, currNode.GetCenter().x, (currNode.GetCenter().x + prevX)/2 - 20)),
+                                                 Mathf.Max(0, Mathf.Min(prevY, currNode.GetCenter().y, (currNode.GetCenter().y + prevY)/2 - 20)));
+                    endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(prevX, currNode.GetCenter().x, (currNode.GetCenter().x + prevX)/2 + 20)),
+                                               Mathf.Min(fullResolution-1, Mathf.Max(prevY, currNode.GetCenter().y, (currNode.GetCenter().y + prevY)/2 + 20)));
+                    MacroNode bridgeNode = new MacroNode(MacroNodeType.Bridge, heights, startCorner, endCorner);
+                    bridgeNode.featureStart = currNode.GetCenter();
+                    bridgeNode.featureEnd = new Vector2Int(prevX, prevY);
+                    bridgeNode.PopulateGrid();
+                    bridgeNode.RehydrateMainHeights();
+                }
             }
-
-            // Bridge node
-            /*
-            Vector2Int startCorner = new Vector2Int(Mathf.Max(0, Mathf.Min(startNode.GetCenter().x, landNode.GetCenter().x, (landNode.GetCenter().x + startNode.GetCenter().x)/2 - 20)),
-                                                    Mathf.Max(0, Mathf.Min(startNode.GetCenter().y, landNode.GetCenter().y, (landNode.GetCenter().y + startNode.GetCenter().y)/2 - 20)));
-            Vector2Int endCorner = new Vector2Int(Mathf.Min(fullResolution-1, Mathf.Max(startNode.GetCenter().x, landNode.GetCenter().x, (landNode.GetCenter().x + startNode.GetCenter().x)/2 + 20)),
-                                                  Mathf.Min(fullResolution-1, Mathf.Max(startNode.GetCenter().y, landNode.GetCenter().y, (landNode.GetCenter().y + startNode.GetCenter().y)/2 + 20)));
-            MacroNode bridgeNode = new MacroNode(MacroNodeType.Bridge, heights, startCorner, endCorner);
-            bridgeNode.featureStart = landNode.GetCenter();
-            bridgeNode.featureEnd = startNode.GetCenter();
-            bridgeNode.PopulateGrid();
-            bridgeNode.RehydrateMainHeights();
-            */
 
             // Fill ocean simply
             MacroNode waterNode = new MacroNode(MacroNodeType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
