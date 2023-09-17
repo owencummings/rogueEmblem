@@ -11,7 +11,7 @@ namespace TerrainGeneration {
         Bridge,
         Water,
         Ring,
-        StartNode,
+        Start,
         Featureless,
         Pillars,
         Oasis
@@ -244,7 +244,7 @@ namespace TerrainGeneration {
             TargetHeights = new int[EndCorner.x - StartCorner.x + 1, EndCorner.y - StartCorner.y + 1];
             tilePopulationMap = new Dictionary<MacroNodeType, Action>()
             {
-                { MacroNodeType.StartNode, () => PopulateWithWfc(InitializeStart, ResolveStart) },
+                { MacroNodeType.Start, () => PopulateWithWfc(InitializeStart, ResolveStart) },
                 { MacroNodeType.Bridge, () => PopulateBridge() },
                 { MacroNodeType.Land, () => PopulateLand() },
                 { MacroNodeType.Featureless, () => PopulateWithWfc(InitializeFeatureless, ResolveFeatureless) },
