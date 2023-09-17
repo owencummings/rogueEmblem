@@ -17,6 +17,7 @@ namespace TerrainGeneration {
         Oasis
     }
 
+
     public class MacroNode {
         MacroNodeType TileType;
         int[,] GridHeights;
@@ -26,6 +27,7 @@ namespace TerrainGeneration {
         public Vector2Int featureStart;
         public Vector2Int featureEnd;
         public Dictionary<MacroNodeType, Action> tilePopulationMap;
+        public static List<MacroNodeType> SimpleNodes = new List<MacroNodeType>(){ MacroNodeType.Pillars, MacroNodeType.Oasis };
 
         public const int Water = -1;
         public const int ObscuredHeight = -2;
@@ -246,9 +248,9 @@ namespace TerrainGeneration {
             {
                 { MacroNodeType.Start, () => PopulateWithWfc(InitializeStart, ResolveStart) },
                 { MacroNodeType.Bridge, () => PopulateBridge() },
+                { MacroNodeType.Water, () => PopulateWater() },
                 { MacroNodeType.Land, () => PopulateLand() },
                 { MacroNodeType.Featureless, () => PopulateWithWfc(InitializeFeatureless, ResolveFeatureless) },
-                { MacroNodeType.Water, () => PopulateWater() },
                 { MacroNodeType.Pillars, () => PopulateWithWfc(InitializePillars, ResolvePillars)},
                 { MacroNodeType.Oasis, () => PopulateWithWfc(InitializeOasis, ResolveOasis)},
             };
