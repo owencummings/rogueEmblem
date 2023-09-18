@@ -62,7 +62,7 @@ namespace GridSpace{
 
         void CreateNodeTerrain()
         {
-            tilesPerMacroTile = 20;
+            tilesPerMacroTile = 25;
             macroTileResolution = 11;
             fullResolution = tilesPerMacroTile * macroTileResolution;
             List<Vector2Int> availableNodes = new List<Vector2Int>(){ new Vector2Int(5,5) };
