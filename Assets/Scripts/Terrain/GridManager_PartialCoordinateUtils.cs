@@ -36,9 +36,9 @@ namespace GridSpace {
         }
 
         public Vector3 WorldPointFromGridCoordinate(Vector3Int gridCoord){
-            Vector3 worldPoint = new Vector3(gridCoord.x - fullResolution/2,
+            Vector3 worldPoint = new Vector3(gridCoord.x - fullResolution/2f,
                                              gridCoord.y - 10,
-                                             gridCoord.z - fullResolution/2);
+                                             gridCoord.z - fullResolution/2f);
             return worldPoint;
         }
 
