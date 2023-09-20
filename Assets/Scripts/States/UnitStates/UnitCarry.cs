@@ -16,6 +16,7 @@ public class UnitCarry : IState
     private CarryData _carryData;
     public ICarryable carryable;
     public int walkableMask = LayerMask.GetMask("Walkable");
+    public bool forceExit = false;
 
     public UnitCarry(NavMeshAgent navMeshAgent, Rigidbody rb, Transform tf, CarryData carryData)
     {
@@ -49,13 +50,21 @@ public class UnitCarry : IState
         _rb.isKinematic = true;
         _tf.parent = _carryData.carryTarget.transform;
         carryable = _carryData.carryTarget.GetComponent<ICarryable>();
+        carryable.exitCallback += OnCarryExit;
         carryable.Carriers += 1;
+        forceExit = false;
+    }
+
+    public void OnCarryExit(){
+        forceExit = true;
     }
 
     public void OnExit(){
         _tf.parent = null;
         carryable.Carriers -= 1;
+        carryable.exitCallback -= OnCarryExit;
         carryable = null;
+        
     }
 
     public void OnCollisionEnter(Collision collision){}

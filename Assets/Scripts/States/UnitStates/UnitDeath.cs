@@ -19,7 +19,6 @@ public class UnitDeath : IState
     }
 
     public void Tick(){
-        //targetToLook = new Vector3(targetObject.transform.x, 0, targetObject.transform.z);
         if (_deathProgress > _deathTime) {
             Object.Destroy(_go);
         }

@@ -15,8 +15,10 @@ public class Carryable1 : NavBody, ICarryable
     public float CurrCarryOffset { get; set; }
     public Vector3[] CarryPivots { get; set; }
     public NavMeshAgent NavAgent { get; set; }
+    public UnitCarried carried;
+    public ForceCarryExit exitCallback { get; set; }
 
-    new void Awake(){
+    public void CarryableAwake(){
         base.Awake();
         _rb.drag = 4f;
         Carriers = 0;
@@ -26,8 +28,7 @@ public class Carryable1 : NavBody, ICarryable
         CarryOffset = 0.3f;
         (this as ICarryable).GetCarryPivots();
         NavAgent = _navMeshAgent;
-        
-        var carried = new UnitCarried(_navMeshAgent, _rb, (this as ICarryable));
+        carried = new UnitCarried(_navMeshAgent, _rb, (this as ICarryable));
         _rb.constraints = 0;
 
         Func<bool> Carried = () => (Carriers >= CarriersNeeded);
