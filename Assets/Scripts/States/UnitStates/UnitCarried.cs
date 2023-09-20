@@ -28,6 +28,7 @@ public class UnitCarried : IState
     }
     public void OnExit(){
         _navMeshAgent.baseOffset = _carryable.CarryBase; // May eventually need to pass along a non-carried offset param as well
+        _carryable.exitCallback();
     }
     public void OnCollisionEnter(Collision collision){}
 }

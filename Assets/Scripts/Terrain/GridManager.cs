@@ -48,11 +48,14 @@ namespace GridSpace {
 
         void Start(){
             CreateSquad(Resources.Load("Archer") as GameObject, fullResolution/2, fullResolution/2);
-            CreateSquad(Resources.Load("Melee") as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
+            CreateSquad(Resources.Load("Melee") as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
             LazySlamFeature(Resources.Load("BigEnemy") as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
             LazySlamFeature(Resources.Load("Wizard") as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
             LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, fullResolution/2+10, fullResolution/2 + 10); 
-            LazySlamFeature(Resources.Load("Carryable") as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
+            LazySlamFeature(Resources.Load("Carryable") as GameObject, fullResolution/2 + 1, fullResolution/2 + 1);
+            LazySlamFeature(Resources.Load("Food") as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
+            LazySlamFeature(Resources.Load("Ingestor") as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
+
         }
 
     }

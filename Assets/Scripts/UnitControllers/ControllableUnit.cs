@@ -162,6 +162,7 @@ public class ControllableUnit : Unit, ICommandable
         At(idle, carryRally, NewCarry);
         At(carryRally, carry, NearCarryTarget);
         At(carry, findNavMesh, NewCancel);
+        At(carry, rigidIdle, () => carry.forceExit);
         At(rally, jump, NewJump);
         At(idle, jump, NewJump);
         At(jump, rigidIdle, JumpFinished);

@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using Vector3Utils;
+
+public delegate void ForceCarryExit();
 
 public interface ICarryable
 {
@@ -17,5 +20,10 @@ public interface ICarryable
     public void GetCarryPivots()
     {
         CarryPivots =  Vector3UtilsClass.getDestinationCircle(Vector3.down * CarryBase, CarriersNeeded, CarryRadius);
+    }
+
+    public ForceCarryExit exitCallback { get; set; }
+    void ForceExit(){
+        exitCallback?.Invoke();
     }
 }
