@@ -300,6 +300,7 @@ namespace TerrainGeneration {
             {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
+                    if (StartCorner.x + i >= GridHeights.GetLength(0) || StartCorner.y + j >= GridHeights.GetLength(1)){ continue; }
                     TargetHeights[i, j] = GridHeights[StartCorner.x + i, StartCorner.y + j];
                 }
             } 
@@ -312,6 +313,7 @@ namespace TerrainGeneration {
                 for (int j=0; j < TargetHeights.GetLength(1); j++)
                 {
                     if (TargetHeights[i,j] != ObscuredHeight) {
+                        if (StartCorner.x + i >= GridHeights.GetLength(0) || StartCorner.y + j >= GridHeights.GetLength(1)){ continue; }
                         GridHeights[StartCorner.x + i, StartCorner.y + j] = TargetHeights[i,j];
                     }
                 }
