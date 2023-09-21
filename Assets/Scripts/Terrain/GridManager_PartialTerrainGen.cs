@@ -120,6 +120,8 @@ namespace GridSpace{
             int[] triangleArray;
             List<CombineInstance> combineList = new List<CombineInstance>();
             int density = 10;
+            int objects = 0;
+            GameObject dummy = new GameObject("Dummy");
             // Create terrain meshes + rigidbodies
             for (int i = 0; i < fullResolution; i++){
                 for (int j = 0; j < fullResolution; j++){
@@ -128,10 +130,14 @@ namespace GridSpace{
                         for (int k = -4; k < height + 1; k++)
                         {
                             Vector3 location = new Vector3((i-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (j-fullResolution/2f)*cubeSize);
-                            cubes[i,k+10,j] = Instantiate(cubePrefab, location, Quaternion.identity, this.transform);                               
-                            if (k != height)
-                            {
-                                cubes[i,k+10,j].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                            dummy.transform.position = location;
+                            if (k > 0){
+                                cubes[i,k+10,j] = Instantiate(cubePrefab, location, Quaternion.identity, this.transform);                               
+                                objects += 1;
+                                if (k != height)
+                                {
+                                    cubes[i,k+10,j].layer = LayerMask.NameToLayer("NonWalkableTerrain");
+                                }
                             }
 
                             // Create mesh
@@ -185,7 +191,7 @@ namespace GridSpace{
 
                             // Memoize mesh to combine later
                             combine.mesh = mesh;
-                            combine.transform = cubes[i,k+10,j].transform.localToWorldMatrix;
+                            combine.transform = dummy.transform.localToWorldMatrix;
                             combineList.Add(combine);
                         }
                     }
@@ -193,6 +199,8 @@ namespace GridSpace{
                 }
             }
 
+            Debug.Log(objects);
+            Destroy(dummy);
             // Combine meshes into one
             // TODO: Ensure this doesnt go over the vert limit (~32k)
             // Under those circumstances, we will crash.
