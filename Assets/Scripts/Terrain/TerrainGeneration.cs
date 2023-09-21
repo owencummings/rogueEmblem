@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using CustomGeometry;
+using Unity.Mathematics;
 
 namespace TerrainGeneration {
 
@@ -315,6 +318,105 @@ namespace TerrainGeneration {
             } 
         }
  
+        public GameObject GenerateMeshFromHeights(){
+            Vector3[] vertArray;
+            int[] triangleArray;
+            List<CombineInstance> combineList = new List<CombineInstance>();
+            GameObject go = new GameObject("Node Object");
+            MeshFilter meshFilter = go.AddComponent<MeshFilter>();
+            MeshRenderer meshRenderer = go.AddComponent<MeshRenderer>();
+            meshRenderer.material = Resources.Load("Toon") as Material;
+            int density = 5;
+            for (int i = 0; i < TargetHeights.GetLength(0); i++){
+                for (int j = 0; j < TargetHeights.GetLength(1); j++){
+                    int height = TargetHeights[i, j];
+                    if (height > 0 && TargetHeights[i,j] != GridHeights[i + StartCorner.x, j + StartCorner.y]){
+                        for (int k = -4; k < height + 1; k++)
+                        {
+                            Vector3 location = new Vector3(( i + StartCorner.x - GridHeights.GetLength(0)/2f), k - 0.5f, (j + StartCorner.y - GridHeights.GetLength(1)/2f));
+                            go.transform.position = location;
+
+                            // Create mesh
+                            Mesh mesh = new Mesh();
+                            List<Vector3> vertices = new List<Vector3>();
+                            List<int> triangles = new List<int>();
+                            CombineInstance combine = new CombineInstance();
+
+                            // Determine which faces of cube to render
+                            if (k == height){
+                                CubeGenerator.CreateTop(vertices, triangles, 1);
+                            }
+                            if (k == -4){
+                                // Not sure if we really ever need this..
+                                CubeGenerator.CreateBottom(vertices, triangles, 1);
+                            }
+                            if (i == GridHeights.GetLength(0) - 1 || (i+1 < GridHeights.GetLength(0) && GridHeights[i+1,j] < height))
+                            {
+                                CubeGenerator.CreateRight(vertices, triangles, density);
+                            }
+                            if (i == 0 || (i-1 >= 0 && GridHeights[i-1,j] < height))
+                            {
+                                CubeGenerator.CreateLeft(vertices, triangles, density);
+                            }
+                            if (j == GridHeights.GetLength(1) - 1 || (j+1 < GridHeights.GetLength(1) && GridHeights[i,j+1] < height))
+                            {
+                                CubeGenerator.CreateForward(vertices, triangles, density);
+                            }
+                            if (j == 0 || (j-1 >= 0 && GridHeights[i,j-1] < height))
+                            {
+                                CubeGenerator.CreateBack(vertices, triangles, density);
+                            }
+
+                            
+                            vertArray = vertices.ToArray();
+                            triangleArray = triangles.ToArray();
+
+                            //Offset mesh by noise
+                            float coeff = 1;
+                            for (int v = 0; v < vertArray.Length; v++)
+                            {
+                                if (k==height){
+                                    coeff = 1 - vertArray[v].y - 0.5f; 
+                                }
+                                vertArray[v][0] = vertArray[v][0] + coeff*(Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].z + j) * 0.5f - 0.25f);
+                                vertArray[v][2] = vertArray[v][2] + coeff*(Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].x + i) * 0.5f - 0.25f);
+                            }
+
+                            CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
+                            if (k == height){ CubeGenerator.ShrinkMeshTop(mesh); }
+
+                            // Memoize mesh to combine later
+                            combine.mesh = mesh;
+                            combine.transform = go.transform.localToWorldMatrix;
+                            combineList.Add(combine);
+                        }
+                    }
+
+                }
+            }
+
+            // Combine meshes into one
+            // TODO: Ensure this doesnt go over the vert limit (~32k)
+            // Under those circumstances, we will crash.
+            go.transform.position = Vector3.zero;
+            CombineInstance[] combineArray = new CombineInstance[combineList.Count];
+            int index = 0;
+            foreach (CombineInstance combInstance in combineList)
+            {
+                combineArray[index] = combInstance;
+                index += 1;
+            }
+            Mesh combinedMesh = new Mesh();
+            combinedMesh.indexFormat = IndexFormat.UInt32;
+            combinedMesh.CombineMeshes(combineArray);
+            combinedMesh.RecalculateNormals();
+            combinedMesh.RecalculateTangents();
+            combinedMesh.RecalculateBounds();
+            combinedMesh.Optimize();
+            meshFilter.sharedMesh =  combinedMesh;
+            return go;
+        }
+
         public void PopulateGrid()
         {
             if (TileType == MacroNodeType.Land || TileType == MacroNodeType.Water || TileType == MacroNodeType.Null){ ObscureExistingData(); }

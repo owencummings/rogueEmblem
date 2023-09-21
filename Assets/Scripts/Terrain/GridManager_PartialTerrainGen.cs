@@ -62,6 +62,8 @@ namespace GridSpace{
 
         void CreateNodeTerrain()
         {
+            GameObject terrainMeshes = new GameObject("TerrainMeshes");
+            GameObject newMesh = null;
             tilesPerMacroTile = 25;
             macroTileResolution = 11;
             fullResolution = tilesPerMacroTile * macroTileResolution;
@@ -88,6 +90,8 @@ namespace GridSpace{
                 Vector2Int endCorner = new Vector2Int((location.x + 1)*tilesPerMacroTile, (location.y + 1)*tilesPerMacroTile);
                 currNode = new MacroNode(typeToBuild, heights, startCorner, endCorner);
                 currNode.PopulateGrid();
+                newMesh = currNode.GenerateMeshFromHeights();
+                newMesh.transform.SetParent(terrainMeshes.transform);
                 currNode.RehydrateMainHeights();
                 PropogateNodeAvailability(unavailableNodes, availableNodes, neighborNodes, location);
                 if (neighborNodes.ContainsKey(location)){
@@ -102,9 +106,13 @@ namespace GridSpace{
                     bridgeNode.featureStart = currNode.GetCenter();
                     bridgeNode.featureEnd = new Vector2Int(prevX, prevY);
                     bridgeNode.PopulateGrid();
+                    newMesh = bridgeNode.GenerateMeshFromHeights();
+                    newMesh.transform.SetParent(terrainMeshes.transform);
                     bridgeNode.RehydrateMainHeights();
                 }
             }
+
+            StaticBatchingUtility.Combine(terrainMeshes);
 
             // Fill ocean simply
             MacroNode waterNode = new MacroNode(MacroNodeType.Water, heights, new Vector2Int(0, 0), new Vector2Int(fullResolution-1, fullResolution-1));
@@ -116,12 +124,6 @@ namespace GridSpace{
     
         void GenerateMeshFromHeights()
         {
-            Vector3[] vertArray;
-            int[] triangleArray;
-            List<CombineInstance> combineList = new List<CombineInstance>();
-            int density = 10;
-            int objects = 0;
-            GameObject dummy = new GameObject("Dummy");
             // Create terrain meshes + rigidbodies
             for (int i = 0; i < fullResolution; i++){
                 for (int j = 0; j < fullResolution; j++){
@@ -130,95 +132,18 @@ namespace GridSpace{
                         for (int k = -4; k < height + 1; k++)
                         {
                             Vector3 location = new Vector3((i-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (j-fullResolution/2f)*cubeSize);
-                            dummy.transform.position = location;
                             if (k > 0){
                                 cubes[i,k+10,j] = Instantiate(cubePrefab, location, Quaternion.identity, this.transform);                               
-                                objects += 1;
                                 if (k != height)
                                 {
                                     cubes[i,k+10,j].layer = LayerMask.NameToLayer("NonWalkableTerrain");
                                 }
                             }
-
-                            // Create mesh
-                            Mesh mesh = new Mesh();
-                            List<Vector3> vertices = new List<Vector3>();
-                            List<int> triangles = new List<int>();
-                            CombineInstance combine = new CombineInstance();
-
-                            // Determine which faces of cube to render
-                            if (k == height){
-                                CubeGenerator.CreateTop(vertices, triangles,density);
-                            }
-                            if (k == -4){
-                                // Not sure if we really ever need this..
-                                CubeGenerator.CreateBottom(vertices, triangles, density);
-                            }
-                            if (i == heights.GetLength(0) - 1 || (i+1 < heights.GetLength(0) && heights[i+1,j] < height))
-                            {
-                                CubeGenerator.CreateRight(vertices, triangles, density);
-                            }
-                            if (i == 0 || (i-1 >= 0 && heights[i-1,j] < height))
-                            {
-                                CubeGenerator.CreateLeft(vertices, triangles, density);
-                            }
-                            if (j == heights.GetLength(1) - 1 || (j+1 < heights.GetLength(1) && heights[i,j+1] < height))
-                            {
-                                CubeGenerator.CreateForward(vertices, triangles, density);
-                            }
-                            if (j == 0 || (j-1 >= 0 && heights[i,j-1] < height))
-                            {
-                                CubeGenerator.CreateBack(vertices, triangles, density);
-                            }
-
-                            
-                            vertArray = vertices.ToArray();
-                            triangleArray = triangles.ToArray();
-
-                            //Offset mesh by noise
-                            float coeff = 1;
-                            for (int v = 0; v < vertArray.Length; v++)
-                            {
-                                if (k==height){
-                                    coeff = 1 - vertArray[v].y - 0.5f; 
-                                }
-                                vertArray[v][0] = vertArray[v][0] + coeff*(Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].z + j) * 0.5f - 0.25f);
-                                vertArray[v][2] = vertArray[v][2] + coeff*(Mathf.PerlinNoise((vertArray[v].y + k) * 0.1f, vertArray[v].x + i) * 0.5f - 0.25f);
-                            }
-
-                            CubeGenerator.RenderMesh(mesh, vertArray, triangleArray);
-                            if (k == height){ CubeGenerator.ShrinkMeshTop(mesh); }
-
-                            // Memoize mesh to combine later
-                            combine.mesh = mesh;
-                            combine.transform = dummy.transform.localToWorldMatrix;
-                            combineList.Add(combine);
                         }
                     }
 
                 }
             }
-
-            Debug.Log(objects);
-            Destroy(dummy);
-            // Combine meshes into one
-            // TODO: Ensure this doesnt go over the vert limit (~32k)
-            // Under those circumstances, we will crash.
-            CombineInstance[] combineArray = new CombineInstance[combineList.Count];
-            int index = 0;
-            foreach (CombineInstance combInstance in combineList)
-            {
-                combineArray[index] = combInstance;
-                index += 1;
-            }
-            Mesh combinedMesh = new Mesh();
-            combinedMesh.indexFormat = IndexFormat.UInt32;
-            combinedMesh.CombineMeshes(combineArray);
-            combinedMesh.RecalculateNormals();
-            combinedMesh.RecalculateTangents();
-            combinedMesh.RecalculateBounds();
-            combinedMesh.Optimize();
-            meshFilter.sharedMesh = combinedMesh;
 
             CreateGrassBase();
         }
