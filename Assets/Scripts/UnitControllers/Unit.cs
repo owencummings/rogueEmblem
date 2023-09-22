@@ -16,7 +16,7 @@ public class Unit : NavBody, IDamageable
     public TeamEnum Team { get; set; }
     public Transform SourceTransform { get; set; }
     public int ObjectID { get; set; }
-    private Squad parentSquad;
+    public Squad parentSquad;
     public UnitType unitTypeEnum;
 
     #region Behaviors

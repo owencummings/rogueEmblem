@@ -26,6 +26,7 @@ public class UnitIngest : IState
     public void OnEnter()
     {
         ingestProgress = 0f;
+        _rb.detectCollisions = false;
         _navMeshAgent.enabled = false;
         _rb.isKinematic = false;
         _rb.AddForce((_transform.up * 1000f) * _transform.localScale.magnitude);

@@ -19,7 +19,7 @@ public class Carryable1 : NavBody, ICarryable
     public ForceCarryExit exitCallback { get; set; }
 
     public void CarryableAwake(){
-        base.Awake();
+        NavBodyAwake();
         _rb.drag = 4f;
         Carriers = 0;
         CarriersNeeded = 3;
@@ -46,5 +46,9 @@ public class Carryable1 : NavBody, ICarryable
         At(carried, rigidIdle, Uncarried);
 
         _stateMachine.SetState(rigidIdle);
+    }
+
+    new void Awake(){
+        CarryableAwake();
     }
 }

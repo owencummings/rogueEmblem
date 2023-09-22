@@ -55,7 +55,7 @@ namespace GridSpace{
             if (found)
             {
                 Instantiate(prefab, 
-                            WorldPointFromGridCoordinate(new Vector3Int(outputX,outputY,outputZ)),
+                            WorldPointFromGridCoordinate(new Vector3Int(outputX,outputY,outputZ)) + Vector3.up * 0.5f,
                             Quaternion.identity);
             }
         }
