@@ -43,7 +43,6 @@ public abstract class NavBody : MonoBehaviour
         Func<bool> FoundNavMesh = () => (_navMeshAgent.isOnNavMesh);
         Func<bool> NotAttaching = () => {
             if (findNavMesh.timeFinding > 1f){ 
-                Debug.Log("Detaching");
                 rigidIdle.entryForce = new Vector3(UnityEngine.Random.Range(-100f, 100f), 
                                                    UnityEngine.Random.Range(0f, 100f), 
                                                    UnityEngine.Random.Range(-100f, 100f)); 
@@ -69,6 +68,10 @@ public abstract class NavBody : MonoBehaviour
     // Could break this out into a modular, grounded-check part
     internal void FixedUpdate()
     {
+        NavBodyFixedUpdate();
+    }
+
+    public void NavBodyFixedUpdate(){
         if (Physics.OverlapSphere(transform.position + Vector3.down * 0.1f,
                                   transform.localScale.x/2,
                                   walkableMask).Length != 0)

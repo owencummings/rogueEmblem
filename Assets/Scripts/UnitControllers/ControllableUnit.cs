@@ -216,4 +216,26 @@ public class ControllableUnit : Unit, ICommandable
         mostRecentCommand = unitCommand;
     }
 
+    new void FixedUpdate(){
+        NavBodyFixedUpdate();
+        // Do this here since we can do this regardless of state
+        if (parentSquad != null) { return; }
+        Collider[] _aggroHit;
+        _aggroHit = Physics.OverlapBox(transform.position, new Vector3(1, 1, 1), Quaternion.identity);
+        if (_aggroHit.Length > 0){
+            foreach(Collider coll in _aggroHit){
+                if (coll.gameObject.TryGetComponent<Squad>(out Squad squad)){
+                    Debug.Log("Add to squad");
+                    squad.AddUnit(gameObject, (this as ICommandable));
+                    parentSquad = squad;
+                }
+            }
+        }
+    }
+
+    void OnDestroy(){
+        if (parentSquad != null){
+            parentSquad.currUnits -= 1;
+        }
+    }
 }
