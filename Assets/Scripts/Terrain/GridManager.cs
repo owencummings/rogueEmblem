@@ -6,12 +6,15 @@ using Unity.Mathematics;
 using TerrainGeneration;
 using CustomGeometry;
 using GridSpace;
+using EntitySpawningSpace;
 
 namespace GridSpace {
     [RequireComponent(typeof(MeshFilter))]
     public partial class GridManager : MonoBehaviour
     {
         // Eventually there has to be a LevelBuilder that sets parameters and generates this
+        private bool started = false;
+        public List<MacroNode> nodeList;
         public NavMeshSurface navSurface;
         public GameObject[,,] cubes;
         public int[,] heights;
@@ -43,11 +46,19 @@ namespace GridSpace {
             fullResolution = macroTileResolution * tilesPerMacroTile;
             meshFilter = GetComponent<MeshFilter>();
             GetComponent<MeshRenderer>().material.color = new Color(0.75f, 0.9f, 0.9f, 1f);
-            CreateNodeTerrain();
         }
 
-        void Start(){
-            CreateSquad(Resources.Load("Archer") as GameObject, fullResolution/2, fullResolution/2);
+        void Update(){
+            if (!started){
+                StartCoroutine(GenerateTerrain());
+                started = true;
+            }
+        }
+
+        private IEnumerator GenerateTerrain(){
+            CreateNodeTerrain();
+            NavMeshManager.Instance.InitializeNavMesh();
+            UnitAttributes.BirdPalettes.PopulatePalettes();
             CreateSquad(Resources.Load("Melee") as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
             LazySlamFeature(Resources.Load("BigEnemy") as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
             LazySlamFeature(Resources.Load("Wizard") as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
@@ -55,7 +66,9 @@ namespace GridSpace {
             LazySlamFeature(Resources.Load("Carryable") as GameObject, fullResolution/2 + 1, fullResolution/2 + 1);
             LazySlamFeature(Resources.Load("Food") as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
             LazySlamFeature(Resources.Load("Ingestor") as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
-
+            EntitySpawning EntityManager = new EntitySpawning();
+            yield return EntityManager.LoadEntities();
+            CreateSquad(EntityManager.EntityLookup["Archer"], fullResolution/2, fullResolution/2);
         }
 
     }

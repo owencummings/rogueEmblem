@@ -28,12 +28,7 @@ public class NavMeshManager : MonoBehaviour
 
     }
 
-    private void Start()
-    {
-        InitializeNavMesh();
-    }
-
-    private void InitializeNavMesh()
+    public void InitializeNavMesh()
     {
         navData = new NavMeshData();
         NavMesh.AddNavMeshData(navData);
