@@ -18,7 +18,6 @@ public class Ingestor : MonoBehaviour
     void FixedUpdate(){
             _aggroHit = Physics.OverlapBox(transform.position, new Vector3(2, 2, 2), Quaternion.identity, carryableMask);
             if (_aggroHit.Length > 0){
-                Debug.Log("Hit");
                 foreach(Collider coll in _aggroHit){
                     if (coll.gameObject.TryGetComponent<Food>(out Food food)){
                         if (!food.toIngest){

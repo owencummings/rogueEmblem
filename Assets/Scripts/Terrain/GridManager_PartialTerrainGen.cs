@@ -79,7 +79,7 @@ namespace GridSpace{
             offsetY = 0.5f;
             cubes = new GameObject[fullResolution, 20, fullResolution];
             ResetHeights();
-            List<MacroNode> nodeList = new List<MacroNode>();
+            nodeList = new List<MacroNode>();
             List<CombineInstance> combineList = new List<CombineInstance>();
 
             for (int curr = 0; curr < nodesToBuild; curr++){
@@ -93,6 +93,7 @@ namespace GridSpace{
                 newMesh = currNode.GenerateMeshFromHeights();
                 newMesh.transform.SetParent(terrainMeshes.transform);
                 currNode.RehydrateMainHeights();
+                nodeList.Add(currNode);
                 PropogateNodeAvailability(unavailableNodes, availableNodes, neighborNodes, location);
                 if (neighborNodes.ContainsKey(location)){
                     Vector2Int prev = neighborNodes[location][UnityEngine.Random.Range(0, neighborNodes[location].Count)];
@@ -109,6 +110,7 @@ namespace GridSpace{
                     newMesh = bridgeNode.GenerateMeshFromHeights();
                     newMesh.transform.SetParent(terrainMeshes.transform);
                     bridgeNode.RehydrateMainHeights();
+                    nodeList.Add(bridgeNode);
                 }
             }
 
@@ -120,6 +122,7 @@ namespace GridSpace{
             waterNode.RehydrateMainHeights();
 
             GenerateMeshFromHeights();
+            Debug.Log(nodeList.Count);
         }
     
         void GenerateMeshFromHeights()
