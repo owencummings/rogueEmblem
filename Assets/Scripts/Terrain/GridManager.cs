@@ -23,6 +23,7 @@ namespace GridSpace {
         public MeshFilter meshFilter;
         public float squareSize = 1f;
         public float cubeSize = 1f;
+        public EntitySpawning EntityManager;
 
         public int macroTileResolution = 10;
         public int tilesPerMacroTile = 10;
@@ -59,15 +60,15 @@ namespace GridSpace {
             CreateNodeTerrain();
             NavMeshManager.Instance.InitializeNavMesh();
             UnitAttributes.BirdPalettes.PopulatePalettes();
-            CreateSquad(Resources.Load("Melee") as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
-            LazySlamFeature(Resources.Load("BigEnemy") as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
-            LazySlamFeature(Resources.Load("Wizard") as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
-            LazySlamWaterFeature(Resources.Load("Lurker") as GameObject, fullResolution/2+10, fullResolution/2 + 10); 
-            LazySlamFeature(Resources.Load("Carryable") as GameObject, fullResolution/2 + 1, fullResolution/2 + 1);
-            LazySlamFeature(Resources.Load("Food") as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
-            LazySlamFeature(Resources.Load("Ingestor") as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
-            EntitySpawning EntityManager = new EntitySpawning();
+            EntityManager = new EntitySpawning();
             yield return EntityManager.LoadEntities();
+            CreateSquad(EntityManager.EntityLookup["Melee"] as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
+            LazySlamFeature(EntityManager.EntityLookup["BigEnemy"] as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
+            LazySlamFeature(EntityManager.EntityLookup["Wizard"] as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
+            LazySlamWaterFeature(EntityManager.EntityLookup["Lurker"] as GameObject, fullResolution/2+10, fullResolution/2 + 10); 
+            LazySlamFeature(EntityManager.EntityLookup["Carryable"] as GameObject, fullResolution/2 + 1, fullResolution/2 + 1);
+            LazySlamFeature(EntityManager.EntityLookup["Food"] as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
+            LazySlamFeature(EntityManager.EntityLookup["Ingestor"] as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
             CreateSquad(EntityManager.EntityLookup["Archer"], fullResolution/2, fullResolution/2);
         }
 
