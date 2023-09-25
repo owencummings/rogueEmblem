@@ -24,9 +24,46 @@ MonoBehaviour:
     - unit
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: da9b3de81b81816469e0af61c8a2445d
-    m_Address: Assets/Prefabs/BigEnemy.prefab
+    m_Address: BigEnemy
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 089fb1d949ad526498bcb8442543ad2c
+    m_Address: Carryable
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65962bec57d1bfb43a8cee645a7987c1
+    m_Address: Food
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de7d06ae0acf77b4a84a8ececbfec53b
+    m_Address: Ingestor
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 427aa0c408aa21f4b9dabfd6702c5f51
+    m_Address: Lurker
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d0c56972db51bb498c8c714be4dbcf2
+    m_Address: Melee
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - unit
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 251b179adac4b104f9429a1bf6ec5228
+    m_Address: Wizard
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - unit
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 165107f4257714f4a872dd13c38bd6de, type: 2}
