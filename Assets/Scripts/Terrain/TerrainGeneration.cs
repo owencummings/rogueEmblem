@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using CustomGeometry;
 using Unity.Mathematics;
+using GridSpace;
 
 namespace TerrainGeneration {
 
@@ -20,6 +21,16 @@ namespace TerrainGeneration {
         Oasis
     }
 
+    public struct EntitySpawn 
+    {
+        public EntitySpawn(GameObject entity, Vector3Int position){
+            Entity = entity;
+            Position = position;
+        }
+
+        public GameObject Entity;
+        public Vector3Int Position;
+    }
 
     public class MacroNode {
         MacroNodeType TileType;
@@ -31,6 +42,7 @@ namespace TerrainGeneration {
         public Vector2Int featureEnd;
         public Dictionary<MacroNodeType, Action> tilePopulationMap;
         public static List<MacroNodeType> SimpleNodes = new List<MacroNodeType>(){ MacroNodeType.Pillars, MacroNodeType.Oasis };
+        public List<EntitySpawn> NodeEntities = new List<EntitySpawn>();
 
         public const int Water = -1;
         public const int ObscuredHeight = -2;
@@ -812,6 +824,10 @@ namespace TerrainGeneration {
                 }
             }
             size = UnityEngine.Random.Range(1, 4);
+            if(height == 6 && UnityEngine.Random.value > 0.8f){
+                NodeEntities.Add(new EntitySpawn(GridManager.Instance.EntityManager.EntityLookup["Food"],
+                                                 new Vector3Int(chosen.x + StartCorner.x, height + 11, chosen.y + StartCorner.y)));
+            }
             AssignWfcCellChunk(wfcCells, chosen, depth, height, 1);
         }
 
