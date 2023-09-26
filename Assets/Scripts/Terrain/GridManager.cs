@@ -57,11 +57,11 @@ namespace GridSpace {
         }
 
         private IEnumerator GenerateTerrain(){
+            EntityManager = new EntitySpawning();
+            yield return EntityManager.LoadEntities();
             CreateNodeTerrain();
             NavMeshManager.Instance.InitializeNavMesh();
             UnitAttributes.BirdPalettes.PopulatePalettes();
-            EntityManager = new EntitySpawning();
-            yield return EntityManager.LoadEntities();
             CreateSquad(EntityManager.EntityLookup["Melee"] as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
             LazySlamFeature(EntityManager.EntityLookup["BigEnemy"] as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
             LazySlamFeature(EntityManager.EntityLookup["Wizard"] as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
@@ -70,6 +70,12 @@ namespace GridSpace {
             LazySlamFeature(EntityManager.EntityLookup["Food"] as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
             LazySlamFeature(EntityManager.EntityLookup["Ingestor"] as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
             CreateSquad(EntityManager.EntityLookup["Archer"], fullResolution/2, fullResolution/2);
+            foreach(MacroNode node in nodeList){
+                foreach(EntitySpawn entity in node.NodeEntities){
+                    Instantiate(entity.Entity, WorldPointFromGridCoordinate(entity.Position), Quaternion.identity);
+                }
+            }
+        
         }
 
     }
