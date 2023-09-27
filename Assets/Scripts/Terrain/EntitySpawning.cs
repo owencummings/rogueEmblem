@@ -14,7 +14,7 @@ namespace EntitySpawningSpace {
     public class EntitySpawning{
         public bool isLoaded = false;
 
-        public Dictionary<string, GameObject> EntityLookup = new Dictionary<string, GameObject>(){
+        public static Dictionary<string, GameObject> EntityLookup = new Dictionary<string, GameObject>(){
             //{ Entity.Barrel, new GameObject() },
             //{ Entity.Fruit, new GameObject() }
         };

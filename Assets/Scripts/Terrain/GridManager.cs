@@ -62,14 +62,14 @@ namespace GridSpace {
             CreateNodeTerrain();
             NavMeshManager.Instance.InitializeNavMesh();
             UnitAttributes.BirdPalettes.PopulatePalettes();
-            CreateSquad(EntityManager.EntityLookup["Melee"] as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
-            LazySlamFeature(EntityManager.EntityLookup["BigEnemy"] as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
-            LazySlamFeature(EntityManager.EntityLookup["Wizard"] as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
-            LazySlamWaterFeature(EntityManager.EntityLookup["Lurker"] as GameObject, fullResolution/2+10, fullResolution/2 + 10); 
-            LazySlamFeature(EntityManager.EntityLookup["Carryable"] as GameObject, fullResolution/2 + 1, fullResolution/2 + 1);
-            LazySlamFeature(EntityManager.EntityLookup["Food"] as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
-            LazySlamFeature(EntityManager.EntityLookup["Ingestor"] as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
-            CreateSquad(EntityManager.EntityLookup["Archer"], fullResolution/2, fullResolution/2);
+            CreateSquad(EntitySpawning.EntityLookup["Melee"] as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
+            LazySlamFeature(EntitySpawning.EntityLookup["BigEnemy"] as GameObject, fullResolution/2 - 5, fullResolution/2 - 5);
+            LazySlamFeature(EntitySpawning.EntityLookup["Wizard"] as GameObject, fullResolution/2 - 5, fullResolution/2 + 5);
+            LazySlamWaterFeature(EntitySpawning.EntityLookup["Lurker"] as GameObject, fullResolution/2+10, fullResolution/2 + 10); 
+            LazySlamFeature(EntitySpawning.EntityLookup["Carryable"] as GameObject, fullResolution/2 + 1, fullResolution/2 + 1);
+            LazySlamFeature(EntitySpawning.EntityLookup["Food"] as GameObject, fullResolution/2 - 2, fullResolution/2 - 2);
+            LazySlamFeature(EntitySpawning.EntityLookup["Ingestor"] as GameObject, fullResolution/2 + 2, fullResolution/2 + 2);
+            CreateSquad(EntitySpawning.EntityLookup["Archer"], fullResolution/2, fullResolution/2);
             foreach(MacroNode node in nodeList){
                 foreach(EntitySpawn entity in node.NodeEntities){
                     Instantiate(entity.Entity, WorldPointFromGridCoordinate(entity.Position), Quaternion.identity);

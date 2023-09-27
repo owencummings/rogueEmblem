@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GridSpace;
+using EntitySpawningSpace;
 
 public class Ingestor : MonoBehaviour
 {   
@@ -33,7 +34,7 @@ public class Ingestor : MonoBehaviour
     void SpawnInUnits(int unitsToSpawn){
         for(int i = 0; i < unitsToSpawn; i++)
         {
-            Instantiate(GridManager.Instance.EntityManager.EntityLookup["Melee"] as GameObject, 
+            Instantiate(EntitySpawning.EntityLookup["Melee"] as GameObject, 
                         this.transform.position + Vector3.up + UnityEngine.Random.insideUnitSphere,
                         Quaternion.identity);
         }
