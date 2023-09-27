@@ -32,7 +32,8 @@ public class NavMeshManager : MonoBehaviour
     {
         navData = new NavMeshData();
         NavMesh.AddNavMeshData(navData);
-        navBounds = new Bounds(new Vector3(0,0,0), new Vector3(100,100,100));
+        // TODO: link navmesh bounds to world gen bounds
+        navBounds = new Bounds(new Vector3(0,0,0), new Vector3(300,100,300));
         sources = new List<NavMeshBuildSource>();
         NavMeshBuilder.CollectSources(navBounds, navSurface.layerMask, navSurface.useGeometry, navSurface.defaultArea, new List<NavMeshBuildMarkup>(), sources);
         NavMeshBuilder.UpdateNavMeshData(navData, navSurface.GetBuildSettings(), sources, navBounds);
