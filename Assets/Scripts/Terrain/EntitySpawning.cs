@@ -19,6 +19,17 @@ namespace EntitySpawningSpace {
             //{ Entity.Fruit, new GameObject() }
         };
 
+        public static List<string> Rewards = new List<string>{"Food", "Carryable"};
+        public static List<string> Enemies = new List<string>{"BigEnemy", "Wizard"};
+
+        public static GameObject RandomReward(){
+            return EntityLookup[Rewards[UnityEngine.Random.Range(0,Rewards.Count)]];
+        }
+
+        public static GameObject RandomEnemy(){
+            return EntityLookup[Enemies[UnityEngine.Random.Range(0,Enemies.Count)]];
+        }
+
         private AsyncOperationHandle<IList<GameObject>> handle;
 
         public IEnumerator LoadEntities(){
