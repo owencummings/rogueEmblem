@@ -6,6 +6,7 @@ using UnityEngine.Rendering;
 using CustomGeometry;
 using Unity.Mathematics;
 using GridSpace;
+using EntitySpawningSpace;
 
 namespace TerrainGeneration {
 
@@ -825,7 +826,7 @@ namespace TerrainGeneration {
             }
             size = UnityEngine.Random.Range(1, 4);
             if(height == 6 && UnityEngine.Random.value > 0.8f){
-                NodeEntities.Add(new EntitySpawn(GridManager.Instance.EntityManager.EntityLookup["Food"],
+                NodeEntities.Add(new EntitySpawn(EntitySpawning.EntityLookup["Food"],
                                                  new Vector3Int(chosen.x + StartCorner.x, height + 11, chosen.y + StartCorner.y)));
             }
             AssignWfcCellChunk(wfcCells, chosen, depth, height, 1);
