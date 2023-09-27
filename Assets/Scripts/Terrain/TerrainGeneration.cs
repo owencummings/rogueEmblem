@@ -678,6 +678,8 @@ namespace TerrainGeneration {
             wfcCells[12, 8].AssignValue(4, 3);
             wfcCells[8, 12].AssignValue(4, 3);
             wfcCells[12, 12].AssignValue(4, 3);
+            NodeEntities.Add(new EntitySpawn(EntitySpawning.EntityLookup["Ingestor"],
+                                                 new Vector3Int(12 + StartCorner.x, 15, 12 + StartCorner.y)));
             /*
             wfcCells[5, 5].AssignValue(1);
             wfcCells[15, 5].AssignValue(1);
@@ -825,9 +827,13 @@ namespace TerrainGeneration {
                 }
             }
             size = UnityEngine.Random.Range(1, 4);
-            if(height == 6 && UnityEngine.Random.value > 0.8f){
-                NodeEntities.Add(new EntitySpawn(EntitySpawning.EntityLookup["Food"],
-                                                 new Vector3Int(chosen.x + StartCorner.x, height + 11, chosen.y + StartCorner.y)));
+            if(height == 6 && UnityEngine.Random.value > 0.92f){
+                NodeEntities.Add(new EntitySpawn(EntitySpawning.RandomReward(),
+                                 new Vector3Int(chosen.x + StartCorner.x, height + 11, chosen.y + StartCorner.y)));
+            }
+            if (height == 1 && UnityEngine.Random.value > 0.98f){
+                NodeEntities.Add(new EntitySpawn(EntitySpawning.RandomEnemy(),
+                                 new Vector3Int(chosen.x + StartCorner.x, height + 11, chosen.y + StartCorner.y)));
             }
             AssignWfcCellChunk(wfcCells, chosen, depth, height, 1);
         }
