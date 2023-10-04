@@ -57,13 +57,6 @@ namespace EntitySpawningSpace {
                 yield return groupOp;
 
             Addressables.Release(loadResourceLocationsHandle);
-
-            //take a gander at our results.
-            foreach (var item in EntityLookup)
-            {
-                Debug.Log(item.Key + " - " + item.Value.name);
-            }
-
             isLoaded = true;
         }
     }

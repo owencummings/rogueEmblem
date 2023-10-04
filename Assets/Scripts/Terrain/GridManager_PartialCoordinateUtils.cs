@@ -29,15 +29,15 @@ namespace GridSpace {
 
         public Vector3Int GetGridCoordinatesFromPoint(Vector3 inputPoint)
         {
-            Vector3Int gridManagerCoordinates = new Vector3Int((int)inputPoint.x + fullResolution/2,
-                                                               (int)inputPoint.y+10,
-                                                               (int)inputPoint.z + fullResolution/2);
+            Vector3Int gridManagerCoordinates = new Vector3Int((int) (inputPoint.x + fullResolution/2f),
+                                                               (int) (inputPoint.y + 10.5f),
+                                                               (int) (inputPoint.z + fullResolution/2f));
             return gridManagerCoordinates;
         }
 
         public Vector3 WorldPointFromGridCoordinate(Vector3Int gridCoord){
             Vector3 worldPoint = new Vector3(gridCoord.x - fullResolution/2f,
-                                             gridCoord.y - 10,
+                                             gridCoord.y - 10.5f,
                                              gridCoord.z - fullResolution/2f);
             return worldPoint;
         }
@@ -81,6 +81,27 @@ namespace GridSpace {
         public Vector3Int GetRandomGridCoordinateInRange(Vector3 worldPoint, int range){
             Vector3Int gridCoordinate = GetGridCoordinatesFromPoint(worldPoint);
             return GetRandomGridCoordinateInRange(gridCoordinate, range);
+        }
+    
+        public List<Vector3Int> GetNeighborSquares(Vector3Int gridCoordinate){
+            List<Vector3Int> neighbors = new List<Vector3Int>();
+            List<Vector3Int> directions = new List<Vector3Int>(){
+                new Vector3Int(1, 0, 0),
+                new Vector3Int(-1, 0, 0),
+                new Vector3Int(0, 0, 1),
+                new Vector3Int(0, 0, -1)
+            };
+            Vector3Int dest;
+            foreach (Vector3Int d in directions){
+                // TODO: Refine this check to account for ramps
+                dest = gridCoordinate + d;
+                Debug.Log(cubes[dest.x, dest.y + 1, dest.z]);
+                if (cubes[dest.x, dest.y, dest.z] != null && cubes[dest.x, dest.y + 1, dest.z] == null){
+                    neighbors.Add(dest);
+                    Debug.Log("Moving");
+                }
+            }
+            return neighbors;
         }
     }
 }

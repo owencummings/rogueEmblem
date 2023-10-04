@@ -9,7 +9,6 @@ using GridSpace;
 public class Selector : MonoBehaviour
 {
     public Camera gameCam;
-    private int gridLayer = 1;
     private ISelectable selectedObject;
 
     private HashSet<ISelectable> selectableSet;
@@ -40,9 +39,7 @@ public class Selector : MonoBehaviour
 
         Ray ray = gameCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        int gridMask = (1 << (gridLayer-1));
         go = null;
-
 
         // Test building feature here for now, will want to add this to a unit behavior
         if (Input.GetKeyDown(KeyCode.R))
@@ -115,7 +112,7 @@ public class Selector : MonoBehaviour
             }
             selectedObject = null;
             
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~gridMask))
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, terrainMask))
             {   // Make sure water exists on grid layer
                 // Iterate through selectables
                 // TODO this gridMask does nothing

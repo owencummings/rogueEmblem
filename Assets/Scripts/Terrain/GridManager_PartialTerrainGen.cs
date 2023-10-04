@@ -64,7 +64,7 @@ namespace GridSpace{
         {
             GameObject terrainMeshes = new GameObject("TerrainMeshes");
             GameObject newMesh = null;
-            tilesPerMacroTile = 25;
+            tilesPerMacroTile = 26;
             macroTileResolution = 11;
             fullResolution = tilesPerMacroTile * macroTileResolution;
             List<Vector2Int> availableNodes = new List<Vector2Int>(){ new Vector2Int(5,5) };
@@ -87,7 +87,7 @@ namespace GridSpace{
                 typeToBuild = MacroNode.SimpleNodes[UnityEngine.Random.Range(0, MacroNode.SimpleNodes.Count)];
                 if (curr == 0) { typeToBuild = MacroNodeType.Start; }
                 Vector2Int startCorner = new Vector2Int(location.x*tilesPerMacroTile, location.y*tilesPerMacroTile);
-                Vector2Int endCorner = new Vector2Int((location.x + 1)*tilesPerMacroTile, (location.y + 1)*tilesPerMacroTile);
+                Vector2Int endCorner = new Vector2Int((location.x + 1)*tilesPerMacroTile - 1, (location.y + 1)*tilesPerMacroTile - 1);
                 currNode = new MacroNode(typeToBuild, heights, startCorner, endCorner);
                 currNode.PopulateGrid();
                 newMesh = currNode.GenerateMeshFromHeights();
@@ -134,7 +134,7 @@ namespace GridSpace{
                     if (height > 0){
                         for (int k = -4; k < height + 1; k++)
                         {
-                            Vector3 location = new Vector3((i-fullResolution/2f)*cubeSize, cubeSize * squareSize * k - 0.5f, (j-fullResolution/2f)*cubeSize);
+                            Vector3 location = WorldPointFromGridCoordinate(new Vector3Int(i, k + 10, j));
                             if (k > 0){
                                 cubes[i,k+10,j] = Instantiate(cubePrefab, location, Quaternion.identity, this.transform);                               
                                 if (k != height)

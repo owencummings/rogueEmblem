@@ -162,7 +162,7 @@ public class Squad : MonoBehaviour, ISelectable
                     d_i = 0;
                     for (int i = 0; i < unitArr.Length; i++){
                         if (unitArr[i] == null){ continue; }
-                        UnitCommand rallyCommand = new UnitCommand(UnitCommandEnum.Rally, destinations[d_i], null);
+                        UnitCommand rallyCommand = new UnitCommand(UnitCommandEnum.Rally, destinations[d_i], null, hit.transform.position);
                         unitArr[i].OnCommand(rallyCommand);
                         d_i += 1;
                     }

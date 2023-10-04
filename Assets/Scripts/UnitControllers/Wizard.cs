@@ -34,6 +34,8 @@ public class Wizard : Unit, IDamageable
         var teleport = new UnitTeleport(_navMeshAgent, _rb, transform, rallyData);
         var meteorAttack = new UnitMeteorAttack(_navMeshAgent, _rb, transform, attackData);
         var lookAt = new UnitLookAt(_navMeshAgent, transform, lookData);
+        var patrol = new UnitPatrol(_navMeshAgent, _rb, transform);
+
 
         Func<bool> InLookRange = () =>
         {
@@ -78,6 +80,8 @@ public class Wizard : Unit, IDamageable
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(idle, lookAt, InLookRange);
+        At(idle, patrol, () => (timeGrounded > 3f));
+        At(patrol, lookAt, InLookRange);
         At(lookAt, meteorAttack, InAggroRange);
         At(lookAt, teleport, InTeleportRange);
         At(teleport, idle, WarpFinished);
