@@ -160,7 +160,7 @@ public class Squad : MonoBehaviour, ISelectable
                     rallyFlag.transform.position = rallyLocation;
                     Vector3[] destinations = Vector3UtilsClass.getDestinationCircle(rallyLocation, currUnits, 0.3f * currUnits/3f);
                     d_i = 0;
-                    for (int i = 0; i < unitArr.Length; i++){
+                    for (int i = 0; i < currUnits; i++){
                         if (unitArr[i] == null){ continue; }
                         UnitCommand rallyCommand = new UnitCommand(UnitCommandEnum.Rally, destinations[d_i], null, hit.transform.position);
                         unitArr[i].OnCommand(rallyCommand);

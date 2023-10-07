@@ -14,13 +14,12 @@ namespace EntitySpawningSpace {
     public class EntitySpawning{
         public bool isLoaded = false;
 
-        public static Dictionary<string, GameObject> EntityLookup = new Dictionary<string, GameObject>(){
-            //{ Entity.Barrel, new GameObject() },
-            //{ Entity.Fruit, new GameObject() }
-        };
+        public static Dictionary<string, GameObject> EntityLookup = new Dictionary<string, GameObject>(){};
 
         public static List<string> Rewards = new List<string>{"Food", "Carryable"};
         public static List<string> Enemies = new List<string>{"BigEnemy", "Wizard"};
+
+        public static Dictionary<string, int> EntitiesToPool = new Dictionary<string, int>();
 
         public static GameObject RandomReward(){
             return EntityLookup[Rewards[UnityEngine.Random.Range(0,Rewards.Count)]];
