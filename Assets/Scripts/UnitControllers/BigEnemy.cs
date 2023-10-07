@@ -33,6 +33,7 @@ public class BigEnemy : Unit, IDamageable
         var attackApproach = new UnitRally(_navMeshAgent, _rb, rallyData);
         var attack = new UnitBigAttack(_navMeshAgent, _rb, transform, attackData);
         var lookAt = new UnitLookAt(_navMeshAgent, transform, lookData);
+        var patrol = new UnitPatrol(_navMeshAgent, _rb, transform);
 
         Func<bool> InLookRange = () =>
         {
@@ -56,7 +57,9 @@ public class BigEnemy : Unit, IDamageable
 
         void At(IState to, IState from, Func<bool> condition) => _stateMachine.AddTransition(to, from, condition);
         At(idle, lookAt, InLookRange);
+        At(idle, patrol, () => (timeGrounded > 3f));
         At(lookAt, attackApproach, InAggroRange);
+        At(patrol, lookAt, InLookRange);
         At(attackApproach, attack, NearAttackTarget);
         At(attack, findNavMesh, AttackFinished);
 

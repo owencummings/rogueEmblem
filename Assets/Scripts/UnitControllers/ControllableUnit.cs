@@ -185,9 +185,11 @@ public class ControllableUnit : Unit, ICommandable
             {
                 // Convert back to square-centered destination
                 // Should probably just pass this with unitCommand
-                Vector3 newDestination = new Vector3(Mathf.RoundToInt(unitCommand.TargetDestination.x),
-                                                    unitCommand.TargetDestination.y + 0.5f,
-                                                    Mathf.RoundToInt(unitCommand.TargetDestination.z));
+                // TODO: dont rely on RoundToInt
+
+                Vector3 newDestination = new Vector3(Mathf.RoundToInt(unitCommand.ExtraPosition.x),
+                                                     unitCommand.TargetDestination.y + carry.carryable.CarryBase + carry.carryable.CarryOffset,
+                                                     Mathf.RoundToInt(unitCommand.ExtraPosition.z));
                 carry.carryable.NavAgent.destination = newDestination;
             }
             return;

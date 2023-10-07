@@ -23,6 +23,7 @@ public class UnitCarried : IState
     }
 
     public void Tick(){
+        // TODO: fps-independent lerp
         _navMeshAgent.baseOffset = Mathf.Lerp(_navMeshAgent.baseOffset, _carryable.CarryBase + _carryable.CarryOffset, 0.03f);
         _carryable.CurrCarryOffset = _navMeshAgent.baseOffset - _carryable.CarryBase;
     }

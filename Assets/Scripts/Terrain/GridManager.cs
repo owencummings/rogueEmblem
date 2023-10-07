@@ -7,6 +7,7 @@ using TerrainGeneration;
 using CustomGeometry;
 using GridSpace;
 using EntitySpawningSpace;
+using ObjectPooling;
 
 namespace GridSpace {
     [RequireComponent(typeof(MeshFilter))]
@@ -24,6 +25,7 @@ namespace GridSpace {
         public float squareSize = 1f;
         public float cubeSize = 1f;
         public EntitySpawning EntityManager;
+        public ObjectPool PoolManager;
 
         public int macroTileResolution = 10;
         public int tilesPerMacroTile = 10;
@@ -59,10 +61,12 @@ namespace GridSpace {
         private IEnumerator GenerateTerrain(){
             EntityManager = new EntitySpawning();
             yield return EntityManager.LoadEntities();
+            PoolManager = new ObjectPool();
+            ObjectPool.PoolObjects(EntitySpawning.EntitiesToPool);
             CreateNodeTerrain();
             NavMeshManager.Instance.InitializeNavMesh();
             UnitAttributes.BirdPalettes.PopulatePalettes();
-            CreateSquad(EntitySpawning.EntityLookup["Melee"] as GameObject, fullResolution/2 + 2, fullResolution/2 - 2);
+            CreateSquad(EntitySpawning.EntityLookup["Melee"], fullResolution/2 + 2, fullResolution/2 - 2);
             CreateSquad(EntitySpawning.EntityLookup["Archer"], fullResolution/2, fullResolution/2);
             foreach(MacroNode node in nodeList){
                 foreach(EntitySpawn entity in node.NodeEntities){

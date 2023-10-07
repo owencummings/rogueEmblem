@@ -15,7 +15,7 @@ public class UnitAttack : IState
     private Rigidbody _rb;
     private Transform _tf;
     private AttackData _attackData;
-    private float attackCooldown = 0.25f;
+    private float attackCooldown = 2f;
     private float attackTime = 0f;
 
     public UnitAttack(NavMeshAgent navMeshAgent, Rigidbody rb, Transform transform, AttackData attackData)
@@ -36,10 +36,11 @@ public class UnitAttack : IState
 
     public void OnEnter()
     {
-        _navMeshAgent.enabled = false;
+        Debug.Log("Attacking");
+        _navMeshAgent.enabled = true;
+        _rb.isKinematic = true;
+        _navMeshAgent.ResetPath();
         _tf.LookAt(_attackData.attackTarget.transform);
-        _rb.isKinematic = false;
-        _rb.AddForce((_tf.up * 100 + _tf.forward * 300) * _tf.localScale.magnitude * 1.5f);
         attackTime = 0f;
         _attackData.attackFinished = false;
     }

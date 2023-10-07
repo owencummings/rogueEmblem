@@ -9,7 +9,7 @@ public class Melee : ControllableUnit
 {
 
     public AttackData attackData;
-    private float attackRange = 2f;
+    private float attackRange = 1f;
 
     new void Awake()
     {
