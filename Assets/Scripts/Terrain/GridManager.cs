@@ -7,7 +7,6 @@ using TerrainGeneration;
 using CustomGeometry;
 using GridSpace;
 using EntitySpawningSpace;
-using ObjectPooling;
 
 namespace GridSpace {
     [RequireComponent(typeof(MeshFilter))]
@@ -61,8 +60,7 @@ namespace GridSpace {
         private IEnumerator GenerateTerrain(){
             EntityManager = new EntitySpawning();
             yield return EntityManager.LoadEntities();
-            PoolManager = new ObjectPool();
-            ObjectPool.PoolObjects(EntitySpawning.EntitiesToPool);
+            ObjectPool.Instance.PoolObjects();
             CreateNodeTerrain();
             NavMeshManager.Instance.InitializeNavMesh();
             UnitAttributes.BirdPalettes.PopulatePalettes();
